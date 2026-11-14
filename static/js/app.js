@@ -35,8 +35,9 @@
         var btn = event.target.closest("[data-cookie-choice]");
         if (!btn) return;
         var value = btn.getAttribute("data-cookie-choice");
-        try { window.localStorage.setItem(COOKIE_KEY, value); } catch (e) { /* storage may be blocked */ }
-        /* Persist consent in the server-side HttpOnly cookie without navigating away. */
+        try { window.localStorage.setItem(COOKIE_KEY, value); } catch (e) {}
+
+        /* Persist consent in the Django HttpOnly cookie without navigating away. */
         var url = btn.getAttribute("data-cookie-url");
         var csrfInput = document.querySelector("[data-cookie-csrf] input[name=csrfmiddlewaretoken]");
         var csrfToken = csrfInput ? csrfInput.value : "";
@@ -53,11 +54,11 @@
             },
             body: body.toString()
           }).catch(function () {
-            /* Local storage still keeps the panel dismissed if the request fails. */
+            /* Local storage still prevents the banner reappearing in this browser. */
           });
         }
         banner.classList.remove("is-visible");
-      });
+      });;
     }
 
     /* Dismissible server messages */
