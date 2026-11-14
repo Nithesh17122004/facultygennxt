@@ -36,12 +36,25 @@
         if (!btn) return;
         var value = btn.getAttribute("data-cookie-choice");
         try { window.localStorage.setItem(COOKIE_KEY, value); } catch (e) { /* storage may be blocked */ }
-        if (value === "all") {
-          var url = btn.getAttribute("data-cookie-url");
-          if (url) {
-            window.location.href = url + (url.indexOf("?") === -1 ? "?" : "&") + "analytics=on&marketing=on";
-            return;
-          }
+        /* Persist consent in the server-side HttpOnly cookie without navigating away. */
+        var url = btn.getAttribute("data-cookie-url");
+        var csrfInput = document.querySelector("[data-cookie-csrf] input[name=csrfmiddlewaretoken]");
+        var csrfToken = csrfInput ? csrfInput.value : "";
+        if (url && csrfToken) {
+          var body = new URLSearchParams();
+          body.set("analytics", value === "all" ? "on" : "");
+          body.set("marketing", value === "all" ? "on" : "");
+          fetch(url, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              "X-CSRFToken": csrfToken
+            },
+            body: body.toString()
+          }).catch(function () {
+            /* Local storage still keeps the panel dismissed if the request fails. */
+          });
         }
         banner.classList.remove("is-visible");
       });
@@ -65,10 +78,10 @@
       });
     }
 
-    /* Dependent state -> city selects */
+    /* Dependent state -> city selects. Targets may be supplied as #id or id. */
     document.querySelectorAll("[data-state-select]").forEach(function (stateSelect) {
       var targetId = stateSelect.getAttribute("data-city-target");
-      var citySelect = targetId ? document.getElementById(targetId) : null;
+      var citySelect = targetId ? document.getElementById(targetId.replace(/^#/, "")) : null;
       if (!citySelect) return;
       var options = Array.prototype.slice.call(citySelect.options);
       var sync = function () {
