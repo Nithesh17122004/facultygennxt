@@ -189,12 +189,13 @@
   </footer>
   {% endblock %}
 
+  <form hidden data-cookie-csrf>{% csrf_token %}</form>
   <div class="cookie-banner" data-cookie-banner role="dialog" aria-label="Cookie preferences">
     <h2>Your privacy, your choice</h2>
     <p>We use essential cookies to run FacultyNxtGen and optional analytics or marketing cookies only with your consent. Read the <a href="{% url 'core:privacy' %}">privacy policy</a>.</p>
     <div class="cookie-actions">
       <button type="button" class="btn btn-brand btn-sm" data-cookie-choice="all" data-cookie-url="{% url 'core:cookies' %}">Accept all</button>
-      <button type="button" class="btn btn-outline-brand btn-sm" data-cookie-choice="essential">Essential only</button>
+      <button type="button" class="btn btn-outline-brand btn-sm" data-cookie-choice="essential" data-cookie-url="{% url 'core:cookies' %}">Essential only</button>
       <a href="{% url 'core:cookies' %}" class="btn btn-link btn-sm">Manage preferences</a>
     </div>
   </div>
