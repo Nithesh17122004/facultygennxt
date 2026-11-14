@@ -11,6 +11,9 @@ from django.utils.http import url_has_allowed_host_and_scheme, urlencode
 logger = logging.getLogger("facultynxtgen.security")
 
 MFA_ALLOWED_PREFIXES = (
+    # These are the actual URL paths registered in apps/accounts/urls.py.
+    # Keep the setup/verify endpoints reachable while MFA is being enrolled.
+    "/accounts/security/mfa/",
     "/accounts/mfa/",
     "/accounts/logout/",
     "/accounts/password-reset/",
