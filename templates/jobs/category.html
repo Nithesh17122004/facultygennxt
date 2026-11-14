@@ -34,7 +34,7 @@
           <label class="visually-hidden" for="category-city">City</label>
           <select class="form-select" id="category-city" name="city">
             <option value="">All cities</option>
-            {% for city in cities %}<option value="{{ city.slug }}" data-state="{{ city.state_id }}" {% if search_terms.city == city.slug %}selected{% endif %}>{{ city.name }}</option>{% endfor %}
+            {% for city in cities %}<option value="{{ city.slug }}" data-state="{{ city.state.slug }}" {% if search_terms.city == city.slug %}selected{% endif %}>{{ city.name }}</option>{% endfor %}
           </select>
         </div>
         <div class="col-lg-2"><button class="btn btn-brand w-100" type="submit">Search</button></div>

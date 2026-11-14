@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.encoding import force_bytes
@@ -51,6 +52,35 @@ class CandidateRegistrationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "already exists")
         self.assertEqual(User.objects.filter(email="existing@example.com").count(), 1)
+
+
+class RegistrationRateLimitTests(TestCase):
+    def test_rate_limited_registration_returns_friendly_429(self):
+        cache.clear()
+        url = reverse("accounts:register")
+        invalid_payload = {
+            "full_name": "Rate Limited",
+            "email": "rate-limited@example.com",
+            "mobile": "9876543299",
+            "password1": "SecurePass!2345",
+            "password2": "SecurePass!2345",
+            # Terms intentionally omitted so each attempt is a validation error.
+        }
+        for _ in range(6):
+            response = self.client.post(
+                url, invalid_payload, REMOTE_ADDR="203.0.113.77"
+            )
+            self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(
+            url, invalid_payload, REMOTE_ADDR="203.0.113.77"
+        )
+        self.assertEqual(response.status_code, 429)
+        self.assertContains(response, "Too many requests", status_code=429)
+        self.assertEqual(response["Retry-After"], "60")
+        self.assertNotContains(
+            response, "You do not have access to this page", status_code=429
+        )
 
 
 class EmailVerificationTests(TestCase):

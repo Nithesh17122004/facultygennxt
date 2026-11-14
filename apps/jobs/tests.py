@@ -116,6 +116,12 @@ class PublicJobVisibilityTests(TestCase):
         self.assertContains(response, "Published Physics Vacancy")
         self.assertNotContains(response, "Confidential Draft Vacancy")
 
+    def test_city_options_use_state_slugs_for_dependent_filtering(self):
+        response = self.client.get(reverse("jobs:find"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-state="telangana"')
+        self.assertNotContains(response, f'data-state="{self.institution.state_id}"')
+
     def test_published_detail_has_json_ld(self):
         response = self.client.get(self.published.get_absolute_url())
         self.assertEqual(response.status_code, 200)

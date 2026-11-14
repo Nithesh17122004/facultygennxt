@@ -72,6 +72,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.accounts.middleware.LastSeenMiddleware",
+    "django_ratelimit.middleware.RatelimitMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -187,7 +188,7 @@ CACHES = {
         "LOCATION": "facultynxtgen-default",
     }
 }
-RATELIMIT_VIEW = "core.views.ratelimited"
+RATELIMIT_VIEW = "apps.core.views.ratelimited"
 
 EMAIL_BACKEND = env(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
