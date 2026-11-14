@@ -62,7 +62,8 @@ def database_config(default_sqlite=True):
             "PASSWORD": unquote(parsed.password or ""),
             "HOST": parsed.hostname or "",
             "PORT": str(parsed.port or ""),
-            "CONN_MAX_AGE": env_int("DB_CONN_MAX_AGE", 60),
+            "CONN_MAX_AGE": env_int("DB_CONN_MAX_AGE", 0),
+            "CONN_HEALTH_CHECKS": True,
             "OPTIONS": options,
         }
 
@@ -74,7 +75,8 @@ def database_config(default_sqlite=True):
             "PASSWORD": env("POSTGRES_PASSWORD", ""),
             "HOST": env("POSTGRES_HOST", "localhost"),
             "PORT": env("POSTGRES_PORT", "5432"),
-            "CONN_MAX_AGE": env_int("DB_CONN_MAX_AGE", 60),
+            "CONN_MAX_AGE": env_int("DB_CONN_MAX_AGE", 0),
+            "CONN_HEALTH_CHECKS": True,
             "OPTIONS": {"sslmode": env("POSTGRES_SSLMODE", "prefer")},
         }
 
