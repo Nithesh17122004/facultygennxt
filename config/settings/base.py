@@ -67,9 +67,10 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django_otp.middleware.OTPMiddleware",
+    # MessageMiddleware must run before custom middleware that calls messages.*.
+    "django.contrib.messages.middleware.MessageMiddleware",
     "apps.core.middleware.SecurityHeadersMiddleware",
     "apps.accounts.middleware.StaffMFAEnforcementMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.accounts.middleware.LastSeenMiddleware",
     "django_ratelimit.middleware.RatelimitMiddleware",
