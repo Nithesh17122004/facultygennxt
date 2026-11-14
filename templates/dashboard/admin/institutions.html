@@ -1,0 +1,82 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Institutions — Administration — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Institutions{% endblock %}
+{% block dashboard_subtitle %}Review verification evidence, monitor recruiter teams and keep institution records accurate.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:institutions' %}?status=pending"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>Pending queue ({{ counts.pending }})</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="card-fng">
+  <div class="card-fng__header"><h2>Institution directory</h2><span class="badge-soft neutral">{{ counts.all }} records</span></div>
+  <div class="card-fng__body">
+    <div class="status-tabs" role="navigation" aria-label="Filter institutions by verification status">
+      <a href="{% url 'dashboard:institutions' %}{% if q %}?q={{ q|urlencode }}{% endif %}" class="{% if not status %}active{% endif %}">All <span class="ms-1">{{ counts.all }}</span></a>
+      {% for value, label in status_choices %}
+        <a href="?status={{ value }}{% if q %}&q={{ q|urlencode }}{% endif %}" class="{% if status == value %}active{% endif %}">{{ label }} <span class="ms-1">{% if value == 'pending' %}{{ counts.pending }}{% elif value == 'verified' %}{{ counts.verified }}{% elif value == 'suspended' %}{{ counts.suspended }}{% endif %}</span></a>
+      {% endfor %}
+    </div>
+
+    <form method="get" class="d-flex flex-wrap gap-2 mb-3" role="search" aria-label="Search institutions">
+      {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+      <input class="form-control flex-grow-1" style="min-width:220px;" type="search" name="q" value="{{ q }}" placeholder="Search by name, email or city" aria-label="Search institutions">
+      <button class="btn btn-outline-brand" type="submit"><i class="bi bi-search me-1" aria-hidden="true"></i>Search</button>
+      {% if q or status %}<a class="btn btn-outline-brand" href="{% url 'dashboard:institutions' %}" aria-label="Clear filters"><i class="bi bi-x-lg" aria-hidden="true"></i></a>{% endif %}
+    </form>
+
+    {% if page_obj.object_list %}
+      <div class="table-wrap">
+        <div class="table-responsive">
+          <table class="table table-fng align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Institution</th>
+                <th scope="col">Location</th>
+                <th scope="col">Evidence</th>
+                <th scope="col">Vacancies</th>
+                <th scope="col">Verification</th>
+                <th scope="col">Registered</th>
+                <th scope="col" class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for institution in page_obj %}
+                <tr>
+                  <td>
+                    <a class="fw-semibold" href="{% url 'dashboard:institution_detail' institution.pk %}">{{ institution.name|truncatechars:42 }}</a>
+                    <span class="cell-meta">{{ institution.get_institution_type_display }} · {{ institution.official_email }}</span>
+                  </td>
+                  <td>{{ institution.city.name }}<span class="cell-meta">{{ institution.state.name }}</span></td>
+                  <td>{{ institution.docs_count }} document{{ institution.docs_count|pluralize }}<span class="cell-meta">{% if institution.verified_at %}Verified {{ institution.verified_at|date:"j M Y" }}{% else %}Not verified{% endif %}</span></td>
+                  <td>{{ institution.jobs_count }}<span class="cell-meta">non-deleted</span></td>
+                  <td>
+                    <span class="badge-soft {% if institution.verification_status == 'verified' %}success{% elif institution.verification_status == 'pending' %}warning{% elif institution.verification_status == 'suspended' %}danger{% else %}neutral{% endif %}">{{ institution.get_verification_status_display }}</span>
+                  </td>
+                  <td>{{ institution.created_at|date:"j M Y" }}</td>
+                  <td class="text-end"><a class="btn btn-sm btn-outline-brand" href="{% url 'dashboard:institution_detail' institution.pk %}">Review</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state__icon mx-auto"><i class="bi bi-buildings" aria-hidden="true"></i></div>
+        <h3>No institutions found</h3>
+        <p>{% if q or status %}No institutions match this filter.{% else %}Institutions appear here after registering and submitting verification documents.{% endif %}</p>
+        {% if q or status %}<a class="btn btn-outline-brand" href="{% url 'dashboard:institutions' %}">Clear filters</a>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="alert-fng info mt-3">
+  <i class="bi bi-shield-lock" aria-hidden="true"></i>
+  <div><strong>Verification evidence is private.</strong> Open documents only through the signed links on the institution page. Every decision is recorded in the audit log with your account and notes.</div>
+</div>
+{% endblock %}

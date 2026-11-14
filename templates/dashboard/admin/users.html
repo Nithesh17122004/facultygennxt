@@ -1,0 +1,91 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Users — Administration — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Users{% endblock %}
+{% block dashboard_subtitle %}Search candidate and recruiter accounts, review account history and moderate access.{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3 mb-2">
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__value">{{ counts.all }}</div><div class="stat-card__label">All accounts</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__value">{{ counts.candidates }}</div><div class="stat-card__label">Candidates</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__value">{{ counts.recruiters }}</div><div class="stat-card__label">Recruiters</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__value">{{ counts.staff }}</div><div class="stat-card__label">Staff · {{ counts.inactive }} inactive</div></div></div>
+</div>
+
+<div class="card-fng mt-2">
+  <div class="card-fng__header"><h2>Account directory</h2><span class="badge-soft neutral">{{ page_obj.paginator.count }} matching</span></div>
+  <div class="card-fng__body">
+    <form method="get" class="row g-2 align-items-end mb-3" role="search" aria-label="Filter users">
+      <div class="col-md-4">
+        <label class="form-label" for="user-search">Search</label>
+        <input class="form-control" id="user-search" type="search" name="q" value="{{ q }}" placeholder="Name, email or mobile">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="user-role">Role</label>
+        <select class="form-select" id="user-role" name="role">
+          <option value="">All roles</option>
+          {% for value, label in role_choices %}<option value="{{ value }}" {% if role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="user-state">Account state</label>
+        <select class="form-select" id="user-state" name="state">
+          <option value="">Any state</option>
+          <option value="active" {% if state == "active" %}selected{% endif %}>Active</option>
+          <option value="inactive" {% if state == "inactive" %}selected{% endif %}>Inactive</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button class="btn btn-brand flex-grow-1" type="submit">Filter</button>
+        {% if q or role or state %}<a class="btn btn-outline-brand" href="{% url 'dashboard:users' %}" aria-label="Clear filters"><i class="bi bi-x-lg" aria-hidden="true"></i></a>{% endif %}
+      </div>
+    </form>
+
+    {% if page_obj.object_list %}
+      <div class="table-wrap">
+        <div class="table-responsive">
+          <table class="table table-fng align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Account</th>
+                <th scope="col">Role</th>
+                <th scope="col">Verified</th>
+                <th scope="col">Status</th>
+                <th scope="col">Joined</th>
+                <th scope="col">Last seen</th>
+                <th scope="col" class="text-end">Open</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for account in page_obj %}
+                <tr>
+                  <td>
+                    <a class="fw-semibold" href="{% url 'dashboard:user_detail' account.pk %}">{{ account.get_full_name }}</a>
+                    <span class="cell-meta">{{ account.email }}{% if account.mobile %} · {{ account.mobile }}{% endif %}</span>
+                  </td>
+                  <td><span class="badge-soft {% if account.is_staff %}primary{% elif account.is_recruiter %}info{% else %}neutral{% endif %}">{{ account.get_role_display }}</span></td>
+                  <td>{% if account.is_email_verified %}<span class="text-success"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Yes</span>{% else %}<span class="text-muted-fng">No</span>{% endif %}</td>
+                  <td><span class="badge-soft {% if account.is_active %}success{% else %}danger{% endif %}">{% if account.is_active %}Active{% else %}Inactive{% endif %}</span>{% if account.is_locked %}<span class="cell-meta">Locked</span>{% endif %}</td>
+                  <td>{{ account.date_joined|date:"j M Y" }}</td>
+                  <td>{{ account.last_seen_at|date:"j M Y"|default:"—" }}</td>
+                  <td class="text-end"><a class="btn btn-sm btn-outline-brand" href="{% url 'dashboard:user_detail' account.pk %}">Review</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state__icon mx-auto"><i class="bi bi-people" aria-hidden="true"></i></div>
+        <h3>No users found</h3>
+        <p>{% if q or role or state %}No accounts match these filters.{% else %}New candidate and recruiter accounts appear here.{% endif %}</p>
+        {% if q or role or state %}<a class="btn btn-outline-brand" href="{% url 'dashboard:users' %}">Clear filters</a>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

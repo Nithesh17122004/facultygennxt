@@ -1,0 +1,54 @@
+{% load fng %}
+<article class="job-card">
+  <div class="job-card__top">
+    <div class="job-card__logo">
+      <span class="avatar avatar--org" aria-hidden="true">
+        {% if job.institution.logo %}
+          <img src="{{ job.institution.logo.url }}" alt="">
+        {% else %}
+          {{ job.institution.name|user_initials }}
+        {% endif %}
+      </span>
+    </div>
+    <div class="job-card__org">
+      <span class="job-card__org-name">
+        <a href="{{ job.institution.get_absolute_url }}" class="text-reset">{{ job.institution.name }}</a>
+        {% if job.institution.verification_status == "verified" %}<i class="bi bi-patch-check-fill" title="Verified institution" aria-label="Verified institution"></i>{% endif %}
+      </span>
+      <span class="job-card__posted">{{ job.published_at|time_ago|default:"Recently published" }}</span>
+    </div>
+    {% if user.is_authenticated and user.is_candidate %}
+      <form method="post" action="{% url 'jobs:toggle_save' job.slug %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+        <button type="submit" class="job-card__save" aria-label="Save {{ job.title }}" title="Save job">
+          <i class="bi bi-bookmark" aria-hidden="true"></i>
+        </button>
+      </form>
+    {% endif %}
+  </div>
+  <h3 class="job-card__title"><a href="{{ job.get_absolute_url }}">{{ job.title }}</a></h3>
+  <div class="job-card__meta">
+    <span><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ job.location_label }}</span>
+    <span><i class="bi bi-briefcase" aria-hidden="true"></i>{{ job.employment_type_label }}</span>
+    {% if job.vacancies %}<span><i class="bi bi-people" aria-hidden="true"></i>{{ job.vacancies }} vacancy{{ job.vacancies|pluralize }}</span>{% endif %}
+  </div>
+  <div class="job-card__tags">
+    <span class="badge-soft primary">{{ job.designation.name }}</span>
+    <span class="badge-soft neutral">{{ job.department.name }}</span>
+    {% if job.experience_min %}<span class="badge-soft neutral">{{ job.experience_min }}+ yrs</span>{% endif %}
+  </div>
+  <div class="job-card__footer">
+    <span class="job-card__salary">
+      {% if job.salary_is_disclosed %}
+        {{ job.salary_min|salary_short }}{% if job.salary_max and job.salary_max != job.salary_min %} – {{ job.salary_max|salary_short }}{% endif %}
+        <span class="text-muted-fng fw-normal">/{% if job.salary_period == "month" %}mo{% elif job.salary_period == "year" %}yr{% else %}period{% endif %}</span>
+      {% else %}
+        <span class="text-muted-fng fw-normal">Salary not disclosed</span>
+      {% endif %}
+    </span>
+    <span class="job-card__deadline {% if job.days_left is not None and job.days_left <= 3 %}is-urgent{% endif %}">
+      <i class="bi bi-clock" aria-hidden="true"></i>{{ job.deadline_label }}
+    </span>
+  </div>
+</article>

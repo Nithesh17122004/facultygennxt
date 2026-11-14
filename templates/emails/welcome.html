@@ -1,0 +1,17 @@
+{% extends "emails/base.html" %}
+{% block title %}Welcome to FacultyNxtGen{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 12px;font-size:24px;line-height:1.3;color:#10264A;">Welcome to FacultyNxtGen</h1>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#33455E;">Hello {{ display_name|default:"there" }},</p>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#33455E;">
+  Your account is ready. FacultyNxtGen focuses on vacancies from verified institutions, with the official notification attached and a clear application route for every listing.
+</p>
+<p style="margin:0 0 10px;font-size:15px;line-height:1.7;color:#10264A;font-weight:600;">A good next step</p>
+<p style="margin:0 0 20px;font-size:15px;line-height:1.7;color:#33455E;">
+  Complete your academic profile — qualifications, teaching and research experience, publications and your CV. A complete profile helps you apply faster and lets recruiters understand your record.
+</p>
+<p style="margin:0 0 24px;">
+  <a href="{{ dashboard_url }}" style="display:inline-block;background-color:#087BDB;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:12px 22px;border-radius:6px;">Open my dashboard</a>
+</p>
+<p style="margin:0;font-size:13px;line-height:1.7;color:#5B6B82;">You can control visibility, alerts, data export and deletion from account settings at any time.</p>
+{% endblock %}

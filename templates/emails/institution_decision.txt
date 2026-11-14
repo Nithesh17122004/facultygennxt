@@ -1,0 +1,14 @@
+FacultyNxtGen — institution verification update
+
+The verification status for {{ institution.name }} is now {{ decision_label }}.
+
+{% if decision == "verified" %}Your institution can now submit vacancies for listing. Every vacancy still passes a separate checklist review before it is published, so make sure the official notification, deadline and application route are accurate.{% elif decision == "rejected" %}We could not verify the institution with the information provided. You can review the reason below, update the institution profile and supporting documents, then contact us to request a fresh review.{% else %}Our team needs a little more information before verification can be completed. Please review the notes below and update your profile or documents.{% endif %}
+
+{% if notes %}Reviewer notes:
+{{ notes }}
+{% endif %}
+Open institution dashboard:
+{{ dashboard_url }}
+
+Questions? Contact {{ SUPPORT_EMAIL }}.
+© {{ current_year }} {{ SITE_NAME }}

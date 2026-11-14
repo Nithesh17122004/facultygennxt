@@ -1,0 +1,15 @@
+FacultyNxtGen — we received your enquiry
+
+Hello {{ enquiry.name }},
+
+Thank you for contacting FacultyNxtGen. Your reference is {{ reference }}. Our team will respond within two working days.
+
+Your message:
+Purpose: {{ enquiry.get_purpose_display }}
+Subject: {{ enquiry.subject }}
+{{ enquiry.message }}
+
+For privacy requests, include the reference above in any follow-up. Do not send passwords, OTPs or full identity documents by email.
+
+Need to add something? Reply to this email or write to {{ SUPPORT_EMAIL }}.
+© {{ current_year }} {{ SITE_NAME }}

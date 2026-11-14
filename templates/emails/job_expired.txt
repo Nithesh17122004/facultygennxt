@@ -1,0 +1,11 @@
+FacultyNxtGen — your vacancy has expired
+
+The application deadline for {{ job.title }} at {{ job.institution.name }} has passed, so the listing is no longer public.
+
+Existing applications and their records remain available in your dashboard. If the institution re-advertises the role, create a new vacancy with the new official notification and deadline rather than editing an expired listing.
+
+Open my vacancies:
+{{ jobs_url }}
+
+Need to correct the deadline? Contact {{ SUPPORT_EMAIL }} before making changes to a published listing.
+© {{ current_year }} {{ SITE_NAME }}

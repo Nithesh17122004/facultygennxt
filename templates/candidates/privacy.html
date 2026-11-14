@@ -1,0 +1,58 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Privacy controls — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Privacy controls{% endblock %}
+{% block dashboard_subtitle %}Decide how your profile and contact details are used.{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.is_open_to_work %}
+          {% include "partials/form_field.html" with field=form.share_profile_with_recruiters %}
+          <hr>
+          {% include "partials/form_field.html" with field=form.marketing %}
+          <button class="btn btn-brand" type="submit">Save privacy choices</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Your data rights</h2></div>
+      <div class="card-fng__body">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 border-bottom pb-3 mb-3">
+          <div><h3 class="h6 mb-1">Download your data</h3><p class="text-small text-muted-fng mb-0">A JSON copy of your account, profile, applications and document metadata.</p></div>
+          <a class="btn btn-outline-brand btn-sm" href="{% url 'accounts:export_data' %}">Download</a>
+        </div>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div><h3 class="h6 mb-1">Delete your account</h3><p class="text-small text-muted-fng mb-0">Deactivate your account and submit a deletion request.</p></div>
+          <a class="btn btn-outline-danger btn-sm" href="{% url 'accounts:delete_account' %}">Request deletion</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <h2 class="h6">What recruiters can see</h2>
+        <ul class="list-unstyled d-grid gap-2 text-small mt-2 mb-0">
+          <li class="d-flex gap-2"><i class="bi bi-check-circle-fill text-success" aria-hidden="true"></i><span>Your application, CV and documents for a vacancy you apply to.</span></li>
+          <li class="d-flex gap-2"><i class="bi bi-check-circle-fill text-success" aria-hidden="true"></i><span>Your academic profile snapshot at the time of application.</span></li>
+          <li class="d-flex gap-2"><i class="bi bi-x-circle-fill text-danger" aria-hidden="true"></i><span>Your mobile number is not shown publicly or to advertisers.</span></li>
+          <li class="d-flex gap-2"><i class="bi bi-x-circle-fill text-danger" aria-hidden="true"></i><span>Your documents are never published on the public site.</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="alert-fng info mt-3">
+      <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+      <div>If you turn off profile sharing, institutions still receive the application record and documents you submit, but your extended profile details are hidden from the recruiter view.</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

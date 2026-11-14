@@ -1,0 +1,158 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}{% if is_edit %}Edit vacancy{% else %}Post a vacancy{% endif %} — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}{% if is_edit %}Edit vacancy{% else %}Post a vacancy{% endif %}{% endblock %}
+{% block dashboard_subtitle %}{% if is_edit %}Update the draft or resubmit after corrections. Structural details and the official source are required before review.{% else %}Build a complete, verifiable listing. Save a draft at any time; submission requires a notification, deadline and official source.{% endif %}{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% if job %}{% url 'jobs:recruiter_detail' job.pk %}{% else %}{% url 'jobs:recruiter_list' %}{% endif %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>{% if job %}Back to vacancy{% else %}All vacancies{% endif %}</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-xl-9">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {% include "partials/nonfield_errors.html" with form=form %}
+
+      <div class="card-fng">
+        <div class="card-fng__header"><h2>Role basics</h2><span class="badge-soft primary">Required</span></div>
+        <div class="card-fng__body">
+          {% include "partials/form_field.html" with field=form.title %}
+          <div class="row">
+            <div class="col-md-6">{% include "partials/form_field.html" with field=form.designation %}</div>
+            <div class="col-md-6">{% include "partials/form_field.html" with field=form.department %}</div>
+          </div>
+          <div class="row">
+            <div class="col-md-8">{% include "partials/form_field.html" with field=form.specialization %}</div>
+            <div class="col-md-4">{% include "partials/form_field.html" with field=form.vacancies %}</div>
+          </div>
+          {% include "partials/form_field.html" with field=form.employment_type %}
+        </div>
+      </div>
+
+      <div class="card-fng mt-3">
+        <div class="card-fng__header"><h2>Location</h2></div>
+        <div class="card-fng__body">
+          <div class="row">
+            <div class="col-md-6">{% include "partials/form_field.html" with field=form.state %}</div>
+            <div class="col-md-6">{% include "partials/form_field.html" with field=form.city %}</div>
+          </div>
+          {% include "partials/form_field.html" with field=form.campus_location %}
+        </div>
+      </div>
+
+      <div class="card-fng mt-3">
+        <div class="card-fng__header"><h2>Eligibility and experience</h2></div>
+        <div class="card-fng__body">
+          {% include "partials/form_field.html" with field=form.required_qualification %}
+          <div class="row">
+            <div class="col-md-6">{% include "partials/form_field.html" with field=form.experience_min %}</div>
+            <div class="col-md-6">{% include "partials/form_field.html" with field=form.experience_max %}</div>
+          </div>
+          {% include "partials/form_field.html" with field=form.eligibility %}
+        </div>
+      </div>
+
+      <div class="card-fng mt-3">
+        <div class="card-fng__header"><h2>Compensation</h2></div>
+        <div class="card-fng__body">
+          {% include "partials/form_field.html" with field=form.salary_disclosed %}
+          <div id="salary-fields">
+            <div class="row">
+              <div class="col-md-4">{% include "partials/form_field.html" with field=form.salary_min %}</div>
+              <div class="col-md-4">{% include "partials/form_field.html" with field=form.salary_max %}</div>
+              <div class="col-md-4">{% include "partials/form_field.html" with field=form.salary_period %}</div>
+            </div>
+            {% include "partials/form_field.html" with field=form.salary_notes %}
+          </div>
+          <p class="text-small text-muted-fng mb-0">Disclose a range when possible. Candidates distrust listings that hide pay; “As per UGC norms” alone is not a salary range.</p>
+        </div>
+      </div>
+
+      <div class="card-fng mt-3">
+        <div class="card-fng__header"><h2>Role details</h2><span class="badge-soft warning">Required for review</span></div>
+        <div class="card-fng__body">
+          {% include "partials/form_field.html" with field=form.description %}
+          {% include "partials/form_field.html" with field=form.required_documents %}
+        </div>
+      </div>
+
+      <div class="card-fng mt-3">
+        <div class="card-fng__header"><h2>Application method</h2><span class="badge-soft warning">Required for review</span></div>
+        <div class="card-fng__body">
+          {% include "partials/form_field.html" with field=form.application_method %}
+          {% include "partials/form_field.html" with field=form.application_instruction %}
+          <div id="external-application-fields">
+            <div class="row">
+              <div class="col-md-7">{% include "partials/form_field.html" with field=form.external_application_url %}</div>
+              <div class="col-md-5">{% include "partials/form_field.html" with field=form.external_application_email %}</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">{% include "partials/form_field.html" with field=form.deadline %}</div>
+            <div class="col-md-6">{% include "partials/form_field.html" with field=form.publication_date %}</div>
+          </div>
+          <div class="alert-fng info mb-0"><i class="bi bi-info-circle-fill" aria-hidden="true"></i><div>Choose FacultyNxtGen applications to receive candidate documents inside your dashboard. Choose external applications to send candidates to your official portal or email.</div></div>
+        </div>
+      </div>
+
+      <div class="card-fng mt-3">
+        <div class="card-fng__header"><h2>Official source and notification</h2><span class="badge-soft warning">Required for review</span></div>
+        <div class="card-fng__body">
+          {% if job.notification_document and not job.notification_document.is_deleted %}
+            <div class="alert-fng success"><i class="bi bi-file-earmark-check-fill" aria-hidden="true"></i><div>A notification is already attached ({{ job.notification_document.original_name }}). Upload a new file only to replace it.</div></div>
+          {% endif %}
+          {% include "partials/form_field.html" with field=form.notification_file %}
+          {% include "partials/form_field.html" with field=form.notification_url %}
+          {% include "partials/form_field.html" with field=form.source_information %}
+        </div>
+      </div>
+
+      <div class="card-fng mt-3">
+        <div class="card-fng__body">
+          {% include "partials/form_field.html" with field=form.authorization_confirmed %}
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <button class="btn btn-outline-brand" type="submit" name="action" value="draft"><i class="bi bi-save me-1" aria-hidden="true"></i>Save draft</button>
+            <button class="btn btn-brand" type="submit" name="action" value="submit"><i class="bi bi-send-check me-1" aria-hidden="true"></i>Save and submit for review</button>
+            <a class="btn btn-link" href="{% if job %}{% url 'jobs:recruiter_detail' job.pk %}{% else %}{% url 'jobs:recruiter_list' %}{% endif %}">Cancel</a>
+          </div>
+          <p class="text-tiny text-muted-fng mt-2 mb-0">Submitting sends the vacancy to our verification team. You can edit a rejected vacancy and resubmit after correcting the issues.</p>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-xl-3">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <h2 class="h6">Submission checklist</h2>
+        <ul class="checklist mt-2">
+          <li><i class="bi bi-check2-circle pending" aria-hidden="true"></i><span>Official recruitment notification attached or linked</span></li>
+          <li><i class="bi bi-check2-circle pending" aria-hidden="true"></i><span>Correct application deadline</span></li>
+          <li><i class="bi bi-check2-circle pending" aria-hidden="true"></i><span>Complete qualifications and eligibility</span></li>
+          <li><i class="bi bi-check2-circle pending" aria-hidden="true"></i><span>Working application URL or official email</span></li>
+          <li><i class="bi bi-check2-circle pending" aria-hidden="true"></i><span>Official reference or source details</span></li>
+          <li><i class="bi bi-check2-circle pending" aria-hidden="true"></i><span>Authorisation confirmed</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Institutional context</h2>
+        <dl class="kv-list mt-2">
+          <div class="kv-list__row"><dt>Institution</dt><dd>{{ institution.name|truncatechars:24 }}</dd></div>
+          <div class="kv-list__row"><dt>Verification</dt><dd><span class="badge-soft {% if institution.verification_status == 'verified' %}success{% else %}warning{% endif %}">{{ institution.get_verification_status_display }}</span></dd></div>
+        </dl>
+        <p class="text-small text-muted-fng mt-2 mb-0">Vacancies are published only after institution verification and a vacancy-level checklist review.</p>
+      </div>
+    </div>
+
+    <div class="alert-fng info mt-3">
+      <i class="bi bi-shield-check" aria-hidden="true"></i>
+      <div>Do not include caste, religion, marital status, age or photographs unless the official notification legally requires them. FacultyNxtGen may reject discriminatory listings.</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Disable two-factor authentication — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Disable two-factor authentication{% endblock %}
+{% block dashboard_subtitle %}Confirm your password and current authenticator code.{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <div class="alert-fng warning">
+          <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+          <div>Disabling two-factor authentication makes your account easier to compromise. We recommend keeping it enabled.</div>
+        </div>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.password %}
+          {% include "partials/form_field.html" with field=form.token %}
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-danger" type="submit">Disable two-factor authentication</button>
+            <a class="btn btn-outline-brand" href="{% url 'accounts:security' %}">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

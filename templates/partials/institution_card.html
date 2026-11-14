@@ -1,0 +1,25 @@
+{% load fng %}
+<article class="institution-card">
+  <span class="avatar avatar--org" aria-hidden="true" style="width:56px;height:56px;">
+    {% if institution.logo %}
+      <img src="{{ institution.logo.url }}" alt="">
+    {% else %}
+      {{ institution.name|user_initials }}
+    {% endif %}
+  </span>
+  <div class="institution-card__body">
+    <div class="d-flex justify-content-between align-items-start gap-2">
+      <h3><a href="{{ institution.get_absolute_url }}">{{ institution.name }}</a></h3>
+    </div>
+    <div class="institution-card__meta">
+      <span><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ institution.city.name }}, {{ institution.state.name }}</span>
+      <span><i class="bi bi-building" aria-hidden="true"></i>{{ institution.get_institution_type_display }}</span>
+    </div>
+    <div class="institution-card__stats">
+      <span class="text-success"><i class="bi bi-patch-check-fill" aria-hidden="true"></i> Verified</span>
+      <span><i class="bi bi-briefcase" aria-hidden="true"></i> {{ institution.live_jobs_count|default:0 }} live vacanc{{ institution.live_jobs_count|default:0|pluralize:"y,ies" }}</span>
+      {% if institution.established_year %}<span><i class="bi bi-calendar3" aria-hidden="true"></i> Est. {{ institution.established_year }}</span>{% endif %}
+    </div>
+    {% if institution.description %}<p class="text-small text-muted-fng mt-2 mb-0 truncate-2">{{ institution.description }}</p>{% endif %}
+  </div>
+</article>

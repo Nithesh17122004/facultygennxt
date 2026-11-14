@@ -1,0 +1,81 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Your applications — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Your applications{% endblock %}
+{% block dashboard_subtitle %}Track every vacancy you applied to, review status updates and withdraw applications you no longer want considered.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-brand btn-sm" href="{% url 'jobs:find' %}"><i class="bi bi-search me-1" aria-hidden="true"></i>Find jobs</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="card-fng">
+  <div class="card-fng__header">
+    <h2>Application history</h2>
+    <span class="badge-soft neutral">{{ total }} total</span>
+  </div>
+  <div class="card-fng__body">
+    <div class="status-tabs" role="navigation" aria-label="Filter applications by status">
+      <a href="{% url 'applications:candidate_list' %}" class="{% if not status %}active{% endif %}">All{% if total %} <span class="ms-1">{{ total }}</span>{% endif %}</a>
+      <a href="?status=submitted" class="{% if status == 'submitted' %}active{% endif %}">Submitted{% if counts|get_item:'submitted' %} <span class="ms-1">{{ counts|get_item:'submitted' }}</span>{% endif %}</a>
+      <a href="?status=under_review" class="{% if status == 'under_review' %}active{% endif %}">Under review{% if counts|get_item:'under_review' %} <span class="ms-1">{{ counts|get_item:'under_review' }}</span>{% endif %}</a>
+      <a href="?status=shortlisted" class="{% if status == 'shortlisted' %}active{% endif %}">Shortlisted{% if counts|get_item:'shortlisted' %} <span class="ms-1">{{ counts|get_item:'shortlisted' }}</span>{% endif %}</a>
+      <a href="?status=selected" class="{% if status == 'selected' %}active{% endif %}">Selected{% if counts|get_item:'selected' %} <span class="ms-1">{{ counts|get_item:'selected' }}</span>{% endif %}</a>
+      <a href="?status=rejected" class="{% if status == 'rejected' %}active{% endif %}">Not selected{% if counts|get_item:'rejected' %} <span class="ms-1">{{ counts|get_item:'rejected' }}</span>{% endif %}</a>
+      <a href="?status=withdrawn" class="{% if status == 'withdrawn' %}active{% endif %}">Withdrawn{% if counts|get_item:'withdrawn' %} <span class="ms-1">{{ counts|get_item:'withdrawn' }}</span>{% endif %}</a>
+    </div>
+
+    {% if page_obj.object_list %}
+      <div class="table-wrap">
+        <div class="table-responsive">
+          <table class="table table-fng align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Vacancy</th>
+                <th scope="col">Institution</th>
+                <th scope="col">Applied</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for application in page_obj %}
+                <tr>
+                  <td>
+                    <a href="{% url 'applications:candidate_detail' application.pk %}" class="fw-semibold">{{ application.job.title|truncatechars:52 }}</a>
+                    <span class="cell-meta">{{ application.job.designation.name }} · {{ application.job.department.name }} · {{ application.job.location_label }}</span>
+                  </td>
+                  <td>{{ application.job.institution.name|truncatechars:32 }}</td>
+                  <td>{{ application.applied_at|date:"j M Y" }}<span class="cell-meta">{{ application.applied_at|date:"H:i" }}</span></td>
+                  <td><span class="badge-soft {{ application.status_css }}">{{ application.get_status_display }}</span></td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-brand" href="{% url 'applications:candidate_detail' application.pk %}">Open</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state__icon mx-auto"><i class="bi bi-send" aria-hidden="true"></i></div>
+        <h3>{% if status %}No applications with this status{% else %}No applications yet{% endif %}</h3>
+        <p>{% if status %}Try another status filter or view all applications.{% else %}When you apply to a verified vacancy, you can follow its progress here.{% endif %}</p>
+        {% if status %}
+          <a class="btn btn-outline-brand" href="{% url 'applications:candidate_list' %}">View all applications</a>
+        {% else %}
+          <a class="btn btn-brand" href="{% url 'jobs:find' %}">Browse verified jobs</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="alert-fng info mt-3">
+  <i class="bi bi-info-circle" aria-hidden="true"></i>
+  <div>Status updates are shared by the institution through FacultyNxtGen. If an institution contacts you outside the platform, verify the sender before sharing documents or paying any fee.</div>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Vacancies — Administration — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Vacancy moderation{% endblock %}
+{% block dashboard_subtitle %}Approve, publish, reject or suspend vacancies after checking the institution, official notification and application route.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:jobs' %}?status=pending"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>Review queue ({{ counts.pending|default:0 }})</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="card-fng">
+  <div class="card-fng__header"><h2>All vacancies</h2><span class="badge-soft neutral">{{ counts.all }} records</span></div>
+  <div class="card-fng__body">
+    <div class="status-tabs" role="navigation" aria-label="Filter vacancies by status">
+      <a href="{% url 'dashboard:jobs' %}{% if q %}?q={{ q|urlencode }}{% endif %}" class="{% if not status %}active{% endif %}">All <span class="ms-1">{{ counts.all }}</span></a>
+      {% for value, label in status_choices %}
+        <a href="?status={{ value }}{% if q %}&q={{ q|urlencode }}{% endif %}" class="{% if status == value %}active{% endif %}">{{ label }}{% if counts|get_item:value %} <span class="ms-1">{{ counts|get_item:value }}</span>{% endif %}</a>
+      {% endfor %}
+    </div>
+
+    <form method="get" class="d-flex flex-wrap gap-2 mb-3" role="search" aria-label="Search vacancies">
+      {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+      <input class="form-control flex-grow-1" style="min-width:220px;" type="search" name="q" value="{{ q }}" placeholder="Search title, institution or recruiter email" aria-label="Search vacancies">
+      <button class="btn btn-outline-brand" type="submit"><i class="bi bi-search me-1" aria-hidden="true"></i>Search</button>
+      {% if q or status %}<a class="btn btn-outline-brand" href="{% url 'dashboard:jobs' %}" aria-label="Clear filters"><i class="bi bi-x-lg" aria-hidden="true"></i></a>{% endif %}
+    </form>
+
+    {% if page_obj.object_list %}
+      <div class="table-wrap">
+        <div class="table-responsive">
+          <table class="table table-fng align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Vacancy</th>
+                <th scope="col">Institution</th>
+                <th scope="col">Route</th>
+                <th scope="col">Deadline</th>
+                <th scope="col">Status</th>
+                <th scope="col">Updated</th>
+                <th scope="col" class="text-end">Review</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for job in page_obj %}
+                <tr>
+                  <td>
+                    <a class="fw-semibold" href="{% url 'dashboard:job_detail' job.pk %}">{{ job.title|truncatechars:44 }}</a>
+                    <span class="cell-meta">{{ job.designation.name }} · {{ job.department.name }} · {{ job.city.name }}</span>
+                  </td>
+                  <td>{{ job.institution.name|truncatechars:28 }}<span class="cell-meta">{{ job.posted_by.get_full_name }}</span></td>
+                  <td><span class="badge-soft {% if job.application_method == 'internal' %}primary{% else %}neutral{% endif %}">{{ job.get_application_method_display }}</span></td>
+                  <td>{{ job.deadline|date:"j M Y"|default:"Not set" }}<span class="cell-meta">{{ job.deadline_label }}</span></td>
+                  <td><span class="badge-soft {% if job.status == 'published' %}success{% elif job.status == 'pending' %}warning{% elif job.status == 'approved' %}primary{% elif job.status == 'rejected' or job.status == 'suspended' %}danger{% else %}neutral{% endif %}">{{ job.get_status_display }}</span></td>
+                  <td>{{ job.updated_at|date:"j M Y" }}<span class="cell-meta">{{ job.updated_at|time:"H:i" }}</span></td>
+                  <td class="text-end">
+                    <div class="d-inline-flex gap-1">
+                      <a class="btn btn-sm btn-outline-brand" href="{% url 'dashboard:job_detail' job.pk %}">Open</a>
+                      {% if job.status == 'published' %}<a class="btn btn-sm btn-outline-brand" href="{{ job.get_absolute_url }}" target="_blank" rel="noopener" aria-label="View live vacancy"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a>{% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state__icon mx-auto"><i class="bi bi-briefcase" aria-hidden="true"></i></div>
+        <h3>No vacancies found</h3>
+        <p>{% if q or status %}No vacancies match this filter.{% else %}Vacancies appear here when institutions create them.{% endif %}</p>
+        {% if q or status %}<a class="btn btn-outline-brand" href="{% url 'dashboard:jobs' %}">Clear filters</a>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card-fng mt-3">
+  <div class="card-fng__body">
+    <h2 class="h6">Moderation standard</h2>
+    <div class="row g-3 mt-1">
+      <div class="col-md-4"><div class="text-small"><span class="badge-soft warning mb-2">Pending review</span><p class="text-muted-fng mb-0">Check the institution is verified, the official notification exists and the application route is genuine.</p></div></div>
+      <div class="col-md-4"><div class="text-small"><span class="badge-soft success mb-2">Published</span><p class="text-muted-fng mb-0">Publishing requires every checklist item. Live vacancies must keep a valid deadline and verified institution.</p></div></div>
+      <div class="col-md-4"><div class="text-small"><span class="badge-soft danger mb-2">Rejected / suspended</span><p class="text-muted-fng mb-0">Use a specific reason. The institution receives it and can correct rejected vacancies before resubmitting.</p></div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

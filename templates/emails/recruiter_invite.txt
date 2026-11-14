@@ -1,0 +1,12 @@
+FacultyNxtGen — recruiter invitation
+
+{{ inviter.get_full_name|default:inviter.email }} has invited you to manage recruitment for {{ institution.name }} on FacultyNxtGen{% if designation %} as {{ designation }}{% endif %}.
+
+Accept the invitation to set your password and access the institution dashboard. The link expires in 7 days and can only be used once:
+
+{{ invite_url }}
+
+If you were not expecting this invitation, you can ignore it. No access is granted until you accept and set a password.
+
+Support: {{ SUPPORT_EMAIL }}
+© {{ current_year }} {{ SITE_NAME }}

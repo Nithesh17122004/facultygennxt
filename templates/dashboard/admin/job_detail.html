@@ -1,0 +1,185 @@
+{% extends "dashboard/base.html" %}
+{% load fng documents %}
+
+{% block title %}{{ job.title }} — Moderation — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}{{ job.title }}{% endblock %}
+{% block dashboard_subtitle %}{{ job.institution.name }} · {{ job.designation.name }} · {{ job.department.name }}{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:jobs' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>All vacancies</a>
+  {% if job.status == "published" %}<a class="btn btn-outline-brand btn-sm" href="{{ job.get_absolute_url }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>View live</a>{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header">
+        <h2>Vacancy record</h2>
+        <span class="badge-soft {% if job.status == 'published' %}success{% elif job.status == 'pending' %}warning{% elif job.status == 'approved' %}primary{% elif job.status == 'rejected' or job.status == 'suspended' %}danger{% else %}neutral{% endif %}">{{ job.get_status_display }}</span>
+      </div>
+      <div class="card-fng__body">
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <span class="badge-soft neutral">{{ job.get_employment_type_display }}</span>
+          <span class="badge-soft {% if job.application_method == 'internal' %}primary{% else %}neutral{% endif %}">{{ job.get_application_method_display }}</span>
+          {% if job.is_deleted %}<span class="badge-soft danger">Deleted</span>{% endif %}
+        </div>
+        <dl class="kv-list">
+          <div class="kv-list__row"><dt>Institution</dt><dd><a href="{% url 'dashboard:institution_detail' job.institution.pk %}">{{ job.institution.name }}</a> · {{ job.institution.verification_label }}</dd></div>
+          <div class="kv-list__row"><dt>Posted by</dt><dd>{{ job.posted_by.get_full_name }} · {{ job.posted_by.email }}</dd></div>
+          <div class="kv-list__row"><dt>Location</dt><dd>{{ job.location_label }}{% if job.campus_location %} · {{ job.campus_location }}{% endif %}</dd></div>
+          <div class="kv-list__row"><dt>Deadline</dt><dd>{{ job.deadline|date:"j M Y"|default:"Not set" }} · {{ job.deadline_label }}</dd></div>
+          <div class="kv-list__row"><dt>Published</dt><dd>{{ job.published_at|date:"j M Y, H:i"|default:"Not published" }}</dd></div>
+          <div class="kv-list__row"><dt>Approved</dt><dd>{% if job.approved_at %}{{ job.approved_at|date:"j M Y" }} by {{ job.approved_by.get_full_name|default:"staff" }}{% else %}Not approved{% endif %}</dd></div>
+          <div class="kv-list__row"><dt>Applications</dt><dd>{{ applications_count }}</dd></div>
+          <div class="kv-list__row"><dt>Views</dt><dd>{{ job.views_count }}</dd></div>
+          <div class="kv-list__row"><dt>Created</dt><dd>{{ job.created_at|date:"j M Y, H:i" }}</dd></div>
+          <div class="kv-list__row"><dt>Last updated</dt><dd>{{ job.updated_at|date:"j M Y, H:i" }}</dd></div>
+        </dl>
+
+        {% if job.rejection_reason %}
+          <div class="alert-fng danger mt-3"><i class="bi bi-x-octagon" aria-hidden="true"></i><div><strong>Rejection reason.</strong> {{ job.rejection_reason }}</div></div>
+        {% endif %}
+        {% if job.suspension_reason %}
+          <div class="alert-fng warning mt-3"><i class="bi bi-pause-circle" aria-hidden="true"></i><div><strong>Suspension reason.</strong> {{ job.suspension_reason }}</div></div>
+        {% endif %}
+        {% if job.review_notes %}
+          <div class="alert-fng info mt-3"><i class="bi bi-journal-text" aria-hidden="true"></i><div><strong>Internal notes.</strong> {{ job.review_notes }}</div></div>
+        {% endif %}
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-6">
+            <h3 class="h6">Application route</h3>
+            {% if job.application_method == "external" %}
+              {% if job.external_application_url %}<p class="text-small mb-1">URL: <a href="{{ job.external_application_url }}" target="_blank" rel="noopener noreferrer nofollow">{{ job.external_application_url|truncatechars:56 }}</a></p>{% endif %}
+              {% if job.external_application_email %}<p class="text-small mb-1">Email: <span class="mono">{{ job.external_application_email }}</span></p>{% endif %}
+            {% else %}
+              <p class="text-small text-muted-fng">Candidates apply through FacultyNxtGen. Documents are shared only with this institution.</p>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <h3 class="h6">Official source</h3>
+            {% if job.source_information %}<p class="text-small mb-1">{{ job.source_information|linebreaksbr }}</p>{% else %}<p class="text-small text-danger mb-1">No source information provided.</p>{% endif %}
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              {% if job.notification_document and not job.notification_document.is_deleted %}
+                <a class="btn btn-sm btn-outline-brand" href="{% document_url job.notification_document user %}" target="_blank" rel="noopener"><i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>Official notification</a>
+              {% elif job.notification_url %}
+                <a class="btn btn-sm btn-outline-brand" href="{{ job.notification_url }}" target="_blank" rel="noopener noreferrer nofollow"><i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>Notification URL</a>
+              {% else %}
+                <span class="badge-soft danger">No notification on file</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <h3 class="h6 mt-4">Role description</h3>
+        <div class="job-content">{% if job.description %}{{ job.description|linebreaks }}{% else %}<p class="text-muted-fng">No description provided.</p>{% endif %}</div>
+        <h3 class="h6 mt-4">Required qualifications</h3>
+        <div class="job-content">{% if job.required_qualification %}{{ job.required_qualification|linebreaks }}{% else %}<p class="text-muted-fng">Not provided.</p>{% endif %}</div>
+        <h3 class="h6 mt-4">Eligibility</h3>
+        <div class="job-content">{% if job.eligibility %}{{ job.eligibility|linebreaks }}{% else %}<p class="text-muted-fng">Not provided.</p>{% endif %}</div>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Status history</h2></div>
+      <div class="card-fng__body">
+        <div class="timeline">
+          {% for event in job.status_history %}
+            <div class="timeline-item">
+              <div class="d-flex flex-wrap justify-content-between gap-2">
+                <strong>{{ event.to_status|capfirst }}</strong>
+                <span class="text-tiny text-muted-fng">{{ event.created_at|date:"j M Y, H:i" }} · {{ event.actor.get_full_name|default:"System" }}</span>
+              </div>
+              {% if event.note %}<p class="text-small text-muted-fng mb-0">{{ event.note }}</p>{% endif %}
+            </div>
+          {% empty %}
+            <p class="text-small text-muted-fng mb-0">No status history recorded.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Audit trail</h2><a class="link-arrow text-small" href="{% url 'dashboard:audit' %}?q={{ job.title|urlencode }}">Full log</a></div>
+      <div class="card-fng__body">
+        {% for entry in audit_entries %}
+          <div class="border-bottom pb-2 mb-2">
+            <span class="text-small fw-semibold">{{ entry.summary|truncatechars:70 }}</span>
+            <span class="d-block text-tiny text-muted-fng">{{ entry.action }} · {{ entry.actor.get_full_name|default:"System" }} · {{ entry.created_at|date:"j M Y, H:i" }}</span>
+          </div>
+        {% empty %}
+          <p class="text-small text-muted-fng mb-0">No audit entries for this vacancy.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Verification checklist</h2><span class="badge-soft {% if checklist_complete %}success{% else %}warning{% endif %}">{% if checklist_complete %}Complete{% else %}Incomplete{% endif %}</span></div>
+      <div class="card-fng__body">
+        <form method="post" action="{% url 'dashboard:job_decision' job.pk %}" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="form_name" value="review">
+          {% include "partials/nonfield_errors.html" with form=review_form %}
+          {% include "partials/form_field.html" with field=review_form.verified_institution %}
+          {% include "partials/form_field.html" with field=review_form.verified_recruiter %}
+          {% include "partials/form_field.html" with field=review_form.verified_advertisement %}
+          {% include "partials/form_field.html" with field=review_form.verified_application_url %}
+          {% include "partials/form_field.html" with field=review_form.verified_deadline %}
+          {% include "partials/form_field.html" with field=review_form.verified_eligibility %}
+          {% include "partials/form_field.html" with field=review_form.review_notes %}
+          <div class="d-grid gap-2">
+            <button class="btn btn-outline-brand" type="submit" name="action" value="save"><i class="bi bi-save me-1" aria-hidden="true"></i>Save checklist</button>
+            {% if job.status == "pending" or job.status == "rejected" %}
+              <button class="btn btn-soft" type="submit" name="action" value="approve"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Approve without publishing</button>
+            {% endif %}
+            {% if job.status == "pending" or job.status == "approved" or job.status == "suspended" %}
+              <button class="btn btn-brand" type="submit" name="action" value="publish"><i class="bi bi-broadcast me-1" aria-hidden="true"></i>Approve &amp; publish live</button>
+            {% endif %}
+          </div>
+          <p class="apply-note mt-3 mb-0">Publishing requires all six checks, a verified institution and a future deadline. The public listing appears immediately after publishing.</p>
+        </form>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Request changes</h2></div>
+      <div class="card-fng__body">
+        <form method="post" action="{% url 'dashboard:job_decision' job.pk %}" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="form_name" value="reject">
+          {% include "partials/nonfield_errors.html" with form=reject_form %}
+          {% include "partials/form_field.html" with field=reject_form.reason %}
+          <button class="btn btn-outline-brand w-100 text-danger" type="submit" data-confirm="Reject this vacancy and notify the institution?"><i class="bi bi-x-circle me-1" aria-hidden="true"></i>Reject and request changes</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Suspend vacancy</h2></div>
+      <div class="card-fng__body">
+        <form method="post" action="{% url 'dashboard:job_decision' job.pk %}" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="form_name" value="suspend">
+          {% include "partials/nonfield_errors.html" with form=suspend_form %}
+          {% include "partials/form_field.html" with field=suspend_form.reason %}
+          <button class="btn btn-outline-brand w-100 text-danger" type="submit" data-confirm="Suspend this vacancy immediately? It will be removed from public listings."><i class="bi bi-pause-circle me-1" aria-hidden="true"></i>Suspend vacancy</button>
+        </form>
+        <p class="apply-note mt-3 mb-0">Suspend immediately for suspected fraud, expired deadlines or institution suspension. The institution is notified with the reason.</p>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Quick links</h2>
+        <div class="d-grid gap-2 mt-2">
+          <a class="btn btn-outline-brand" href="{% url 'dashboard:institution_detail' job.institution.pk %}">Institution file</a>
+          <a class="btn btn-outline-brand" href="{% url 'dashboard:reports' %}?status=open">Open reports</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

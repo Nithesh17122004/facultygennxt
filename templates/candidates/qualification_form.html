@@ -1,0 +1,56 @@
+{% extends "dashboard/base.html" %}
+{% load documents %}
+
+{% block title %}Edit qualification — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Edit qualification{% endblock %}
+{% block dashboard_subtitle %}Update your degree record or replace the attached certificate.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'candidates:qualifications' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Back to qualifications</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>{{ record.degree }} · {{ record.year_completed }}</h2><span class="badge-soft primary">{{ record.get_level_display }}</span></div>
+      <div class="card-fng__body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.level %}
+          {% include "partials/form_field.html" with field=form.degree %}
+          {% include "partials/form_field.html" with field=form.specialization %}
+          {% include "partials/form_field.html" with field=form.institution %}
+          {% include "partials/form_field.html" with field=form.university_board %}
+          <div class="row">
+            <div class="col-sm-6">{% include "partials/form_field.html" with field=form.year_completed %}</div>
+            <div class="col-sm-6">{% include "partials/form_field.html" with field=form.percentage_or_grade %}</div>
+          </div>
+          {% include "partials/form_field.html" with field=form.document_file %}
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-brand" type="submit"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Save changes</button>
+            <a class="btn btn-outline-brand" href="{% url 'candidates:qualifications' %}">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Attached certificate</h2></div>
+      <div class="card-fng__body">
+        {% if record.document and not record.document.is_deleted %}
+          <p class="text-small text-muted-fng">Uploaded {{ record.document.created_at|date:"j M Y" }} · {{ record.document.original_name }}</p>
+          <a class="btn btn-outline-brand w-100" href="{% document_url record.document user %}" target="_blank" rel="noopener"><i class="bi bi-file-earmark-lock me-1" aria-hidden="true"></i>View current certificate</a>
+          <p class="text-tiny text-muted-fng mt-2 mb-0">Uploading a new file replaces the certificate used on this record. The previous file is retained privately as an audit reference.</p>
+        {% else %}
+          <p class="text-small text-muted-fng mb-2">No certificate is attached to this qualification.</p>
+          <div class="alert-fng info mb-0"><i class="bi bi-lock-fill" aria-hidden="true"></i><div>Certificates are private. They are shared only when you apply to a vacancy.</div></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

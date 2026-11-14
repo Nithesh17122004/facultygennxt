@@ -1,0 +1,59 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Email preferences — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Email preferences{% endblock %}
+{% block dashboard_subtitle %}Choose which optional emails you receive at {{ user.email }}. Security and transactional account notices are always delivered.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'notifications:list' %}"><i class="bi bi-bell me-1" aria-hidden="true"></i>Notifications</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Optional email</h2></div>
+      <div class="card-fng__body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.job_alerts %}
+          {% include "partials/form_field.html" with field=form.application_updates %}
+          {% include "partials/form_field.html" with field=form.institution_updates %}
+          {% include "partials/form_field.html" with field=form.marketing %}
+          <button class="btn btn-brand" type="submit"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Save preferences</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="alert-fng info mt-3">
+      <i class="bi bi-shield-lock" aria-hidden="true"></i>
+      <div><strong>Always sent.</strong> Password resets, email verification, security alerts and legally required account notices cannot be disabled. Essential service messages about an application you submitted are part of that service.</div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <h2 class="h6">Your email address</h2>
+        <p class="text-small text-muted-fng mb-2">{{ user.email }}</p>
+        {% if user.is_email_verified %}
+          <span class="badge-soft success"><i class="bi bi-check-circle-fill" aria-hidden="true"></i>Verified</span>
+        {% else %}
+          <span class="badge-soft warning">Not verified</span>
+          <a class="btn btn-outline-brand btn-sm w-100 mt-2" href="{% url 'accounts:verify_email_pending' %}">Verify email</a>
+        {% endif %}
+        <a class="btn btn-outline-brand w-100 mt-3" href="{% url 'accounts:identity' %}">Manage account details</a>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Privacy</h2>
+        <p class="text-small text-muted-fng">Marketing email requires explicit opt-in and is off by default. We do not sell your email address or share it with advertisers.</p>
+        <a class="link-arrow text-small" href="{% url 'core:privacy' %}">Read the privacy policy</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

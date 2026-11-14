@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Verification link invalid — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+
+{% block content %}
+<section class="section section--white">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="auth-card text-center">
+          <div class="auth-icon mx-auto"><i class="bi bi-link-45deg" aria-hidden="true"></i></div>
+          <h1>This verification link is not valid</h1>
+          <p class="auth-sub">It may have expired, already been used, or belong to an account that changed email address.</p>
+          <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+            <a class="btn btn-brand" href="{% url 'accounts:resend_verification' %}">Request a new link</a>
+            <a class="btn btn-outline-brand" href="{% url 'accounts:login' %}">Sign in</a>
+          </div>
+          <p class="text-small text-muted-fng mt-4 mb-0">Still stuck? <a href="{% url 'core:contact' %}">Contact support</a> from the email address on your account.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

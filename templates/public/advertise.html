@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Advertise</li>
+      </ol>
+    </nav>
+    <span class="eyebrow eyebrow--light">For universities, colleges and research institutions</span>
+    <h1>Post academic vacancies free.</h1>
+    <p>FacultyNxtGen lists verified teaching, research and non-teaching vacancies for Indian higher education. Every institution and every vacancy is reviewed before it appears publicly — so candidates can act on what they read. Core recruitment features are free for registered educational institutions.</p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <div class="row g-5 align-items-start">
+      <div class="col-lg-7">
+        <span class="eyebrow">Why advertise here</span>
+        <h2 class="mb-3">A shortlist, not a scattergun.</h2>
+        <p class="text-muted-fng">Academic recruitment is specialised. Candidates need to know the department, eligibility conditions, pay matrix, required documents and the official application route. We structure every listing around those details and reject incomplete or unverifiable vacancies.</p>
+        <div class="row g-3 mt-2">
+          <div class="col-sm-6">
+            <div class="value-card">
+              <span class="value-card__icon"><i class="bi bi-patch-check" aria-hidden="true"></i></span>
+              <h3>Verification-first audience</h3>
+              <p>Candidates arrive knowing that institution identity and the official notification have been checked.</p>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="value-card">
+              <span class="value-card__icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+              <h3>Structured applications</h3>
+              <p>Receive internal applications with academic records and documents, or route candidates to your official portal with click tracking.</p>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="value-card">
+              <span class="value-card__icon"><i class="bi bi-graph-up" aria-hidden="true"></i></span>
+              <h3>Useful analytics</h3>
+              <p>See deduplicated daily views, external application clicks and applicant status at a glance.</p>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="value-card">
+              <span class="value-card__icon"><i class="bi bi-unlock" aria-hidden="true"></i></span>
+              <h3>Free to post</h3>
+              <p>Verified institutions can publish vacancies, manage applicants and invite recruiters without payment or a paid plan.</p>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="mt-5 mb-3">How listing works</h2>
+        <ol class="measure text-muted-fng">
+          <li class="mb-2"><strong class="text-navy">Register your institution.</strong> Provide your official email, website, address and a signed authorisation letter. Our team verifies the institution before any vacancy can be published.</li>
+          <li class="mb-2"><strong class="text-navy">Create the vacancy.</strong> Add the designation, department, eligibility, pay details, deadline and the official notification. Drafts are private; submissions enter the review queue.</li>
+          <li class="mb-2"><strong class="text-navy">Pass the checklist.</strong> We confirm the institution, recruiter authority, advertisement authenticity, application route, deadline and eligibility details.</li>
+          <li class="mb-2"><strong class="text-navy">Publish and manage.</strong> Once approved, the vacancy goes live with structured data, search visibility and an application workflow you control.</li>
+        </ol>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <a class="btn btn-brand" href="{% url 'institutions:register' %}">Register Your Institution — Free.</a>
+          <a class="btn btn-link" href="{% url 'core:contact' %}?purpose=advertise">Talk to our team</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card-fng">
+          <div class="card-fng__header"><h2>What we check before publication</h2></div>
+          <div class="card-fng__body">
+            <ul class="checklist">
+              <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Institution identity, registration and current verification status</span></li>
+              <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Recruiter authority to publish for the institution</span></li>
+              <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Vacancy details against the official advertisement or notification</span></li>
+              <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Official application URL, email or internal application route</span></li>
+              <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Application deadline and eligibility conditions</span></li>
+            </ul>
+            <p class="text-small text-muted-fng mt-3 mb-0">Listings that cannot be verified are returned with a reason and can be corrected and resubmitted.</p>
+          </div>
+        </div>
+        <div class="card-fng mt-3">
+          <div class="card-fng__body">
+            <h2 class="h6">Free recruitment services</h2>
+            <p class="text-small text-muted-fng">FacultyNxtGen currently provides free academic recruitment services to registered educational institutions. Posting vacancies, managing applicants and inviting recruiters do not require a paid plan.</p>
+            <a class="link-arrow" href="{% url 'core:contact' %}">Request a call back <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--light">
+  <div class="container">
+    <div class="cta-band">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+          <span class="eyebrow eyebrow--light">Ready when you are</span>
+          <h2>Publish a vacancy candidates can trust.</h2>
+          <p>Start with institution verification. Most reviews are completed within the published verification window, and you can track the status from your dashboard.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+          <a class="btn btn-brand btn-lg" href="{% url 'institutions:register' %}">Get started</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% load static fng %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ page_title|default:SITE_NAME }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ meta_description|default:SITE_TAGLINE }}{% endblock %}">
+  {% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% else %}<link rel="canonical" href="{{ SITE_URL }}{{ request.path }}">{% endif %}
+  {% block robots %}<meta name="robots" content="index,follow,max-image-preview:large">{% endblock %}
+  <meta property="og:site_name" content="{{ SITE_NAME }}">
+  <meta property="og:type" content="{{ og_type|default:'website' }}">
+  <meta property="og:title" content="{% block og_title %}{{ page_title|default:SITE_NAME }}{% endblock %}">
+  <meta property="og:description" content="{{ meta_description|default:SITE_TAGLINE }}">
+  {% if canonical_url %}<meta property="og:url" content="{{ canonical_url }}">{% endif %}
+  {% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#10264A">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'images/favicon-180.png' %}">
+  <link rel="preload" href="{% static 'fonts/inter-400.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'fonts/jakarta-700.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block extra_head %}{% endblock %}
+  {% block structured_data %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <div class="top-strip">
+    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <span><i class="bi bi-shield-check me-1"></i> Verified academic vacancies across India</span>
+      <div class="d-flex align-items-center gap-1">
+        <a href="{% url 'institutions:register' %}">For institutions</a>
+        <span class="dot" aria-hidden="true">·</span>
+        <a href="{% url 'core:contact' %}">Support</a>
+        <span class="dot" aria-hidden="true">·</span>
+        <a href="mailto:{{ SUPPORT_EMAIL }}" aria-label="Email support">{{ SUPPORT_EMAIL }}</a>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <nav class="navbar navbar-expand-lg" aria-label="Primary navigation">
+      <div class="container">
+        <a class="navbar-brand" href="{% url 'core:home' %}">
+          <img src="{% static 'images/facultynxtgen-logo.png' %}" alt="FacultyNxtGen" width="2017" height="605">
+          <span class="brand-caption">Academic careers<br>built on verification</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#primaryNavbar" aria-controls="primaryNavbar" aria-expanded="false" aria-label="Open navigation">
+          <i class="bi bi-list fs-4" aria-hidden="true"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="primaryNavbar">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link {% if request.resolver_match.view_name == 'jobs:find' %}active{% endif %}" href="{% url 'jobs:find' %}">Find jobs</a></li>
+            <li class="nav-item"><a class="nav-link {% if request.resolver_match.view_name == 'jobs:teaching' %}active{% endif %}" href="{% url 'jobs:teaching' %}">Teaching</a></li>
+            <li class="nav-item"><a class="nav-link {% if request.resolver_match.view_name == 'jobs:research' %}active{% endif %}" href="{% url 'jobs:research' %}">Research</a></li>
+            <li class="nav-item"><a class="nav-link {% if request.resolver_match.view_name == 'jobs:non_teaching' %}active{% endif %}" href="{% url 'jobs:non_teaching' %}">Non-teaching</a></li>
+            <li class="nav-item"><a class="nav-link {% if request.resolver_match.view_name == 'institutions:directory' %}active{% endif %}" href="{% url 'institutions:directory' %}">Institutions</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle {% if request.resolver_match.view_name == 'core:blog' %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Resources</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'core:blog' %}"><i class="bi bi-journal-text me-2"></i>Career resources</a></li>
+                <li><a class="dropdown-item" href="{% url 'core:faq' %}"><i class="bi bi-question-circle me-2"></i>FAQs</a></li>
+                <li><a class="dropdown-item" href="{% url 'core:about' %}"><i class="bi bi-info-circle me-2"></i>How verification works</a></li>
+                <li><a class="dropdown-item" href="{% url 'core:advertise' %}"><i class="bi bi-megaphone me-2"></i>Advertise with us</a></li>
+              </ul>
+            </li>
+          </ul>
+          <div class="nav-actions">
+            {% if user.is_authenticated %}
+              <a class="nav-action-link position-relative" href="{% url 'notifications:list' %}" aria-label="Notifications{% if unread_notifications %}, {{ unread_notifications }} unread{% endif %}">
+                <i class="bi bi-bell" aria-hidden="true"></i><span class="d-none d-xl-inline">Notifications</span>
+                {% if unread_notifications %}<span class="notif-indicator">{{ unread_notifications }}</span>{% endif %}
+              </a>
+              <div class="dropdown">
+                <button class="btn btn-outline-brand d-flex align-items-center gap-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <span class="avatar">{{ user|user_initials }}</span>
+                  <span class="d-none d-xl-inline text-start" style="max-width:140px;">
+                    <span class="d-block text-truncate" style="font-size:.82rem;">{{ user.get_short_name }}</span>
+                    <span class="d-block text-muted-fng text-truncate" style="font-size:.68rem;">{{ user.get_role_display }}</span>
+                  </span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="{{ dashboard_url|default:user.get_dashboard_url }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+                  <li><a class="dropdown-item" href="{% url 'accounts:identity' %}"><i class="bi bi-person me-2"></i>Account details</a></li>
+                  <li><a class="dropdown-item" href="{% url 'accounts:security' %}"><i class="bi bi-shield-lock me-2"></i>Security</a></li>
+                  <li><a class="dropdown-item" href="{% url 'notifications:preferences' %}"><i class="bi bi-envelope-gear me-2"></i>Email preferences</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <form method="post" action="{% url 'accounts:logout' %}">
+                      {% csrf_token %}
+                      <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i>Sign out</button>
+                    </form>
+                  </li>
+                </ul>
+              </div>
+            {% else %}
+              <a class="nav-action-link" href="{% url 'accounts:login' %}">Sign in</a>
+              <a class="btn btn-brand btn-sm" href="{% url 'accounts:register' %}">Create account</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    {% if messages %}
+      <div class="messages-wrap">
+        <div class="container">
+          {% include "partials/messages.html" %}
+        </div>
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}
+  <footer class="site-footer">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+          <div class="footer-brand">
+            <img src="{% static 'images/facultynxtgen-logo.png' %}" alt="FacultyNxtGen" width="2017" height="605" loading="lazy">
+            <p>{{ SITE_TAGLINE }} A verification-first academic recruitment platform for Indian universities, colleges and research institutions.</p>
+            <div class="footer-social">
+              {% if SOCIAL_LINKEDIN %}<a href="{{ SOCIAL_LINKEDIN }}" aria-label="FacultyNxtGen on LinkedIn" rel="noopener noreferrer" target="_blank"><i class="bi bi-linkedin"></i></a>{% endif %}
+              {% if SOCIAL_X %}<a href="{{ SOCIAL_X }}" aria-label="FacultyNxtGen on X" rel="noopener noreferrer" target="_blank"><i class="bi bi-twitter-x"></i></a>{% endif %}
+              {% if SOCIAL_INSTAGRAM %}<a href="{{ SOCIAL_INSTAGRAM }}" aria-label="FacultyNxtGen on Instagram" rel="noopener noreferrer" target="_blank"><i class="bi bi-instagram"></i></a>{% endif %}
+              <a href="mailto:{{ SUPPORT_EMAIL }}" aria-label="Email FacultyNxtGen"><i class="bi bi-envelope"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-6">
+          <h2>Find work</h2>
+          <ul class="footer-links">
+            <li><a href="{% url 'jobs:find' %}">All vacancies</a></li>
+            <li><a href="{% url 'jobs:teaching' %}">Teaching jobs</a></li>
+            <li><a href="{% url 'jobs:research' %}">Research jobs</a></li>
+            <li><a href="{% url 'jobs:non_teaching' %}">Non-teaching jobs</a></li>
+            <li><a href="{% url 'jobs:landing_state' 'karnataka' %}">Jobs in Karnataka</a></li>
+            <li><a href="{% url 'candidates:job_alerts' %}">Job alerts</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-3 col-6">
+          <h2>Institutions</h2>
+          <ul class="footer-links">
+            <li><a href="{% url 'institutions:register' %}">List your institution</a></li>
+            <li><a href="{% url 'institutions:directory' %}">Institution directory</a></li>
+            <li><a href="{% url 'core:advertise' %}">Post a vacancy — free</a></li>
+            <li><a href="{% url 'core:about' %}">Verification process</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-6 col-6">
+          <h2>Platform</h2>
+          <ul class="footer-links">
+            <li><a href="{% url 'core:about' %}">About us</a></li>
+            <li><a href="{% url 'core:blog' %}">Career resources</a></li>
+            <li><a href="{% url 'core:faq' %}">FAQs</a></li>
+            <li><a href="{% url 'core:contact' %}">Contact</a></li>
+            <li><a href="{% url 'core:cookies' %}">Cookie preferences</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-6 col-6">
+          <h2>Trust</h2>
+          <ul class="footer-links">
+            <li><a href="{% url 'core:privacy' %}">Privacy policy</a></li>
+            <li><a href="{% url 'core:terms' %}">Terms of use</a></li>
+            <li><a href="{% url 'core:disclaimer' %}">Disclaimer</a></li>
+            <li><a href="{% url 'core:contact' %}">Report a concern</a></li>
+            <li><a href="{% url 'core:sitemap' %}">Sitemap</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <span>© {{ current_year }} {{ SITE_NAME }}. All rights reserved.</span>
+          <div class="footer-legal">
+            <a href="{% url 'core:privacy' %}">Privacy</a>
+            <a href="{% url 'core:terms' %}">Terms</a>
+            <a href="{% url 'core:disclaimer' %}">Disclaimer</a>
+            <a href="{% url 'core:cookies' %}">Cookies</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+  {% endblock %}
+
+  <div class="cookie-banner" data-cookie-banner role="dialog" aria-label="Cookie preferences">
+    <h2>Your privacy, your choice</h2>
+    <p>We use essential cookies to run FacultyNxtGen and optional analytics or marketing cookies only with your consent. Read the <a href="{% url 'core:privacy' %}">privacy policy</a>.</p>
+    <div class="cookie-actions">
+      <button type="button" class="btn btn-brand btn-sm" data-cookie-choice="all" data-cookie-url="{% url 'core:cookies' %}">Accept all</button>
+      <button type="button" class="btn btn-outline-brand btn-sm" data-cookie-choice="essential">Essential only</button>
+      <a href="{% url 'core:cookies' %}" class="btn btn-link btn-sm">Manage preferences</a>
+    </div>
+  </div>
+
+  <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}" defer></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

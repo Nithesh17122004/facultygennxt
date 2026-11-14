@@ -1,0 +1,58 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}{{ title }} — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}{{ title }}{% endblock %}
+{% block dashboard_subtitle %}Choose at least one matching criterion. We will email only newly published vacancies that match every field you set.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'candidates:job_alerts' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>All alerts</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>{{ title }}</h2></div>
+      <div class="card-fng__body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.name %}
+          {% include "partials/form_field.html" with field=form.keyword %}
+          <div class="row">
+            <div class="col-sm-6">{% include "partials/form_field.html" with field=form.department %}</div>
+            <div class="col-sm-6">{% include "partials/form_field.html" with field=form.designation %}</div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">{% include "partials/form_field.html" with field=form.state %}</div>
+            <div class="col-sm-6">{% include "partials/form_field.html" with field=form.city %}</div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">{% include "partials/form_field.html" with field=form.employment_type %}</div>
+            <div class="col-sm-6">{% include "partials/form_field.html" with field=form.frequency %}</div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-brand" type="submit">{% if alert %}Save alert{% else %}Create alert{% endif %}</button>
+            <a class="btn btn-outline-brand" href="{% url 'candidates:job_alerts' %}">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <h2 class="h6">Tips for useful alerts</h2>
+        <ul class="text-small text-muted-fng ps-3 mt-2 mb-0">
+          <li class="mb-2">Leave fields blank if you want a broader match.</li>
+          <li class="mb-2">A keyword searches titles, specialisations, departments and institution names.</li>
+          <li class="mb-2">Daily digests are best for active searches; weekly digests suit exploratory searches.</li>
+          <li>State and city must match the vacancy's location.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="alert-fng info mt-3"><i class="bi bi-shield-check" aria-hidden="true"></i><div>Alerts only include vacancies from verified institutions and never include unverified or suspended listings.</div></div>
+  </div>
+</div>
+{% endblock %}

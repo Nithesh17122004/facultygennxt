@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load fng %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block meta_description %}{{ meta_description }}{% endblock %}
+{% block og_title %}{{ landing.title }} — Verified academic vacancies{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'jobs:find' %}">Find jobs</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ landing.title }}</li>
+      </ol>
+    </nav>
+    <span class="eyebrow eyebrow--light">{{ landing.eyebrow }}</span>
+    <h1>{{ landing.title }}</h1>
+    <p>{{ landing.intro }}</p>
+    <form class="search-panel mt-4" method="get" action="{{ request.path }}" role="search" aria-label="Search {{ landing.title|lower }}">
+      <div class="row g-2">
+        <div class="col-lg-7">
+          <label class="visually-hidden" for="landing-q">Keyword</label>
+          <input class="form-control" type="search" id="landing-q" name="q" value="{{ search_terms.q }}" placeholder="Role, department, institution or city">
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <label class="visually-hidden" for="landing-state">State</label>
+          <select class="form-select" id="landing-state" name="state" data-state-select data-city-target="landing-city">
+            <option value="">All states</option>
+            {% for state in states %}<option value="{{ state.slug }}" {% if search_terms.state == state.slug %}selected{% endif %}>{{ state.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+          <button class="btn btn-brand w-100" type="submit">Search</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="results-bar">
+          <div>
+            <h2>{{ total }} verified vacanc{{ total|pluralize:"y,ies" }}</h2>
+            <p>Every listing includes its official source, eligibility details and application deadline.</p>
+          </div>
+          <a class="link-arrow text-small" href="{% url 'jobs:find' %}">All jobs <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+        </div>
+
+        {% if page_obj.object_list %}
+          <div class="d-grid gap-3">
+            {% for job in page_obj %}
+              {% include "partials/job_card.html" with job=job %}
+            {% endfor %}
+          </div>
+          {% include "partials/pagination.html" %}
+        {% else %}
+          <div class="card-fng">
+            <div class="card-fng__body">
+              <div class="empty-state">
+                <div class="empty-state__icon mx-auto"><i class="bi bi-search" aria-hidden="true"></i></div>
+                <h3>No matching vacancies right now</h3>
+                <p>This collection updates as verified institutions publish new roles. Create a job alert to be notified.</p>
+                <div class="d-flex justify-content-center flex-wrap gap-2">
+                  <a class="btn btn-brand" href="{% url 'candidates:job_alerts' %}">Create job alert</a>
+                  <a class="btn btn-outline-brand" href="{% url 'jobs:find' %}">Browse all jobs</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-4">
+        <div class="job-panel">
+          <h2>Why these listings are different</h2>
+          <ul class="checklist">
+            <li><i class="bi bi-patch-check-fill ok" aria-hidden="true"></i><span>Institution identity and authority verified</span></li>
+            <li><i class="bi bi-patch-check-fill ok" aria-hidden="true"></i><span>Vacancy checked against the official notification</span></li>
+            <li><i class="bi bi-patch-check-fill ok" aria-hidden="true"></i><span>Eligibility, deadline and application route reviewed</span></li>
+            <li><i class="bi bi-patch-check-fill ok" aria-hidden="true"></i><span>Reports from candidates investigated by our team</span></li>
+          </ul>
+        </div>
+
+        <div class="card-fng mt-3">
+          <div class="card-fng__body">
+            <h2 class="h6">Related searches</h2>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              <a class="chip" href="{% url 'jobs:landing_india' %}">Faculty jobs in India</a>
+              <a class="chip" href="{% url 'jobs:landing_assistant_professor' %}">Assistant Professor</a>
+              <a class="chip" href="{% url 'jobs:landing_engineering' %}">Engineering colleges</a>
+              <a class="chip" href="{% url 'jobs:landing_arts_science' %}">Arts and Science</a>
+              <a class="chip" href="{% url 'jobs:landing_research' %}">Research fellows</a>
+              <a class="chip" href="{% url 'jobs:teaching' %}">Teaching jobs</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert-fng info mt-3">
+          <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+          <div>Always verify eligibility and application instructions in the official recruitment notification before paying any fee or sharing documents.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Set up two-factor authentication — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Two-factor authentication{% endblock %}
+{% block dashboard_subtitle %}Add an authenticator app as a second factor for your account.{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        {% if device and device.confirmed %}
+          <div class="text-center py-3">
+            <div class="auth-icon mx-auto"><i class="bi bi-shield-check" aria-hidden="true"></i></div>
+            <h2 class="h5">Two-factor authentication is active</h2>
+            <p class="text-small text-muted-fng">Your authenticator app is linked to this account.</p>
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+              <a class="btn btn-brand" href="{% url 'accounts:security' %}">Back to security</a>
+              {% if not enforced %}<a class="btn btn-outline-brand" href="{% url 'accounts:mfa_disable' %}">Disable MFA</a>{% endif %}
+            </div>
+          </div>
+        {% else %}
+          <h2 class="h5">1. Scan the QR code</h2>
+          <p class="text-small text-muted-fng">Use Google Authenticator, Microsoft Authenticator, 1Password or another TOTP-compatible app.</p>
+          <div class="text-center my-3">
+            {% if qr %}<img src="{{ qr }}" alt="QR code to add FacultyNxtGen to your authenticator app" width="190" height="190" class="img-fluid border rounded-3 p-2 bg-white">{% endif %}
+          </div>
+          {% if secret %}
+            <p class="text-small text-muted-fng mb-1">Cannot scan? Enter this setup key manually:</p>
+            <p class="mono bg-light border rounded-2 p-2 text-break" aria-label="Setup key">{{ secret }}</p>
+          {% endif %}
+          <h2 class="h5 mt-4">2. Enter the six-digit code</h2>
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+            <div class="mb-3">
+              <label class="form-label" for="mfa-token">Authenticator code</label>
+              <input class="form-control" id="mfa-token" name="token" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" minlength="6" placeholder="000000" required style="max-width:200px;letter-spacing:.25em;">
+              <div class="form-text">The code changes every 30 seconds. Check your device clock if it is rejected.</div>
+            </div>
+            <button class="btn btn-brand" type="submit">Enable two-factor authentication</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="alert-fng info">
+      <i class="bi bi-key-fill" aria-hidden="true"></i>
+      <div>Keep the setup key or a recovery method somewhere safe. If you lose access to your authenticator, contact support — you will need to verify your identity.</div>
+    </div>
+    {% if enforced %}
+      <div class="alert-fng warning mt-3">
+        <i class="bi bi-shield-lock-fill" aria-hidden="true"></i>
+        <div>Two-factor authentication is required for staff accounts and cannot be disabled.</div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

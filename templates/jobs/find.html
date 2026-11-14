@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% load fng %}
+
+{% block title %}Find academic jobs — {{ SITE_NAME }}{% endblock %}
+{% block meta_description %}Search verified teaching, research and non-teaching vacancies in Indian universities, colleges and research institutions. Filter by department, designation, location and experience.{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Find jobs</li>
+      </ol>
+    </nav>
+    <span class="eyebrow eyebrow--light">Verified academic vacancies</span>
+    <h1>Find your next academic role</h1>
+    <p>Every vacancy comes from a verified institution and passes a vacancy-level checklist before publishing. Review the official notification before applying.</p>
+    <form class="search-panel mt-4" method="get" action="{% url 'jobs:find' %}" role="search" aria-label="Search academic jobs">
+      {% for key, value in search_terms.items %}{% if key != "q" and value %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}{% endfor %}
+      <div class="row g-2">
+        <div class="col-lg-9">
+          <label class="visually-hidden" for="jobs-q">Search vacancies</label>
+          <div class="input-icon suggest-wrap">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input class="form-control ps-5" type="search" id="jobs-q" name="q" value="{{ search_terms.q }}" placeholder="Role, department, institution or city" data-suggest aria-autocomplete="list" aria-expanded="false">
+            <div class="suggest-menu" data-suggest-menu role="listbox" aria-label="Suggestions"></div>
+          </div>
+        </div>
+        <div class="col-lg-3">
+          <button class="btn btn-brand w-100 btn-lg" type="submit">Search jobs</button>
+        </div>
+      </div>
+    </form>
+    <div class="search-hints">
+      <span>Popular:</span>
+      <a href="{% url 'jobs:teaching' %}">Teaching</a>
+      <a href="{% url 'jobs:research' %}">Research</a>
+      <a href="{% url 'jobs:landing_assistant_professor' %}">Assistant Professor</a>
+      <a href="{% url 'jobs:landing_engineering' %}">Engineering colleges</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="d-lg-none mb-3">
+      <button class="btn btn-outline-brand w-100" type="button" data-filter-toggle aria-expanded="false" aria-controls="job-filters">
+        <i class="bi bi-sliders me-1" aria-hidden="true"></i>Show filters{% if active_filter_count %} ({{ active_filter_count }}){% endif %}
+      </button>
+    </div>
+
+    <div class="search-layout">
+      <aside class="filter-card" id="job-filters" data-filter-card aria-label="Filter vacancies">
+        <h2>Filters <a class="filter-reset" href="{% url 'jobs:find' %}">Reset</a></h2>
+        <form method="get" action="{% url 'jobs:find' %}">
+          {% if search_terms.q %}<input type="hidden" name="q" value="{{ search_terms.q }}">{% endif %}
+          {% if search_terms.sort %}<input type="hidden" name="sort" value="{{ search_terms.sort }}">{% endif %}
+          <div class="filter-group">
+            <label class="form-label" for="filter-state">State / UT</label>
+            <select class="form-select" id="filter-state" name="state" data-state-select data-city-target="filter-city">
+              <option value="">All states</option>
+              {% for state in states %}<option value="{{ state.slug }}" {% if search_terms.state == state.slug %}selected{% endif %}>{{ state.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="form-label" for="filter-city">City</label>
+            <select class="form-select" id="filter-city" name="city">
+              <option value="">All cities</option>
+              {% for city in cities %}<option value="{{ city.slug }}" data-state="{{ city.state_id }}" {% if search_terms.city == city.slug %}selected{% endif %}>{{ city.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="form-label" for="filter-designation">Designation</label>
+            <select class="form-select" id="filter-designation" name="designation">
+              <option value="">Any designation</option>
+              {% for designation in designations %}<option value="{{ designation.slug }}" {% if search_terms.designation == designation.slug %}selected{% endif %}>{{ designation.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="form-label" for="filter-department">Department</label>
+            <select class="form-select" id="filter-department" name="department">
+              <option value="">Any department</option>
+              {% for department in departments %}<option value="{{ department.slug }}" {% if search_terms.department == department.slug %}selected{% endif %}>{{ department.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="form-label" for="filter-institution-type">Institution type</label>
+            <select class="form-select" id="filter-institution-type" name="institution_type">
+              <option value="">Any type</option>
+              {% for value, label in institution_types %}<option value="{{ value }}" {% if search_terms.institution_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="form-label" for="filter-employment">Employment type</label>
+            <select class="form-select" id="filter-employment" name="employment_type">
+              <option value="">Any type</option>
+              {% for value, label in employment_types %}<option value="{{ value }}" {% if search_terms.employment_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="form-label" for="filter-experience">Minimum experience</label>
+            <select class="form-select" id="filter-experience" name="experience">
+              <option value="">Any experience</option>
+              <option value="0" {% if search_terms.experience == "0" %}selected{% endif %}>Fresher / up to 1 year</option>
+              <option value="2" {% if search_terms.experience == "2" %}selected{% endif %}>2+ years</option>
+              <option value="5" {% if search_terms.experience == "5" %}selected{% endif %}>5+ years</option>
+              <option value="10" {% if search_terms.experience == "10" %}selected{% endif %}>10+ years</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="form-label" for="filter-posted">Date posted</label>
+            <select class="form-select" id="filter-posted" name="posted">
+              <option value="">Any time</option>
+              <option value="1" {% if search_terms.posted == "1" %}selected{% endif %}>Last 24 hours</option>
+              <option value="7" {% if search_terms.posted == "7" %}selected{% endif %}>Last 7 days</option>
+              <option value="30" {% if search_terms.posted == "30" %}selected{% endif %}>Last 30 days</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="filter-closing" name="closing" value="soon" {% if search_terms.closing == "soon" %}checked{% endif %}>
+              <label class="form-check-label" for="filter-closing">Closing in the next 7 days</label>
+            </div>
+          </div>
+          <button class="btn btn-brand w-100" type="submit">Apply filters</button>
+        </form>
+      </aside>
+
+      <div>
+        <div class="results-bar">
+          <div>
+            <h2>{{ total }} verified vacanc{{ total|pluralize:"y,ies" }}</h2>
+            <p>{% if search_terms.q %}Results for “{{ search_terms.q }}”{% else %}Verified institutions only · updated continuously{% endif %}</p>
+          </div>
+          <form method="get" action="{% url 'jobs:find' %}" class="d-flex align-items-center gap-2">
+            {% for key, value in search_terms.items %}{% if key != "sort" and value %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}{% endfor %}
+            <label class="form-label mb-0 text-nowrap" for="sort-jobs">Sort</label>
+            <select class="form-select form-select-sm" id="sort-jobs" name="sort" data-auto-submit>
+              <option value="latest" {% if search_terms.sort != "deadline" and search_terms.sort != "oldest" %}selected{% endif %}>Most recent</option>
+              <option value="deadline" {% if search_terms.sort == "deadline" %}selected{% endif %}>Closing soonest</option>
+              <option value="oldest" {% if search_terms.sort == "oldest" %}selected{% endif %}>Oldest first</option>
+            </select>
+            <noscript><button class="btn btn-sm btn-outline-brand" type="submit">Sort</button></noscript>
+          </form>
+        </div>
+
+        {% if search_terms.q or search_terms.state or search_terms.city or search_terms.designation or search_terms.department or search_terms.institution_type or search_terms.employment_type or search_terms.experience or search_terms.posted or search_terms.closing %}
+          <div class="active-filters">
+            {% if search_terms.q %}<span class="chip">“{{ search_terms.q }}”</span>{% endif %}
+            {% if search_terms.state %}<span class="chip">{{ search_terms.state|title }}</span>{% endif %}
+            {% if search_terms.city %}<span class="chip">{{ search_terms.city|title }}</span>{% endif %}
+            {% if search_terms.designation %}<span class="chip">{{ search_terms.designation|title }}</span>{% endif %}
+            {% if search_terms.department %}<span class="chip">{{ search_terms.department|title }}</span>{% endif %}
+            {% if search_terms.institution_type %}<span class="chip">{{ search_terms.institution_type|title }}</span>{% endif %}
+            {% if search_terms.employment_type %}<span class="chip">{{ search_terms.employment_type|title }}</span>{% endif %}
+            {% if search_terms.experience %}<span class="chip">{{ search_terms.experience }}+ years</span>{% endif %}
+            {% if search_terms.posted %}<span class="chip">Posted in {{ search_terms.posted }} days</span>{% endif %}
+            {% if search_terms.closing %}<span class="chip">Closing soon</span>{% endif %}
+            <a class="chip" href="{% url 'jobs:find' %}">Clear all <i class="bi bi-x" aria-hidden="true"></i></a>
+          </div>
+        {% endif %}
+
+        {% if page_obj.object_list %}
+          <div class="d-grid gap-3">
+            {% for job in page_obj %}
+              {% include "partials/job_card.html" with job=job %}
+            {% endfor %}
+          </div>
+          {% include "partials/pagination.html" %}
+        {% else %}
+          <div class="card-fng">
+            <div class="card-fng__body">
+              <div class="empty-state">
+                <div class="empty-state__icon mx-auto"><i class="bi bi-search" aria-hidden="true"></i></div>
+                <h3>No vacancies match your search</h3>
+                <p>Try removing a filter, widening the location or searching a broader department. You can also create a job alert for new matches.</p>
+                <div class="d-flex justify-content-center flex-wrap gap-2">
+                  <a class="btn btn-brand" href="{% url 'jobs:find' %}">Clear filters</a>
+                  <a class="btn btn-outline-brand" href="{% url 'candidates:job_alerts' %}">Create job alert</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="alert-fng info mt-4">
+          <i class="bi bi-shield-check" aria-hidden="true"></i>
+          <div>FacultyNxtGen only lists vacancies from verified institutions. If a listing looks wrong, use the report link on its detail page — our team reviews every report.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

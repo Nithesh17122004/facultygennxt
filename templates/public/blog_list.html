@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static fng %}
+
+{% block content %}
+<section class="page-hero page-hero--light">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Career resources</li>
+      </ol>
+    </nav>
+    <span class="eyebrow">Resources</span>
+    <h1>Academic career guidance, written for India</h1>
+    <p>Practical notes on applications, eligibility, interviews and academic hiring — grounded in how Indian universities and colleges actually recruit.</p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+      <div class="d-flex flex-wrap gap-2" role="navigation" aria-label="Filter resources by category">
+        <a class="chip {% if not category %}is-active{% endif %}" href="{% url 'core:blog' %}">All topics</a>
+        {% for item in categories %}
+          <a class="chip {% if category == item %}is-active{% endif %}" href="{% url 'core:blog' %}?category={{ item|urlencode }}">{{ item }}</a>
+        {% endfor %}
+      </div>
+      <span class="text-small text-muted-fng">{{ page_obj.paginator.count }} article{{ page_obj.paginator.count|pluralize }}</span>
+    </div>
+
+    <div class="row g-4">
+      {% for post in page_obj %}
+        <div class="col-md-6 col-lg-4">
+          <article class="blog-card h-100">
+            {% if post.cover_image %}
+              <div class="blog-card__image"><img src="{{ post.cover_image.url }}" alt="" loading="lazy"></div>
+            {% else %}
+              <div class="blog-card__image blog-card__image--placeholder" aria-hidden="true"><i class="bi bi-journal-text"></i></div>
+            {% endif %}
+            <div class="blog-card__body">
+              <div class="blog-card__meta">
+                <span class="badge-soft primary">{{ post.category }}</span>
+                <span>{{ post.published_at|date:"j M Y" }}</span>
+              </div>
+              <h2><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+              <p>{{ post.excerpt|truncatewords:24 }}</p>
+              <a class="link-arrow" href="{{ post.get_absolute_url }}">Read article <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+        </div>
+      {% empty %}
+        <div class="col-12">
+          {% include "partials/empty_state.html" with icon="bi-journal-text" title="No articles published yet" copy="Our editorial team is preparing practical guidance for academic candidates and institutions. Check back soon." action_url="/jobs/" action_label="Browse verified jobs" %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="mt-4">{% include "partials/pagination.html" %}</div>
+  </div>
+</section>
+{% endblock %}

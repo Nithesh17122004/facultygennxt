@@ -1,0 +1,13 @@
+FacultyNxtGen — vacancy submitted for review
+
+{{ job.title }} at {{ job.institution.name }} has been submitted to our verification team.
+
+A reviewer will check the institution's verification, the official notification, the application route, the deadline and the eligibility details. We aim to complete vacancy reviews within two working days.
+
+Current status: Pending verification. The vacancy is not public yet. If we need changes, we will email the reason and you can edit and resubmit.
+
+View submission:
+{{ job_url }}
+
+Only verified institutions with a complete vacancy checklist can be published. Questions? Contact {{ SUPPORT_EMAIL }}.
+© {{ current_year }} {{ SITE_NAME }}

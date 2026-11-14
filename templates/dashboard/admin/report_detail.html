@@ -1,0 +1,90 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Report {{ report.pk|truncatechars:8 }} — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Investigate report{% endblock %}
+{% block dashboard_subtitle %}{{ report.job.title }} · reported {{ report.created_at|date:"j M Y, H:i" }}{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:reports' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>All reports</a>
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:job_detail' report.job.pk %}"><i class="bi bi-briefcase me-1" aria-hidden="true"></i>Vacancy review</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header">
+        <h2>Report details</h2>
+        <span class="badge-soft {% if report.status == 'open' %}warning{% elif report.status == 'investigating' %}info{% elif report.status == 'resolved' %}success{% else %}neutral{% endif %}">{{ report.get_status_display }}</span>
+      </div>
+      <div class="card-fng__body">
+        <dl class="kv-list">
+          <div class="kv-list__row"><dt>Reason</dt><dd>{{ report.get_reason_display }}</dd></div>
+          <div class="kv-list__row"><dt>Reported by</dt><dd>{{ report.reported_by.get_full_name }} · <a href="mailto:{{ report.reported_by.email }}">{{ report.reported_by.email }}</a></dd></div>
+          <div class="kv-list__row"><dt>Vacancy</dt><dd><a href="{% url 'dashboard:job_detail' report.job.pk %}">{{ report.job.title }}</a></dd></div>
+          <div class="kv-list__row"><dt>Institution</dt><dd><a href="{% url 'dashboard:institution_detail' report.job.institution.pk %}">{{ report.job.institution.name }}</a></dd></div>
+          <div class="kv-list__row"><dt>Vacancy status</dt><dd>{{ report.job.get_status_display }} · {{ report.job.deadline_label }}</dd></div>
+          <div class="kv-list__row"><dt>Created</dt><dd>{{ report.created_at|date:"j M Y, H:i" }}</dd></div>
+          {% if report.reviewed_by %}<div class="kv-list__row"><dt>Reviewed by</dt><dd>{{ report.reviewed_by.get_full_name }} · {{ report.updated_at|date:"j M Y, H:i" }}</dd></div>{% endif %}
+        </dl>
+
+        <h3 class="h6 mt-4">What the reporter said</h3>
+        <div class="job-content">{{ report.details|linebreaks }}</div>
+
+        {% if report.resolution_notes %}
+          <div class="alert-fng {% if report.status == 'dismissed' %}neutral{% else %}success{% endif %} mt-3">
+            <i class="bi bi-journal-check" aria-hidden="true"></i>
+            <div><strong>Resolution notes.</strong> {{ report.resolution_notes }}</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Vacancy snapshot</h2></div>
+      <div class="card-fng__body">
+        <dl class="kv-list">
+          <div class="kv-list__row"><dt>Designation</dt><dd>{{ report.job.designation.name }}</dd></div>
+          <div class="kv-list__row"><dt>Department</dt><dd>{{ report.job.department.name }}</dd></div>
+          <div class="kv-list__row"><dt>Location</dt><dd>{{ report.job.location_label }}</dd></div>
+          <div class="kv-list__row"><dt>Application method</dt><dd>{{ report.job.get_application_method_display }}</dd></div>
+          <div class="kv-list__row"><dt>Deadline</dt><dd>{{ report.job.deadline|date:"j M Y"|default:"Not set" }}</dd></div>
+          <div class="kv-list__row"><dt>Institution verification</dt><dd>{{ report.job.institution.verification_label }}</dd></div>
+        </dl>
+        {% if report.job.status == "published" and report.job.is_live %}
+          <a class="btn btn-outline-brand" href="{{ report.job.get_absolute_url }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>Open live vacancy</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Resolution</h2></div>
+      <div class="card-fng__body">
+        <form method="post" action="{% url 'dashboard:report_resolve' report.pk %}" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.status %}
+          {% include "partials/form_field.html" with field=form.resolution_notes %}
+          {% include "partials/form_field.html" with field=form.suspend_job %}
+          <button class="btn btn-brand w-100" type="submit" data-confirm="Save this resolution and notify the reporter?"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Save outcome</button>
+        </form>
+        <p class="apply-note mt-3 mb-0">The reporter receives a notification that their report was reviewed. Resolution notes are internal.</p>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Report history</h2>
+        <dl class="kv-list mt-2">
+          <div class="kv-list__row"><dt>Status</dt><dd>{{ report.get_status_display }}</dd></div>
+          <div class="kv-list__row"><dt>Last updated</dt><dd>{{ report.updated_at|date:"j M Y, H:i" }}</dd></div>
+        </dl>
+        <a class="btn btn-outline-brand w-100" href="{% url 'dashboard:institution_detail' report.job.institution.pk %}">Institution verification file</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

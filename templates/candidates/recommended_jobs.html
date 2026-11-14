@@ -1,0 +1,42 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Recommended jobs — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Recommended vacancies{% endblock %}
+{% block dashboard_subtitle %}Matched on your department, preferred designation and location. Update your profile to improve these recommendations.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'candidates:profile' %}"><i class="bi bi-pencil-square me-1" aria-hidden="true"></i>Update preferences</a>
+  <a class="btn btn-brand btn-sm" href="{% url 'jobs:find' %}"><i class="bi bi-search me-1" aria-hidden="true"></i>Search all jobs</a>
+{% endblock %}
+
+{% block dashboard_content %}
+{% if jobs %}
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <p class="text-small text-muted-fng mb-0">{{ jobs|length }} role{{ jobs|length|pluralize }} matched to your academic preferences</p>
+    <span class="badge-soft primary"><i class="bi bi-stars" aria-hidden="true"></i>{{ profile.department.name|default:"General academic profile" }}</span>
+  </div>
+  <div class="row g-3">
+    {% for job in jobs %}
+      <div class="col-md-6 col-xl-4">{% include "partials/job_card.html" with job=job %}</div>
+    {% endfor %}
+  </div>
+  <div class="alert-fng info mt-4">
+    <i class="bi bi-lightbulb" aria-hidden="true"></i>
+    <div>Recommendations improve when your profile includes a department, preferred designation, specialisation and location. <a href="{% url 'candidates:profile' %}">Complete your profile</a>.</div>
+  </div>
+{% else %}
+  <div class="card-fng">
+    <div class="card-fng__body">
+      <div class="empty-state">
+        <div class="empty-state__icon mx-auto"><i class="bi bi-lightning-charge" aria-hidden="true"></i></div>
+        <h3>No matched vacancies right now</h3>
+        <p>Add your department, preferred designation and location to receive personalised recommendations. You can also browse all verified vacancies.</p>
+        <div class="d-flex justify-content-center flex-wrap gap-2">
+          <a class="btn btn-brand" href="{% url 'candidates:profile' %}">Update profile</a>
+          <a class="btn btn-outline-brand" href="{% url 'jobs:find' %}">Browse all jobs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,16 @@
+FacultyNxtGen — welcome
+
+Hello {{ display_name|default:"there" }},
+
+Your account is ready. FacultyNxtGen focuses on vacancies from verified institutions, with the official notification attached and a clear application route.
+
+Complete your academic profile — qualifications, teaching and research experience, publications and your CV — to apply faster and help recruiters understand your record.
+
+Open your dashboard:
+{{ dashboard_url }}
+
+You can control visibility, alerts, data export and deletion from account settings at any time.
+
+Manage email preferences: {{ preferences_url }}
+Support: {{ SUPPORT_EMAIL }}
+© {{ current_year }} {{ SITE_NAME }}

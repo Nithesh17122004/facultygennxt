@@ -1,0 +1,16 @@
+FacultyNxtGen — new vacancies for your alert
+
+Your alert "{{ alert.name }}" matched {{ jobs|length }} new verified vacanc{{ jobs|length|pluralize:"y,ies" }}.
+
+{% for job in jobs %}- {{ job.title }} at {{ job.institution.name }}
+  {{ job.city.name }}, {{ job.state.name }} · {{ job.get_employment_type_display }} · Apply by {{ job.deadline|date:"d M Y" }}
+  {{ SITE_URL }}{{ job.get_absolute_url }}
+{% endfor %}
+
+Only vacancies from verified institutions that passed our checklist appear in alerts. Always confirm details in the official notification before applying.
+
+Manage job alerts:
+{{ manage_url }}
+
+You are receiving this because you created this alert. You can pause or delete it at any time; job-alert emails can also be turned off in email preferences.
+© {{ current_year }} {{ SITE_NAME }}

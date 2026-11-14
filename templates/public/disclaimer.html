@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="page-hero page-hero--light">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Disclaimer</li>
+      </ol>
+    </nav>
+    <span class="eyebrow">Transparency</span>
+    <h1>Disclaimer</h1>
+    <p>What verification means, what it does not mean, and how to verify a vacancy before you apply.</p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-3">
+        <nav class="legal-nav" aria-label="Disclaimer sections">
+          <a href="#verification">Verification</a>
+          <a href="#vacancy-details">Vacancy details</a>
+          <a href="#external-links">External links</a>
+          <a href="#no-guarantee">No guarantee</a>
+          <a href="#reporting">Reporting a concern</a>
+        </nav>
+      </div>
+      <div class="col-lg-9">
+        <div class="prose measure">
+          <h2 id="verification">Verification is a review, not an endorsement</h2>
+          <p>FacultyNxtGen reviews institution identity, recruiter authority and the official notification behind a vacancy before publication. That review reduces the risk of fraudulent or stale listings. It is not an audit of the institution, a guarantee of working conditions, or an endorsement of any candidate, recruiter or vacancy.</p>
+          <p>Verification evidence may include registration or affiliation documents, a signed authorisation letter, an official website and an official recruitment notice. We may not be able to detect every error, change or misrepresentation, particularly where an institution later departs from its published process.</p>
+
+          <h2 id="vacancy-details">Always check the official notification</h2>
+          <p>Vacancy summaries, eligibility statements, salary indications, deadlines and application instructions are provided for convenience. The official recruitment notification and the institution’s own communications prevail if there is any difference. Pay particular attention to:</p>
+          <ul>
+            <li>Essential and desirable qualifications, including NET/SET/PhD requirements and equivalence conditions.</li>
+            <li>Age limits, reservation rules, experience calculations and required documents.</li>
+            <li>Application fees, deadlines, submission mode and whether late applications are accepted.</li>
+            <li>Whether the vacancy has been cancelled, extended or re-advertised.</li>
+          </ul>
+
+          <h2 id="external-links">External application links</h2>
+          <p>Some vacancies route you to an institution’s official website or email address. When you follow an external link, you leave FacultyNxtGen and become subject to that website’s terms and privacy policy. We record a minimal click event for analytics, but we do not control the destination or its availability. If a link looks wrong, report it instead of entering personal data.</p>
+
+          <h2 id="no-guarantee">No guarantee of outcomes</h2>
+          <p>We do not guarantee that a vacancy will remain open, that an application will be reviewed, that a candidate will be shortlisted, or that a hire will result. We are not a party to any employment relationship between a candidate and an institution. Recruitment decisions, compensation, appointment terms and workplace conduct are the responsibility of the institution.</p>
+          <p>Nothing on this website is legal, immigration, tax or career advice. Seek qualified professional advice for your circumstances.</p>
+
+          <h2 id="reporting">Reporting a concern</h2>
+          <p>If a vacancy appears expired, misleading, duplicated or suspicious, use the “Report this vacancy” action on the job page or contact <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>. Include the job title, institution and what should be checked. Our team can suspend a vacancy while it investigates and will notify the reporter when the review is complete.</p>
+          <p>Never pay a fee to secure a job. Legitimate public recruitment processes state their fees in the official notification and never ask for money through unofficial channels.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

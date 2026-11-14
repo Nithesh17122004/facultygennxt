@@ -1,0 +1,76 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Audit log — Administration — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Audit log{% endblock %}
+{% block dashboard_subtitle %}Append-only record of verification decisions, moderation, access and security events.{% endblock %}
+
+{% block dashboard_content %}
+<div class="card-fng">
+  <div class="card-fng__header"><h2>Recorded actions</h2><span class="badge-soft neutral">{{ page_obj.paginator.count }} matching</span></div>
+  <div class="card-fng__body">
+    <form method="get" class="row g-2 align-items-end mb-3" role="search" aria-label="Filter audit log">
+      <div class="col-md-4">
+        <label class="form-label" for="audit-search">Search</label>
+        <input class="form-control" id="audit-search" type="search" name="q" value="{{ q }}" placeholder="Summary, actor email or entity ID">
+      </div>
+      <div class="col-md-5">
+        <label class="form-label" for="audit-action">Action</label>
+        <select class="form-select" id="audit-action" name="action">
+          <option value="">All actions</option>
+          {% for value in actions %}<option value="{{ value }}" {% if action == value %}selected{% endif %}>{{ value }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button class="btn btn-brand flex-grow-1" type="submit">Filter</button>
+        {% if q or action %}<a class="btn btn-outline-brand" href="{% url 'dashboard:audit' %}" aria-label="Clear filters"><i class="bi bi-x-lg" aria-hidden="true"></i></a>{% endif %}
+      </div>
+    </form>
+
+    {% if page_obj.object_list %}
+      <div class="table-wrap">
+        <div class="table-responsive">
+          <table class="table table-fng align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">When</th>
+                <th scope="col">Actor</th>
+                <th scope="col">Action</th>
+                <th scope="col">Summary</th>
+                <th scope="col">Entity</th>
+                <th scope="col">IP</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for entry in page_obj %}
+                <tr>
+                  <td>{{ entry.created_at|date:"j M Y" }}<span class="cell-meta">{{ entry.created_at|time:"H:i:s" }}</span></td>
+                  <td>{{ entry.actor.get_full_name|default:"System" }}<span class="cell-meta">{{ entry.actor.email|default:"Automated action" }}</span></td>
+                  <td><span class="badge-soft neutral mono">{{ entry.action }}</span></td>
+                  <td>{{ entry.summary|truncatechars:76 }}{% if entry.metadata %}<span class="cell-meta">{{ entry.metadata }}</span>{% endif %}</td>
+                  <td>{% if entry.entity_type %}{{ entry.entity_type }}<span class="cell-meta mono">{{ entry.entity_id|truncatechars:18 }}</span>{% else %}—{% endif %}</td>
+                  <td class="mono text-tiny">{{ entry.ip_address|default:"—" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state__icon mx-auto"><i class="bi bi-shield-check" aria-hidden="true"></i></div>
+        <h3>No audit entries found</h3>
+        <p>{% if q or action %}No entries match these filters.{% else %}Sensitive actions are recorded here as staff and users use the platform.{% endif %}</p>
+        {% if q or action %}<a class="btn btn-outline-brand" href="{% url 'dashboard:audit' %}">Clear filters</a>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="alert-fng info mt-3">
+  <i class="bi bi-lock" aria-hidden="true"></i>
+  <div><strong>Audit records are append-only.</strong> Do not edit or delete entries to correct a mistake. Record a corrective action with a clear explanation instead. Retain logs according to the platform's security and privacy policy.</div>
+</div>
+{% endblock %}

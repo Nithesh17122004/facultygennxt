@@ -1,0 +1,17 @@
+FacultyNxtGen — institution registration received
+
+Hello {{ display_name|default:"there" }},
+
+We have received the registration for {{ institution.name }}. Our verification team will review the institution's identity and the authorisation documents you submitted.
+
+What happens next:
+1. We check the institution website, registration details and authorisation letter.
+2. We may contact the official email or phone number if something is unclear.
+3. Most reviews are completed within {{ verification_window }} working days.
+4. You can prepare vacancy drafts while verification is in progress, but listings cannot be published until the institution is verified.
+
+Open institution dashboard:
+{{ SITE_URL }}{% url 'institutions:dashboard' %}
+
+Questions about verification? Contact {{ SUPPORT_EMAIL }}.
+© {{ current_year }} {{ SITE_NAME }}

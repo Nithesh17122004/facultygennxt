@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">About</li>
+      </ol>
+    </nav>
+    <span class="eyebrow eyebrow--light">Our purpose</span>
+    <h1>Academic hiring deserves a higher standard of verification.</h1>
+    <p>FacultyNxtGen exists to connect Indian higher-education institutions with qualified academics through listings that can be checked, traced and trusted.</p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-7">
+        <div class="prose">
+          <h2 class="mt-0">Why we built FacultyNxtGen</h2>
+          <p>Academic recruitment in India runs on official notifications, eligibility conditions, pay matrices and deadlines. Yet too many job boards republish incomplete listings, strip out the application method, or leave expired vacancies online for months.</p>
+          <p>FacultyNxtGen is a verification-first platform. Institutions submit their authorisation and registration evidence. Our team checks each vacancy against the official notice before publication. Candidates see the source, the application route and the deadline in one place.</p>
+          <p>We are not a recruitment agency and we do not make hiring decisions. Institutions remain responsible for their recruitment process, eligibility decisions and communication with applicants.</p>
+
+          <h2>What we verify</h2>
+          <div class="row g-3 my-2">
+            <div class="col-sm-6">
+              <div class="value-card h-100">
+                <span class="value-card__icon"><i class="bi bi-buildings" aria-hidden="true"></i></span>
+                <h3>Institution identity</h3>
+                <p>Official email domain, website, registration or affiliation documents, and a signed authorisation for the recruiter.</p>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="value-card h-100">
+                <span class="value-card__icon"><i class="bi bi-file-earmark-check" aria-hidden="true"></i></span>
+                <h3>Vacancy authenticity</h3>
+                <p>The role, department, eligibility, pay, deadline and application route must match the official notification.</p>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="value-card h-100">
+                <span class="value-card__icon"><i class="bi bi-person-check" aria-hidden="true"></i></span>
+                <h3>Recruiter authority</h3>
+                <p>The person publishing must be authorised by the institution. Team access is limited and auditable.</p>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="value-card h-100">
+                <span class="value-card__icon"><i class="bi bi-arrow-repeat" aria-hidden="true"></i></span>
+                <h3>Ongoing accuracy</h3>
+                <p>Candidates can report a vacancy. Reports trigger review and, where needed, suspension of the listing.</p>
+              </div>
+            </div>
+          </div>
+
+          <h2>How the review works</h2>
+          <ol>
+            <li><strong>Institution registration.</strong> The institution provides official contact details and uploads its authorisation letter and, where available, registration or affiliation evidence.</li>
+            <li><strong>Document review.</strong> Our team checks the evidence and either verifies the institution, asks for corrections or explains why verification was not approved.</li>
+            <li><strong>Vacancy submission.</strong> A verified recruiter drafts the vacancy and submits it with the source notification or official URL.</li>
+            <li><strong>Checklist approval.</strong> A reviewer confirms institution status, recruiter authority, vacancy details, application route, deadline and eligibility before publishing.</li>
+            <li><strong>Monitoring.</strong> Expired vacancies move out of live search. Reports and spot checks can suspend a listing while it is investigated.</li>
+          </ol>
+
+          <h2>What we will not do</h2>
+          <ul>
+            <li>We will not publish a vacancy from an unverified institution.</li>
+            <li>We will not publish a vacancy that does not pass our verification checklist.</li>
+            <li>We will not share your CV or documents with institutions you have not applied to.</li>
+            <li>We will not use candidate data to make automated hiring decisions.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card-fng mb-3">
+          <div class="card-fng__body">
+            <h2 class="h5">Platform commitments</h2>
+            <ul class="checklist mt-2">
+              <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Verification before publication, not after</span></li>
+              <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Visible application route and source reference</span></li>
+              <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Private, signed access to uploaded documents</span></li>
+              <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Consent-based marketing and double opt-in newsletters</span></li>
+              <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Data export and deletion requests from your account</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="card-fng mb-3">
+          <div class="card-fng__body">
+            <h2 class="h5">Need to verify something?</h2>
+            <p class="text-muted-fng text-small">If a listing looks wrong, report it from the vacancy page. For institution verification questions, contact our team with the institution name and official email domain.</p>
+            <a class="btn btn-brand btn-sm" href="{% url 'core:contact' %}?purpose=institution">Contact verification team</a>
+          </div>
+        </div>
+        <div class="card-fng">
+          <div class="card-fng__body">
+            <h2 class="h5">For institutions</h2>
+            <p class="text-muted-fng text-small">Register your institution, complete document review, then publish vacancies from a dashboard built around the verification checklist.</p>
+            <a class="btn btn-outline-brand btn-sm" href="{% url 'institutions:register' %}">Start registration</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--light">
+  <div class="container">
+    <div class="cta-band">
+      <div class="row align-items-center g-3">
+        <div class="col-lg-8">
+          <h2 class="mb-2">Ready to find your next academic role?</h2>
+          <p class="mb-0">Browse verified teaching, research and non-teaching vacancies, or create an alert for the departments you care about.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+          <a class="btn btn-brand" href="{% url 'jobs:find' %}">Find jobs</a>
+          <a class="btn btn-ghost-light ms-2" href="{% url 'accounts:register' %}">Create account</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

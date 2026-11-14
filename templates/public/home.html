@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+{% load static fng %}
+
+{% block structured_data %}
+  <script type="application/ld+json" nonce="{{ csp_nonce }}">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "{{ SITE_NAME|escapejs }}",
+    "url": "{{ SITE_URL|escapejs }}",
+    "description": "{{ SITE_TAGLINE|escapejs }}",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "{{ SITE_URL }}{% url 'jobs:find' %}?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+{% endblock %}
+
+{% block content %}
+<section class="announcement-band" role="status" aria-label="Free posting announcement">
+  <div class="container text-center">
+    <i class="bi bi-megaphone me-1" aria-hidden="true"></i><strong>Free Academic Job Posting for Educational Institutions.</strong>
+  </div>
+</section>
+
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <span class="eyebrow eyebrow--light">Verified academic recruitment</span>
+        <h1>The next generation of <span class="accent">academic careers</span> starts here.</h1>
+        <p class="lede">Teaching, research and non-teaching vacancies at Indian universities and colleges — reviewed against official notifications before they go live.</p>
+        <div class="hero-badges">
+          <span><i class="bi bi-patch-check-fill" aria-hidden="true"></i> Institution identity verified</span>
+          <span><i class="bi bi-file-earmark-check" aria-hidden="true"></i> Official notification checked</span>
+          <span><i class="bi bi-shield-lock-fill" aria-hidden="true"></i> Documents stay private</span>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="hero-visual" aria-label="Recent verified vacancies">
+          <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+            <span class="text-uppercase text-tiny fw-bold" style="letter-spacing:.09em;color:#8ec8ff;">Latest verified roles</span>
+            <span class="badge-soft dark">{{ home_stats.live_jobs }} live</span>
+          </div>
+          {% for job in latest_jobs|slice:":3" %}
+            <a href="{{ job.get_absolute_url }}" class="hero-float d-block text-reset">
+              <div class="d-flex justify-content-between gap-2">
+                <div class="hero-float__title">{{ job.title }}</div>
+                <span class="hero-float__pill">Verified</span>
+              </div>
+              <div class="hero-float__meta">
+                <span><i class="bi bi-building me-1" aria-hidden="true"></i>{{ job.institution.name|truncatechars:34 }}</span>
+                <span><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ job.location_label }}</span>
+              </div>
+            </a>
+          {% empty %}
+            <div class="hero-float">
+              <div class="hero-float__title">Verification before publication</div>
+              <div class="hero-float__meta"><span>Every vacancy is reviewed against the institution's official notice. No scraped or unverified listings.</span></div>
+            </div>
+            <div class="hero-float">
+              <div class="hero-float__title">Private by design</div>
+              <div class="hero-float__meta"><span>Your CV and certificates are shared only with institutions you choose to apply to.</span></div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="search-panel mt-5">
+      <form method="get" action="{% url 'jobs:find' %}" role="search">
+        <div class="row g-2 align-items-center">
+          <div class="col-lg-5">
+            <div class="suggest-wrap input-icon">
+              <i class="bi bi-search" aria-hidden="true"></i>
+              <label class="visually-hidden" for="home-keyword">Search vacancies</label>
+              <input type="search" class="form-control" id="home-keyword" name="q" placeholder="Role, department or institution" autocomplete="off" data-suggest aria-autocomplete="list" aria-expanded="false">
+              <div class="suggest-menu" data-suggest-menu role="listbox" aria-label="Search suggestions"></div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-3">
+            <label class="visually-hidden" for="home-state">State</label>
+            <select class="form-select" id="home-state" name="state">
+              <option value="">All states &amp; UTs</option>
+              {% for state in states %}
+                <option value="{{ state.slug }}">{{ state.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-sm-6 col-lg-2">
+            <label class="visually-hidden" for="home-department">Department</label>
+            <select class="form-select" id="home-department" name="department">
+              <option value="">All departments</option>
+              {% for department in departments %}
+                <option value="{{ department.slug }}">{{ department.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-lg-2 d-grid">
+            <button class="btn btn-brand" type="submit"><i class="bi bi-search me-1" aria-hidden="true"></i>Search jobs</button>
+          </div>
+        </div>
+      </form>
+      <div class="search-hints">
+        <span class="fw-semibold text-white">Popular:</span>
+        <a href="{% url 'jobs:teaching' %}">Teaching</a>
+        <a href="{% url 'jobs:research' %}">Research</a>
+        <a href="{% url 'jobs:non_teaching' %}">Non-teaching</a>
+        <a href="{% url 'jobs:landing_assistant_professor' %}">Assistant Professor</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card border-0" style="box-shadow:none;background:var(--fng-light);">
+          <div class="stat-card__value">{{ home_stats.live_jobs }}</div>
+          <div class="stat-card__label">Verified live vacancies</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card border-0" style="box-shadow:none;background:var(--fng-light);">
+          <div class="stat-card__value">{{ home_stats.institutions }}</div>
+          <div class="stat-card__label">Verified institutions</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card border-0" style="box-shadow:none;background:var(--fng-light);">
+          <div class="stat-card__value">{{ home_stats.departments }}</div>
+          <div class="stat-card__label">Academic departments</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card border-0" style="box-shadow:none;background:var(--fng-light);">
+          <div class="stat-card__value">{{ home_stats.candidates }}</div>
+          <div class="stat-card__label">Academic professionals</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head section-head--row">
+      <div>
+        <span class="eyebrow">Explore by track</span>
+        <h2>Find the academic role that fits</h2>
+        <p>Three clear tracks, each with the eligibility and application details you need before you apply.</p>
+      </div>
+      <a class="link-arrow" href="{% url 'jobs:find' %}">Browse all vacancies <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <a class="category-card" href="{% url 'jobs:teaching' %}">
+          <span class="category-card__icon"><i class="bi bi-easel2" aria-hidden="true"></i></span>
+          <h3>Teaching &amp; faculty</h3>
+          <p>Assistant Professor, Associate Professor, Professor and academic leadership roles.</p>
+          <span class="category-card__count">{{ category_counts.teaching }} live {{ category_counts.teaching|pluralize:"vacancy,vacancies" }} <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></span>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a class="category-card" href="{% url 'jobs:research' %}">
+          <span class="category-card__icon"><i class="bi bi-activity" aria-hidden="true"></i></span>
+          <h3>Research careers</h3>
+          <p>JRF, SRF, Research Associate, postdoctoral and research faculty opportunities.</p>
+          <span class="category-card__count">{{ category_counts.research }} live {{ category_counts.research|pluralize:"vacancy,vacancies" }} <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></span>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a class="category-card" href="{% url 'jobs:non_teaching' %}">
+          <span class="category-card__icon"><i class="bi bi-diagram-3" aria-hidden="true"></i></span>
+          <h3>Non-teaching roles</h3>
+          <p>Librarian, laboratory, technical, administrative and finance positions.</p>
+          <span class="category-card__count">{{ category_counts.non_teaching }} live {{ category_counts.non_teaching|pluralize:"vacancy,vacancies" }} <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--light">
+  <div class="container">
+    <div class="section-head section-head--row">
+      <div>
+        <span class="eyebrow">Latest opportunities</span>
+        <h2>Recently verified vacancies</h2>
+        <p>Each listing links to the official notification and states exactly how to apply.</p>
+      </div>
+      <a class="btn btn-outline-brand btn-sm" href="{% url 'jobs:find' %}">View all jobs</a>
+    </div>
+    {% if latest_jobs %}
+      <div class="row g-3">
+        {% for job in latest_jobs %}
+          <div class="col-md-6 col-xl-4">{% include "partials/job_card.html" with job=job %}</div>
+        {% endfor %}
+      </div>
+    {% else %}
+      {% include "partials/empty_state.html" with icon="bi-briefcase" title="Verified vacancies are being onboarded" copy="We are working with institutions to publish checked academic vacancies. Create an alert to be notified when matching roles go live." action_url="/dashboard/candidate/job-alerts/create/" action_label="Create a job alert" secondary_url="/institutions/register/" secondary_label="Register your institution" %}
+    {% endif %}
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5">
+        <span class="eyebrow">Why FacultyNxtGen</span>
+        <h2 class="mb-3">A recruitment platform built on checks, not claims.</h2>
+        <p class="text-muted-fng mb-4">Academic hiring depends on precise eligibility, authentic notices and deadlines that mean something. We verify those details before a vacancy appears publicly.</p>
+        <a class="btn btn-brand" href="{% url 'core:about' %}">How verification works <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></a>
+      </div>
+      <div class="col-lg-7">
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <div class="value-card">
+              <span class="value-card__icon"><i class="bi bi-buildings" aria-hidden="true"></i></span>
+              <h3>Verified institutions</h3>
+              <p>Registration certificates and authorisation letters are reviewed by our team before an institution can publish.</p>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="value-card">
+              <span class="value-card__icon"><i class="bi bi-file-earmark-text" aria-hidden="true"></i></span>
+              <h3>Official notifications</h3>
+              <p>Each vacancy is checked against the recruitment notice, including eligibility, pay and application method.</p>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="value-card">
+              <span class="value-card__icon"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
+              <h3>Private documents</h3>
+              <p>CVs and certificates use signed, time-limited access. Recruiters see only what you submit to their vacancy.</p>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="value-card">
+              <span class="value-card__icon"><i class="bi bi-arrow-repeat" aria-hidden="true"></i></span>
+              <h3>Clear lifecycle</h3>
+              <p>Applications move through a visible status workflow, with candidate notifications at every decision.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if departments %}
+<section class="section section--tight section--light">
+  <div class="container">
+    <div class="section-head section-head--row">
+      <div>
+        <span class="eyebrow">By discipline</span>
+        <h2>Explore academic departments</h2>
+      </div>
+      <a class="link-arrow" href="{% url 'jobs:find' %}">All departments <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      {% for department in departments %}
+        <a class="chip" href="{% url 'jobs:find' %}?department={{ department.slug }}">{{ department.name }} <span class="text-muted-fng">· {{ department.live_count }}</span></a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if hiring_institutions %}
+<section class="section section--white">
+  <div class="container">
+    <div class="section-head section-head--row">
+      <div>
+        <span class="eyebrow">Institutions</span>
+        <h2>Verified institutions hiring now</h2>
+        <p>Browse who is recruiting and what they are looking for.</p>
+      </div>
+      <a class="btn btn-outline-brand btn-sm" href="{% url 'institutions:directory' %}">Institution directory</a>
+    </div>
+    <div class="row g-3">
+      {% for institution in hiring_institutions %}
+        <div class="col-md-6">{% include "partials/institution_card.html" with institution=institution %}</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if states %}
+<section class="section section--tight section--light">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <span class="eyebrow">By location</span>
+        <h2>Academic jobs across India</h2>
+        <p class="text-muted-fng">State-wise vacancy pages help you focus on the places you are willing to relocate to.</p>
+      </div>
+      <div class="col-lg-8">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-2">
+          {% for state in states %}
+            <div class="col">
+              <a class="state-pill" href="{% url 'jobs:landing_state' state.state__slug %}">
+                {{ state.state__name }} <span>{{ state.live_count }} live</span>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section section--white">
+  <div class="container">
+    <div class="row g-5 align-items-center">
+      <div class="col-lg-6">
+        <span class="eyebrow">For candidates</span>
+        <h2>Build one verified academic profile.</h2>
+        <p class="text-muted-fng">Keep your qualifications, teaching and research experience, publications and certificates in one place. Apply to internal vacancies without re-uploading the same documents every time.</p>
+        <ul class="list-unstyled d-grid gap-2 mb-4">
+          <li class="d-flex gap-2"><i class="bi bi-check-circle-fill text-success" aria-hidden="true"></i><span>Structured academic record, not a plain CV upload</span></li>
+          <li class="d-flex gap-2"><i class="bi bi-check-circle-fill text-success" aria-hidden="true"></i><span>Saved jobs, tailored alerts and application tracking</span></li>
+          <li class="d-flex gap-2"><i class="bi bi-check-circle-fill text-success" aria-hidden="true"></i><span>Download or delete your data from account settings</span></li>
+        </ul>
+        <a class="btn btn-brand" href="{% url 'jobs:find' %}">Explore Academic Opportunities.</a>
+      </div>
+      <div class="col-lg-6">
+        <span class="eyebrow">For institutions</span>
+        <h2>Reach academics with a verified vacancy.</h2>
+        <p class="text-muted-fng">Complete verification once, then post vacancies and manage applicants and your recruiter team from a single dashboard. Core recruitment features are free for registered educational institutions.</p>
+        <ul class="list-unstyled d-grid gap-2 mb-4">
+          <li class="d-flex gap-2"><i class="bi bi-check-circle-fill text-success" aria-hidden="true"></i><span>Institution and recruiter verification before publishing</span></li>
+          <li class="d-flex gap-2"><i class="bi bi-check-circle-fill text-success" aria-hidden="true"></i><span>Structured applicant review and status communication</span></li>
+          <li class="d-flex gap-2"><i class="bi bi-check-circle-fill text-success" aria-hidden="true"></i><span>Free vacancy posting and recruitment analytics</span></li>
+        </ul>
+        <a class="btn btn-outline-brand" href="{% url 'institutions:register' %}">Register Your Institution — Free.</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if faqs %}
+<section class="section section--light">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-4">
+        <span class="eyebrow">Questions</span>
+        <h2>Before you apply</h2>
+        <p class="text-muted-fng">Answers on verification, eligibility and how applications are handled.</p>
+        <a class="link-arrow" href="{% url 'core:faq' %}">Read all FAQs <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+      </div>
+      <div class="col-lg-8">
+        <div class="accordion accordion-fng" id="homeFaq">
+          {% for item in faqs %}
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#home-faq-{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="home-faq-{{ forloop.counter }}">
+                  {{ item.question }}
+                </button>
+              </h3>
+              <div id="home-faq-{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#homeFaq">
+                <div class="accordion-body">{{ item.answer }}</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section section--white">
+  <div class="container">
+    <div class="cta-band">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <span class="eyebrow eyebrow--light">Stay ahead</span>
+          <h2>Academic career resources, without the noise.</h2>
+          <p>Occasional guidance on applications, interviews, eligibility and academic hiring in India. Confirm your subscription by email; unsubscribe at any time.</p>
+        </div>
+        <div class="col-lg-5">
+          <form method="post" action="{% url 'core:newsletter_subscribe' %}" class="p-3 rounded-3" style="background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.15);">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            {{ newsletter_form.website }}
+            <label class="form-label text-white" for="newsletter-email">Email address</label>
+            <input type="email" class="form-control mb-2" id="newsletter-email" name="email" required autocomplete="email" placeholder="you@example.com">
+            <label class="form-label text-white" for="newsletter-name">First name <span class="fw-normal text-white-50">(optional)</span></label>
+            <input type="text" class="form-control mb-2" id="newsletter-name" name="name" autocomplete="given-name" placeholder="Your first name">
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" value="on" id="newsletter-consent" name="consent" required>
+              <label class="form-check-label" for="newsletter-consent" style="color:#dce7f6;font-size:.8rem;">I agree to receive occasional career resources and platform updates.</label>
+            </div>
+            <button class="btn btn-brand w-100" type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

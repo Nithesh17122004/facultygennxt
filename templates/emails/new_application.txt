@@ -1,0 +1,14 @@
+FacultyNxtGen — new application
+
+{{ candidate.get_full_name|default:candidate.email }} applied for {{ job.title }} at {{ institution.name }}.
+
+Candidate: {{ candidate.get_full_name|default:candidate.email }}
+Submitted: {{ application.submitted_at|date:"d M Y, H:i" }} IST
+Status: {{ application.get_status_display }}
+
+Review the candidate's profile and documents in your dashboard:
+{{ applicant_url }}
+
+Only authorised recruiters for {{ institution.name }} can access candidate documents. Do not forward candidate data outside your hiring team.
+
+© {{ current_year }} {{ SITE_NAME }}

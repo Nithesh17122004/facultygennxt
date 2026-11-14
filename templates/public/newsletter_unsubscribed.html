@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Subscription updated — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+
+{% block content %}
+<section class="section section--white">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="auth-card text-center">
+          <div class="auth-icon mx-auto"><i class="bi bi-envelope-slash" aria-hidden="true"></i></div>
+          <h1>Subscription updated</h1>
+          <p class="auth-sub">{{ subscriber.email }} will no longer receive the FacultyNxtGen newsletter.</p>
+          <p class="text-small text-muted-fng">Transactional messages about your account, applications or institution will still be sent where necessary. You can resubscribe later from the homepage.</p>
+          <a class="btn btn-outline-brand mt-3" href="{% url 'core:home' %}">Return home</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

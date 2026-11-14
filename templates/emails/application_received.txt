@@ -1,0 +1,14 @@
+FacultyNxtGen — application received
+
+Your application for {{ job.title }} at {{ institution.name }} has been recorded. Keep this email for your records.
+
+{% if application.job.application_method == "external" and official_url %}This vacancy uses the institution's own application route. To be considered, submit your application on the official institution portal or by the official email address. Your FacultyNxtGen record is a copy, not a substitute for the official application.
+
+Official application route:
+{{ official_url }}
+{% endif %}
+View my application:
+{{ application_url }}
+
+If you did not submit this application, contact {{ SUPPORT_EMAIL }} immediately.
+© {{ current_year }} {{ SITE_NAME }}

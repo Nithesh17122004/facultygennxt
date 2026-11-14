@@ -1,0 +1,21 @@
+{% extends "emails/base.html" %}
+{% block title %}New application — {{ job.title }}{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 12px;font-size:24px;line-height:1.3;color:#10264A;">New application received</h1>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#33455E;">
+  <strong>{{ candidate.get_full_name|default:candidate.email }}</strong> applied for <strong>{{ job.title }}</strong> at {{ institution.name }}.
+</p>
+<div style="background-color:#F4F7FC;border:1px solid #DCE5F2;border-radius:8px;padding:16px 18px;margin:0 0 20px;">
+  <p style="margin:0 0 6px;font-size:12px;line-height:1.6;color:#5B6B82;text-transform:uppercase;letter-spacing:0.06em;">Application</p>
+  <p style="margin:0 0 4px;font-size:14px;line-height:1.7;color:#33455E;">Candidate: {{ candidate.get_full_name|default:candidate.email }}</p>
+  <p style="margin:0 0 4px;font-size:14px;line-height:1.7;color:#33455E;">Submitted: {{ application.submitted_at|date:"d M Y, H:i" }} IST</p>
+  <p style="margin:0;font-size:14px;line-height:1.7;color:#33455E;">Status: {{ application.get_status_display }}</p>
+</div>
+<p style="margin:0 0 20px;font-size:15px;line-height:1.7;color:#33455E;">
+  Review the candidate's profile and documents in your dashboard. Update the status as the process moves forward so the candidate receives a clear, timely response.
+</p>
+<p style="margin:0 0 24px;">
+  <a href="{{ applicant_url }}" style="display:inline-block;background-color:#087BDB;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:12px 22px;border-radius:6px;">Review application</a>
+</p>
+<p style="margin:0;font-size:13px;line-height:1.7;color:#5B6B82;">Only authorised recruiters for {{ institution.name }} can access candidate documents. Do not forward candidate data outside your hiring team.</p>
+{% endblock %}

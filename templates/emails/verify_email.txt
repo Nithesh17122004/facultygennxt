@@ -1,0 +1,14 @@
+FacultyNxtGen — verify your email address
+
+Hello {{ display_name|default:"there" }},
+
+Confirm your email to activate your FacultyNxtGen account. Verification keeps candidate profiles credible and protects institutions from impersonation.
+
+Verify your email (valid for 48 hours):
+{{ verification_url }}
+
+If you did not create this account, you can ignore this email.
+
+Manage email preferences: {{ preferences_url }}
+Support: {{ SUPPORT_EMAIL }}
+© {{ current_year }} {{ SITE_NAME }}

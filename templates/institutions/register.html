@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Register your institution — {{ SITE_NAME }}{% endblock %}
+{% block meta_description %}Register your university, college or research institution on FacultyNxtGen. Publish verified academic vacancies after document-based verification.{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Institution registration</li>
+      </ol>
+    </nav>
+    <span class="eyebrow eyebrow--light">For universities, colleges and research institutions</span>
+    <h1>Publish academic vacancies with verified authority</h1>
+    <p>Create an institution account, upload your authorisation and registration documents, and publish only after our verification team approves your institution. This protects candidates and your recruitment brand.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card-fng">
+          <div class="card-fng__header"><h2>Institution and contact details</h2><span class="badge-soft primary">Step 1 of 2</span></div>
+          <div class="card-fng__body">
+            <form method="post" enctype="multipart/form-data" novalidate>
+              {% csrf_token %}
+              {% include "partials/nonfield_errors.html" with form=form %}
+
+              <h3 class="form-section-title">Institution identity</h3>
+              {% include "partials/form_field.html" with field=form.institution_name %}
+              <div class="row">
+                <div class="col-md-6">{% include "partials/form_field.html" with field=form.institution_type %}</div>
+                <div class="col-md-6">{% include "partials/form_field.html" with field=form.established_year %}</div>
+              </div>
+              {% include "partials/form_field.html" with field=form.website %}
+
+              <h3 class="form-section-title">Official contact</h3>
+              {% include "partials/form_field.html" with field=form.contact_person %}
+              {% include "partials/form_field.html" with field=form.contact_designation %}
+              <div class="row">
+                <div class="col-md-6">{% include "partials/form_field.html" with field=form.official_email %}</div>
+                <div class="col-md-6">{% include "partials/form_field.html" with field=form.phone %}</div>
+              </div>
+              {% include "partials/form_field.html" with field=form.address %}
+              <div class="row">
+                <div class="col-md-4">{% include "partials/form_field.html" with field=form.state %}</div>
+                <div class="col-md-4">{% include "partials/form_field.html" with field=form.city %}</div>
+                <div class="col-md-4">{% include "partials/form_field.html" with field=form.pincode %}</div>
+              </div>
+
+              <h3 class="form-section-title">Verification documents</h3>
+              {% include "partials/form_field.html" with field=form.authorization_document %}
+              {% include "partials/form_field.html" with field=form.registration_document %}
+              <div class="alert-fng info">
+                <i class="bi bi-file-earmark-lock-fill" aria-hidden="true"></i>
+                <div>Documents are stored privately and reviewed only by authorised verification staff. PDF, JPG or PNG up to 5 MB.</div>
+              </div>
+
+              <h3 class="form-section-title">Account security</h3>
+              <div class="row">
+                <div class="col-md-6">{% include "partials/form_field.html" with field=form.password1 %}</div>
+                <div class="col-md-6">{% include "partials/form_field.html" with field=form.password2 %}</div>
+              </div>
+              {% include "partials/form_field.html" with field=form.terms %}
+              <button class="btn btn-brand btn-lg w-100 mt-2" type="submit"><i class="bi bi-building-check me-1" aria-hidden="true"></i>Create institution account</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card-fng">
+          <div class="card-fng__body">
+            <h2 class="h6">What happens next</h2>
+            <div class="timeline mt-3">
+              <div class="timeline-item">
+                <h3>1. Email verification</h3>
+                <p>Confirm the official institutional email address. You can complete your profile while verification is pending.</p>
+              </div>
+              <div class="timeline-item">
+                <h3>2. Document review</h3>
+                <p>Our team checks your authorisation letter and institutional identity. Typical review time is 2 working days.</p>
+              </div>
+              <div class="timeline-item">
+                <h3>3. Publish vacancies</h3>
+                <p>Once verified, submit vacancies for a final checklist review before they go live.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-fng mt-3">
+          <div class="card-fng__body">
+            <h2 class="h6">Already registered?</h2>
+            <p class="text-small text-muted-fng">Sign in to manage your institution profile, recruiter team and vacancies.</p>
+            <a class="btn btn-outline-brand w-100" href="{% url 'accounts:login' %}">Sign in</a>
+          </div>
+        </div>
+
+        <div class="alert-fng warning mt-3">
+          <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+          <div>FacultyNxtGen never publishes a vacancy solely on an institution's claim. Every listing requires institution verification and a vacancy-level checklist.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

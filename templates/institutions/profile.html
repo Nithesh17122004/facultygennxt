@@ -1,0 +1,121 @@
+{% extends "dashboard/base.html" %}
+{% load documents %}
+
+{% block title %}Institution profile — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Institution profile and verification{% endblock %}
+{% block dashboard_subtitle %}Keep your public profile accurate and maintain current verification evidence. Identity fields lock after verification.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'institutions:dashboard' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Dashboard</a>
+  <a class="btn btn-outline-brand btn-sm" href="{{ institution.get_absolute_url }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>View public profile</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Public profile</h2><span class="badge-soft {% if institution.verification_status == 'verified' %}success{% else %}warning{% endif %}">{{ institution.get_verification_status_display }}</span></div>
+      <div class="card-fng__body">
+        {% if institution.verification_status == "rejected" %}
+          <div class="alert-fng error"><i class="bi bi-x-octagon-fill" aria-hidden="true"></i><div><strong>Verification not approved.</strong> {{ institution.verification_notes|default:"Contact support for the reason and next steps." }}</div></div>
+        {% elif institution.verification_status == "suspended" %}
+          <div class="alert-fng error"><i class="bi bi-slash-circle-fill" aria-hidden="true"></i><div><strong>Institution suspended.</strong> {{ institution.verification_notes|default:"Contact support before making changes." }}</div></div>
+        {% elif institution.verification_status == "pending" %}
+          <div class="alert-fng warning"><i class="bi bi-hourglass-split" aria-hidden="true"></i><div><strong>Verification in progress.</strong> Our team is reviewing your documents. Typical response time is {{ verification_window_days }} working days.</div></div>
+        {% else %}
+          <div class="alert-fng success"><i class="bi bi-patch-check-fill" aria-hidden="true"></i><div><strong>Verified institution.</strong> Identity fields are locked. Contact support if the institution's legal name or website changes.</div></div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          <div class="row">
+            <div class="col-md-8">{% include "partials/form_field.html" with field=form.name %}</div>
+            <div class="col-md-4">{% include "partials/form_field.html" with field=form.institution_type %}</div>
+          </div>
+          <div class="row">
+            <div class="col-md-8">{% include "partials/form_field.html" with field=form.website %}</div>
+            <div class="col-md-4">{% include "partials/form_field.html" with field=form.established_year %}</div>
+          </div>
+          {% include "partials/form_field.html" with field=form.description %}
+          {% include "partials/form_field.html" with field=form.logo %}
+          <h3 class="form-section-title">Recruitment contact</h3>
+          <div class="row">
+            <div class="col-md-6">{% include "partials/form_field.html" with field=form.contact_person %}</div>
+            <div class="col-md-6">{% include "partials/form_field.html" with field=form.contact_designation %}</div>
+          </div>
+          <div class="row">
+            <div class="col-md-4">{% include "partials/form_field.html" with field=form.phone %}</div>
+            <div class="col-md-4">{% include "partials/form_field.html" with field=form.contact_phone %}</div>
+            <div class="col-md-4">{% include "partials/form_field.html" with field=form.contact_email %}</div>
+          </div>
+          {% include "partials/form_field.html" with field=form.address %}
+          <div class="row">
+            <div class="col-md-4">{% include "partials/form_field.html" with field=form.state %}</div>
+            <div class="col-md-4">{% include "partials/form_field.html" with field=form.city %}</div>
+            <div class="col-md-4">{% include "partials/form_field.html" with field=form.pincode %}</div>
+          </div>
+          <button class="btn btn-brand" type="submit"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Save profile</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Verification documents</h2><span class="badge-soft neutral">{{ documents|length }}</span></div>
+      <div class="card-fng__body">
+        {% if documents %}
+          <div class="d-grid gap-2 mb-3">
+            {% for item in documents %}
+              <div class="border rounded-3 p-2">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <strong class="d-block text-small">{{ item.get_doc_type_display }}</strong>
+                    <span class="text-tiny text-muted-fng">{{ item.document.original_name|truncatechars:34 }} · {{ item.created_at|date:"j M Y" }}</span>
+                  </div>
+                  <span class="badge-soft {% if item.status == 'accepted' %}success{% elif item.status == 'rejected' %}danger{% else %}warning{% endif %}">{{ item.get_status_display }}</span>
+                </div>
+                <a class="link-arrow text-tiny mt-1 d-inline-block" href="{% document_url item.document user %}" target="_blank" rel="noopener"><i class="bi bi-file-earmark-lock me-1" aria-hidden="true"></i>Open private copy</a>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-small text-muted-fng">No verification documents uploaded.</p>
+        {% endif %}
+
+        <form method="post" action="{% url 'institutions:upload_document' %}" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          {% include "partials/form_field.html" with field=upload_form.doc_type %}
+          {% include "partials/form_field.html" with field=upload_form.file %}
+          <button class="btn btn-outline-brand w-100" type="submit"><i class="bi bi-upload me-1" aria-hidden="true"></i>Upload verification document</button>
+        </form>
+
+        {% if institution.verification_status != "verified" and institution.verification_status != "suspended" %}
+          <form method="post" action="{% url 'institutions:request_verification' %}" class="mt-2">
+            {% csrf_token %}
+            <button class="btn btn-brand w-100" type="submit"><i class="bi bi-send-check me-1" aria-hidden="true"></i>Request verification review</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Verification requirements</h2>
+        <ul class="text-small text-muted-fng ps-3 mt-2 mb-0">
+          <li class="mb-2">A signed authorisation letter on institutional letterhead.</li>
+          <li class="mb-2">Registration or affiliation certificate where available.</li>
+          <li class="mb-2">Official institutional email and reachable website.</li>
+          <li>Identity fields cannot be changed after verification without support review.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="alert-fng info mt-3">
+      <i class="bi bi-lock-fill" aria-hidden="true"></i>
+      <div>Documents are stored privately. Signed URLs expire and every access is written to the audit log.</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

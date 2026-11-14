@@ -1,0 +1,94 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Recruiter team — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Recruiter team{% endblock %}
+{% block dashboard_subtitle %}Manage who can publish vacancies and review applicants for {{ institution.name }}.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'institutions:settings' %}"><i class="bi bi-gear me-1" aria-hidden="true"></i>Account settings</a>
+  <a class="btn btn-brand btn-sm" href="{% url 'institutions:recruiter_invite' %}"><i class="bi bi-person-plus me-1" aria-hidden="true"></i>Invite recruiter</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-9">
+    <div class="card-fng">
+      <div class="card-fng__header">
+        <h2>Team members</h2>
+        <span class="badge-soft primary">{{ active_count }} active</span>
+      </div>
+      <div class="card-fng__body p-0">
+        {% if team %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng mb-0">
+                <thead><tr><th scope="col">Recruiter</th><th scope="col">Designation</th><th scope="col">Role</th><th scope="col">Status</th><th scope="col" class="text-end">Actions</th></tr></thead>
+                <tbody>
+                  {% for recruiter in team %}
+                    <tr>
+                      <td>
+                        <span class="fw-semibold">{{ recruiter.user.get_full_name }}</span>
+                        <span class="cell-meta">{{ recruiter.user.email }}{% if recruiter.phone %} · {{ recruiter.phone }}{% endif %}</span>
+                      </td>
+                      <td>{{ recruiter.designation|default:"—" }}</td>
+                      <td>{% if recruiter.is_primary %}<span class="badge-soft dark">Primary</span>{% else %}<span class="badge-soft neutral">Recruiter</span>{% endif %}</td>
+                      <td>{% if recruiter.is_active %}<span class="badge-soft success">Active</span>{% else %}<span class="badge-soft neutral">Inactive</span>{% endif %}</td>
+                      <td class="text-end">
+                        <div class="d-inline-flex flex-wrap gap-1 justify-content-end">
+                          <a class="btn btn-sm btn-outline-brand" href="mailto:{{ recruiter.user.email }}" aria-label="Email {{ recruiter.user.get_full_name }}"><i class="bi bi-envelope" aria-hidden="true"></i></a>
+                          {% if not recruiter.user.has_usable_password %}
+                            <form method="post" action="{% url 'institutions:recruiter_resend_invite' recruiter.pk %}">
+                              {% csrf_token %}
+                              <button class="btn btn-sm btn-outline-brand" type="submit">Resend invite</button>
+                            </form>
+                          {% endif %}
+                          {% if not recruiter.is_primary and recruiter.user_id != user.pk %}
+                            <form method="post" action="{% url 'institutions:recruiter_toggle' recruiter.pk %}">
+                              {% csrf_token %}
+                              <button class="btn btn-sm btn-outline-brand {% if recruiter.is_active %}text-danger{% endif %}" type="submit" data-confirm="{% if recruiter.is_active %}Deactivate this recruiter? They will lose dashboard access.{% else %}Reactivate this recruiter?{% endif %}">
+                                {% if recruiter.is_active %}Deactivate{% else %}Activate{% endif %}
+                              </button>
+                            </form>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state__icon mx-auto"><i class="bi bi-people" aria-hidden="true"></i></div>
+            <h3>No recruiters added</h3>
+            <p>Invite colleagues who need to publish vacancies or review applicants.</p>
+            <a class="btn btn-brand" href="{% url 'institutions:recruiter_invite' %}">Invite a recruiter</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <h2 class="h6">Free recruiter access</h2>
+        <p class="text-small text-muted-fng mt-2 mb-0">FacultyNxtGen currently provides free academic recruitment services to registered educational institutions. Invite as many colleagues as your team needs.</p>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Access rules</h2>
+        <ul class="text-small text-muted-fng ps-3 mt-2 mb-0">
+          <li class="mb-2">The primary recruiter manages institution verification.</li>
+          <li class="mb-2">The primary recruiter cannot be deactivated.</li>
+          <li class="mb-2">You cannot deactivate your own account.</li>
+          <li>Invited recruiters set their own password through a time-limited link.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}dashboard-body{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+  <aside class="dash-sidebar" aria-label="Dashboard navigation">
+    {% include "partials/dashboard_nav.html" %}
+  </aside>
+
+  <div class="dash-main">
+    <div class="dash-mobile-bar">
+      <button class="btn btn-outline-brand" type="button" data-bs-toggle="offcanvas" data-bs-target="#dashboardMobileNav" aria-controls="dashboardMobileNav">
+        <i class="bi bi-list me-1" aria-hidden="true"></i>Dashboard menu
+      </button>
+      <a class="btn btn-brand" href="{% block mobile_primary_url %}{{ dashboard_url|default:user.get_dashboard_url }}{% endblock %}">
+        <i class="bi bi-grid-1x2 me-1" aria-hidden="true"></i>Overview
+      </a>
+    </div>
+
+    <div class="dash-topbar">
+      <div>
+        <h1>{% block dashboard_title %}Dashboard{% endblock %}</h1>
+        <p>{% block dashboard_subtitle %}{% endblock %}</p>
+      </div>
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        {% block dashboard_actions %}{% endblock %}
+      </div>
+    </div>
+
+    {% block dashboard_content %}{% endblock %}
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-start offcanvas-fng" tabindex="-1" id="dashboardMobileNav" aria-labelledby="dashboardMobileNavLabel">
+  <div class="offcanvas-header">
+    <h2 class="offcanvas-title h6 mb-0" id="dashboardMobileNavLabel">{{ SITE_NAME }} · Dashboard</h2>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close dashboard navigation"></button>
+  </div>
+  <div class="offcanvas-body">
+    {% include "partials/dashboard_nav.html" %}
+  </div>
+</div>
+{% endblock %}

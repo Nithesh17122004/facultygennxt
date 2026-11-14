@@ -1,0 +1,124 @@
+{% extends "dashboard/base.html" %}
+{% load static fng %}
+
+{% block title %}Candidate dashboard — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Your academic dashboard{% endblock %}
+{% block dashboard_subtitle %}Keep your record current, track applications and discover roles that fit your profile.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'candidates:profile' %}"><i class="bi bi-pencil-square me-1" aria-hidden="true"></i>Edit profile</a>
+  <a class="btn btn-brand btn-sm" href="{% url 'jobs:find' %}"><i class="bi bi-search me-1" aria-hidden="true"></i>Find jobs</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3 mb-1">
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-send" aria-hidden="true"></i></div><div class="stat-card__value">{{ application_count }}</div><div class="stat-card__label">Applications</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-bookmark" aria-hidden="true"></i></div><div class="stat-card__value">{{ saved_count }}</div><div class="stat-card__label">Saved jobs</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-bell" aria-hidden="true"></i></div><div class="stat-card__value">{{ active_alerts }}</div><div class="stat-card__label">Active alerts</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-star" aria-hidden="true"></i></div><div class="stat-card__value">{{ shortlisted_count }}</div><div class="stat-card__label">Shortlisted</div></div></div>
+</div>
+
+<div class="row g-3 mt-2">
+  <div class="col-lg-8">
+    {% if tasks %}
+      <div class="card-fng mb-3">
+        <div class="card-fng__header"><h2>Finish setting up your profile</h2><span class="badge-soft warning">{{ tasks|length }} task{{ tasks|length|pluralize }}</span></div>
+        <div class="card-fng__body">
+          <div class="d-grid gap-2">
+            {% for task in tasks %}
+              <a class="d-flex align-items-center gap-3 text-reset border rounded-3 p-3" href="{% url task.url %}">
+                <span class="stat-card__icon mb-0"><i class="bi {{ task.icon }}" aria-hidden="true"></i></span>
+                <span class="flex-grow-1"><strong class="d-block">{{ task.title }}</strong><span class="text-small text-muted-fng">{{ task.copy }}</span></span>
+                <i class="bi bi-chevron-right text-muted-fng" aria-hidden="true"></i>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Recent applications</h2><a class="link-arrow text-small" href="{% url 'applications:candidate_list' %}">View all</a></div>
+      <div class="card-fng__body p-0">
+        {% if applications %}
+          <div class="table-wrap">
+            <table class="table table-fng mb-0">
+              <thead><tr><th scope="col">Vacancy</th><th scope="col">Institution</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Action</span></th></tr></thead>
+              <tbody>
+                {% for application in applications %}
+                  <tr>
+                    <td><a href="{{ application.job.get_absolute_url }}">{{ application.job.title|truncatechars:44 }}</a><span class="cell-meta">{{ application.applied_at|date:"j M Y" }}</span></td>
+                    <td>{{ application.job.institution.name|truncatechars:28 }}</td>
+                    <td><span class="badge-soft {{ application.status_css }}">{{ application.get_status_display }}</span></td>
+                    <td class="text-end"><a class="btn btn-sm btn-outline-brand" href="{% url 'applications:candidate_detail' application.pk %}">View</a></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state__icon mx-auto"><i class="bi bi-send" aria-hidden="true"></i></div>
+            <h3>No applications yet</h3>
+            <p>When you apply to a vacancy, you can track its status here.</p>
+            <a class="btn btn-brand" href="{% url 'jobs:find' %}">Browse verified jobs</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if recommended_jobs %}
+      <div class="section-head section-head--row mt-4 mb-3">
+        <div><h2 class="h5 mb-0">Recommended for you</h2><p class="text-small text-muted-fng mb-0">Based on your department, designation and location preferences.</p></div>
+        <a class="link-arrow text-small" href="{% url 'candidates:recommended_jobs' %}">See more</a>
+      </div>
+      <div class="row g-3">
+        {% for job in recommended_jobs|slice:":4" %}
+          <div class="col-md-6">{% include "partials/job_card.html" with job=job %}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <div class="d-flex align-items-center gap-3">
+          <span class="avatar avatar--lg" aria-hidden="true">{% if profile.avatar %}<img src="{{ profile.avatar.url }}" alt="">{% else %}{{ user|user_initials }}{% endif %}</span>
+          <div>
+            <h2 class="h6 mb-0">{{ user.full_name }}</h2>
+            <p class="text-small text-muted-fng mb-0">{{ profile.headline|default:"Add a professional headline" }}</p>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div class="d-flex justify-content-between text-small mb-1"><span>Profile completion</span><strong>{{ profile.completion_percentage }}%</strong></div>
+          <div class="progress-fng"><div class="progress-bar" style="width:{{ profile.completion_percentage }}%"></div></div>
+        </div>
+        <div class="kv-list mt-3">
+          <div class="kv-list__row"><dt>Department</dt><dd>{{ profile.department.name|default:"Not set" }}</dd></div>
+          <div class="kv-list__row"><dt>PhD status</dt><dd>{{ profile.get_phd_status_display }}</dd></div>
+          <div class="kv-list__row"><dt>Preferred location</dt><dd>{{ profile.preferred_location_display }}</dd></div>
+          <div class="kv-list__row"><dt>CV</dt><dd>{% if profile.cv_id and not profile.cv.is_deleted %}<span class="text-success"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Ready</span>{% else %}<a href="{% url 'candidates:documents' %}">Upload CV</a>{% endif %}</dd></div>
+        </div>
+        <a class="btn btn-outline-brand w-100 mt-3" href="{% url 'candidates:profile' %}">Update academic profile</a>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Quick links</h2>
+        <div class="d-grid gap-2 mt-2">
+          <a class="d-flex align-items-center gap-2 text-reset" href="{% url 'candidates:qualifications' %}"><i class="bi bi-mortarboard text-primary" aria-hidden="true"></i>Qualifications</a>
+          <a class="d-flex align-items-center gap-2 text-reset" href="{% url 'candidates:documents' %}"><i class="bi bi-folder2-open text-primary" aria-hidden="true"></i>Documents</a>
+          <a class="d-flex align-items-center gap-2 text-reset" href="{% url 'candidates:job_alerts' %}"><i class="bi bi-bell text-primary" aria-hidden="true"></i>Job alerts</a>
+          <a class="d-flex align-items-center gap-2 text-reset" href="{% url 'candidates:privacy' %}"><i class="bi bi-shield-lock text-primary" aria-hidden="true"></i>Privacy controls</a>
+        </div>
+      </div>
+    </div>
+
+    {% if not user.is_email_verified %}
+      <div class="alert-fng warning mt-3"><i class="bi bi-envelope-exclamation-fill" aria-hidden="true"></i><div>Verify your email to apply for jobs. <a href="{% url 'accounts:verify_email_pending' %}">Verify now</a>.</div></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

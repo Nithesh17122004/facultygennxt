@@ -1,0 +1,98 @@
+{% extends "dashboard/base.html" %}
+{% load documents %}
+
+{% block title %}Documents — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Private documents{% endblock %}
+{% block dashboard_subtitle %}Your CV and certificates are stored privately. Links are signed, time-limited and available only to you and institutions you apply to.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'candidates:profile' %}"><i class="bi bi-person-vcard me-1" aria-hidden="true"></i>Academic profile</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header">
+        <h2>Your files</h2>
+        <span class="badge-soft neutral">{{ documents|length }}</span>
+      </div>
+      <div class="card-fng__body p-0">
+        {% if documents %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng align-middle mb-0">
+                <thead><tr><th scope="col">Document</th><th scope="col">Type</th><th scope="col">Added</th><th scope="col" class="text-end">Actions</th></tr></thead>
+                <tbody>
+                  {% for document in documents %}
+                    <tr>
+                      <td>
+                        <span class="fw-semibold">{{ document.original_name }}</span>
+                        <span class="cell-meta">{{ document.size|filesizeformat }}{% if document.description %} · {{ document.description }}{% endif %}</span>
+                        {% if profile.cv_id == document.pk %}<span class="badge-soft success mt-1"><i class="bi bi-star-fill" aria-hidden="true"></i>Primary CV</span>{% endif %}
+                      </td>
+                      <td><span class="badge-soft neutral">{{ document.get_purpose_display }}</span></td>
+                      <td>{{ document.created_at|date:"j M Y" }}<span class="cell-meta">{{ document.created_at|date:"H:i" }}</span></td>
+                      <td class="text-end">
+                        <div class="d-inline-flex gap-1">
+                          <a class="btn btn-sm btn-outline-brand" href="{% document_url document user %}" target="_blank" rel="noopener"><i class="bi bi-download me-1" aria-hidden="true"></i>Open</a>
+                          {% if document.purpose == "cv" or document.purpose == "certificate" or document.purpose == "application_support" or document.purpose == "other" %}
+                            <form method="post" action="{% url 'documents:delete' document.pk %}">
+                              {% csrf_token %}
+                              <input type="hidden" name="next" value="{% url 'candidates:documents' %}">
+                              <button class="btn btn-sm btn-outline-brand text-danger" type="submit" data-confirm="Delete this document permanently?"><i class="bi bi-trash" aria-hidden="true"></i><span class="visually-hidden">Delete {{ document.original_name }}</span></button>
+                            </form>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state__icon mx-auto"><i class="bi bi-folder2-open" aria-hidden="true"></i></div>
+            <h3>No documents uploaded</h3>
+            <p>Upload your CV first. Adding a file as “CV / Resume” sets it as your primary CV for applications.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="alert-fng warning mt-3">
+      <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+      <div><strong>Protect your documents.</strong> FacultyNxtGen never asks you to email documents directly. Only upload files through this page or an application form. Documents supporting institution verification or recruitment notices cannot be deleted.</div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Upload a document</h2></div>
+      <div class="card-fng__body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.purpose %}
+          {% include "partials/form_field.html" with field=form.file %}
+          {% include "partials/form_field.html" with field=form.description %}
+          <button class="btn btn-brand w-100" type="submit"><i class="bi bi-upload me-1" aria-hidden="true"></i>Upload securely</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Upload guidance</h2>
+        <ul class="list-unstyled text-small text-muted-fng mb-0 mt-2">
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>PDF preferred; JPG and PNG accepted.</li>
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>Maximum 5 MB per file.</li>
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>Files are scanned and stored outside the public web root.</li>
+          <li><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>Signed links expire automatically.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

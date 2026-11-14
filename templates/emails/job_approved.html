@@ -1,0 +1,21 @@
+{% extends "emails/base.html" %}
+{% block title %}Your vacancy is live — FacultyNxtGen{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 12px;font-size:24px;line-height:1.3;color:#10264A;">Your vacancy is live</h1>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#33455E;">
+  <strong>{{ job.title }}</strong> at {{ job.institution.name }} passed verification and is now public on FacultyNxtGen.
+</p>
+<div style="background-color:#F4F7FC;border:1px solid #DCE5F2;border-radius:8px;padding:16px 18px;margin:0 0 20px;">
+  <p style="margin:0 0 6px;font-size:12px;line-height:1.6;color:#5B6B82;text-transform:uppercase;letter-spacing:0.06em;">Live listing</p>
+  <p style="margin:0 0 4px;font-size:14px;line-height:1.7;color:#33455E;">Deadline: {{ job.deadline|date:"d M Y" }}</p>
+  <p style="margin:0 0 4px;font-size:14px;line-height:1.7;color:#33455E;">Location: {{ job.city.name }}, {{ job.state.name }}</p>
+  <p style="margin:0;font-size:14px;line-height:1.7;color:#33455E;">Application route: {{ job.get_application_method_display }}</p>
+</div>
+<p style="margin:0 0 24px;">
+  <a href="{{ job_url }}" style="display:inline-block;background-color:#087BDB;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:12px 22px;border-radius:6px;">View public listing</a>
+</p>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#33455E;">
+  Share the listing with your networks and monitor applications from the institution dashboard. Keep candidate data within your authorised hiring team.
+</p>
+<p style="margin:0;font-size:13px;line-height:1.7;color:#5B6B82;">If any detail changes before the deadline, update the vacancy promptly. Do not publish edits that change the official terms without notifying candidates.</p>
+{% endblock %}

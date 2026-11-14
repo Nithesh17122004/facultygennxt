@@ -1,0 +1,123 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Content and enquiries — Administration — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Content and enquiries{% endblock %}
+{% block dashboard_subtitle %}Contact enquiries, published guidance, newsletter reach and email delivery health.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'admin:core_blogpost_changelist' %}"><i class="bi bi-journal-plus me-1" aria-hidden="true"></i>Manage content</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3 mb-2">
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__value">{{ enquiries|length }}</div><div class="stat-card__label">Enquiries shown</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__value">{{ newsletter_count }}</div><div class="stat-card__label">Active newsletter subscribers</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__value">{{ posts|length }}</div><div class="stat-card__label">Recent articles</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__value">{{ email_failures }}</div><div class="stat-card__label">Failed emails</div></div></div>
+</div>
+
+<div class="card-fng mt-2">
+  <div class="card-fng__header"><h2>Contact enquiries</h2><a class="link-arrow text-small" href="{% url 'admin:core_contactenquiry_changelist' %}">Open in Django admin</a></div>
+  <div class="card-fng__body">
+    <div class="status-tabs" role="navigation" aria-label="Filter enquiries by status">
+      <a href="{% url 'dashboard:content' %}" class="{% if not status %}active{% endif %}">All</a>
+      {% for value, label in status_choices %}
+        <a href="?status={{ value }}" class="{% if status == value %}active{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+    {% if enquiries %}
+      <div class="table-wrap">
+        <div class="table-responsive">
+          <table class="table table-fng align-middle mb-0">
+            <thead><tr><th scope="col">From</th><th scope="col">Purpose</th><th scope="col">Subject</th><th scope="col">Status</th><th scope="col">Received</th><th scope="col" class="text-end">Open</th></tr></thead>
+            <tbody>
+              {% for enquiry in enquiries %}
+                <tr>
+                  <td><span class="fw-semibold">{{ enquiry.name }}</span><span class="cell-meta">{{ enquiry.email }}{% if enquiry.organization %} · {{ enquiry.organization }}{% endif %}</span></td>
+                  <td>{{ enquiry.get_purpose_display }}</td>
+                  <td>{{ enquiry.subject|truncatechars:46 }}</td>
+                  <td><span class="badge-soft {% if enquiry.status == 'new' %}warning{% elif enquiry.status == 'in_progress' %}info{% elif enquiry.status == 'resolved' %}success{% else %}neutral{% endif %}">{{ enquiry.get_status_display }}</span></td>
+                  <td>{{ enquiry.created_at|date:"j M Y" }}<span class="cell-meta">{{ enquiry.created_at|time:"H:i" }}</span></td>
+                  <td class="text-end"><a class="btn btn-sm btn-outline-brand" href="{% url 'dashboard:enquiry_detail' enquiry.pk %}">Open</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <div class="empty-state py-4">
+        <div class="empty-state__icon mx-auto"><i class="bi bi-envelope-open" aria-hidden="true"></i></div>
+        <h3>No enquiries</h3>
+        <p>{% if status %}No enquiries with this status.{% else %}Messages from the public contact form appear here.{% endif %}</p>
+        {% if status %}<a class="btn btn-outline-brand" href="{% url 'dashboard:content' %}">View all enquiries</a>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3 mt-2">
+  <div class="col-lg-6">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Latest articles</h2><a class="link-arrow text-small" href="{% url 'core:blog' %}">View blog</a></div>
+      <div class="card-fng__body p-0">
+        {% if posts %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng mb-0">
+                <thead><tr><th scope="col">Article</th><th scope="col">Status</th><th scope="col">Updated</th></tr></thead>
+                <tbody>
+                  {% for post in posts %}
+                    <tr>
+                      <td><a href="{% url 'admin:core_blogpost_change' post.pk %}">{{ post.title|truncatechars:44 }}</a></td>
+                      <td>{% if post.status == "published" %}<span class="badge-soft success">Published</span>{% else %}<span class="badge-soft neutral">Draft</span>{% endif %}</td>
+                      <td>{{ post.updated_at|date:"j M Y" }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <p class="text-small text-muted-fng p-3 mb-0">No articles yet. Add guidance in Django admin.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>FAQs</h2><a class="link-arrow text-small" href="{% url 'admin:core_faq_changelist' %}">Manage FAQs</a></div>
+      <div class="card-fng__body p-0">
+        {% if faqs %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng mb-0">
+                <thead><tr><th scope="col">Question</th><th scope="col">Category</th><th scope="col">Published</th></tr></thead>
+                <tbody>
+                  {% for faq in faqs %}
+                    <tr>
+                      <td><a href="{% url 'admin:core_faq_change' faq.pk %}">{{ faq.question|truncatechars:48 }}</a></td>
+                      <td>{{ faq.category|default:"General" }}</td>
+                      <td>{% if faq.is_published %}<span class="badge-soft success">Yes</span>{% else %}<span class="badge-soft neutral">No</span>{% endif %}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <p class="text-small text-muted-fng p-3 mb-0">No FAQs yet. Add answers in Django admin.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if email_failures %}
+  <div class="alert-fng warning mt-3">
+    <i class="bi bi-envelope-exclamation" aria-hidden="true"></i>
+    <div><strong>{{ email_failures }} email{{ email_failures|pluralize }} failed to deliver.</strong> Review the email log in Django admin, check provider configuration and retry important account or application notifications. <a href="{% url 'admin:notifications_emaillog_changelist' %}">Open email log</a>.</div>
+  </div>
+{% endif %}
+{% endblock %}

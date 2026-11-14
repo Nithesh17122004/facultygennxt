@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load fng %}
+
+{% block title %}This vacancy has closed — {{ SITE_NAME }}{% endblock %}
+{% block meta_description %}This FacultyNxtGen vacancy is no longer accepting applications. Browse similar verified academic vacancies.{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,follow">{% endblock %}
+
+{% block content %}
+<section class="page-hero page-hero--light">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'jobs:find' %}">Find jobs</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Closed vacancy</li>
+      </ol>
+    </nav>
+    <span class="eyebrow">Application window closed</span>
+    <h1>This vacancy is no longer accepting applications</h1>
+    <p>The deadline for {{ job.title }} at {{ job.institution.name }} has passed. The listing is retained for reference but cannot be applied to.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card-fng">
+          <div class="card-fng__header"><h2>{{ job.title }}</h2><span class="badge-soft danger">Closed</span></div>
+          <div class="card-fng__body">
+            <dl class="kv-list">
+              <div class="kv-list__row"><dt>Institution</dt><dd>{{ job.institution.name }}</dd></div>
+              <div class="kv-list__row"><dt>Department</dt><dd>{{ job.department.name }}</dd></div>
+              <div class="kv-list__row"><dt>Location</dt><dd>{{ job.location_label }}</dd></div>
+              <div class="kv-list__row"><dt>Deadline</dt><dd>{{ job.deadline|date:"j M Y" }}</dd></div>
+              <div class="kv-list__row"><dt>Status</dt><dd>Applications closed</dd></div>
+            </dl>
+            <div class="d-flex flex-wrap gap-2 mt-4">
+              <a class="btn btn-brand" href="{% url 'jobs:find' %}">Browse live vacancies</a>
+              <a class="btn btn-outline-brand" href="{{ job.institution.get_absolute_url }}">View institution</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="alert-fng info">
+          <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+          <div>If you already submitted an application through FacultyNxtGen, its status remains available in your candidate dashboard.</div>
+        </div>
+        <a class="btn btn-outline-brand w-100 mt-2" href="{% url 'applications:candidate_list' %}">View your applications</a>
+        <div class="card-fng mt-3">
+          <div class="card-fng__body">
+            <h2 class="h6">Never miss a similar role</h2>
+            <p class="text-small text-muted-fng">Create a job alert for this department or designation and receive verified matches by email.</p>
+            <a class="btn btn-brand w-100" href="{% url 'candidates:job_alerts' %}">Create a job alert</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if similar_jobs %}
+      <div class="section-head section-head--row mt-5 mb-3">
+        <div><h2 class="h4 mb-1">Similar live vacancies</h2><p class="text-small text-muted-fng mb-0">Other verified roles in {{ job.department.name }}.</p></div>
+      </div>
+      <div class="row g-3">
+        {% for similar in similar_jobs %}
+          <div class="col-md-6 col-lg-4">{% include "partials/job_card.html" with job=similar %}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

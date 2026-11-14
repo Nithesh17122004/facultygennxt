@@ -1,0 +1,91 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Apply — {{ job.title }} — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Apply for this vacancy{% endblock %}
+{% block dashboard_subtitle %}Your application and documents are shared only with {{ job.institution.name }}. Review the vacancy details before submitting.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{{ job.get_absolute_url }}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Back to vacancy</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header">
+        <h2>Your application</h2>
+        <span class="badge-soft neutral">Private</span>
+      </div>
+      <div class="card-fng__body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+
+          <div class="alert-fng info">
+            <i class="bi bi-person-vcard" aria-hidden="true"></i>
+            <div>
+              <strong>Applying as {{ user.full_name }}.</strong>
+              {% if profile.headline %}{{ profile.headline }}.{% endif %}
+              {% if profile.cv_id and not profile.cv.is_deleted %}
+                Your saved CV ({{ profile.cv.original_name }}) is attached unless you upload a fresh one.
+              {% else %}
+                Upload a CV below to complete this application.
+              {% endif %}
+              <a class="d-inline-block mt-1" href="{% url 'candidates:profile' %}">Review your academic profile</a>.
+            </div>
+          </div>
+
+          {% include "partials/form_field.html" with field=form.cover_letter %}
+          {% include "partials/form_field.html" with field=form.resume %}
+          {% include "partials/form_field.html" with field=form.attachments %}
+
+          <div class="card-fng card-fng--muted mb-3">
+            <div class="card-fng__body">
+              <h3 class="h6">What the institution will see</h3>
+              <p class="text-small text-muted-fng mb-0">A snapshot of your academic profile, current CV and the supporting documents attached to this application. Your contact details and documents remain private and are not published anywhere on the platform.</p>
+            </div>
+          </div>
+
+          {% include "partials/form_field.html" with field=form.consent %}
+
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-brand" type="submit"><i class="bi bi-send me-1" aria-hidden="true"></i>Submit application</button>
+            <a class="btn btn-outline-brand" href="{{ job.get_absolute_url }}">Cancel</a>
+          </div>
+          <p class="apply-note mt-3 mb-0">Applying on FacultyNxtGen is free. Report any request for money immediately.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Vacancy summary</h2></div>
+      <div class="card-fng__body">
+        <a class="h6 d-block mb-1" href="{{ job.get_absolute_url }}">{{ job.title }}</a>
+        <p class="text-small text-muted-fng mb-3">{{ job.institution.name }}</p>
+        <dl class="kv-list">
+          <div class="kv-list__row"><dt>Department</dt><dd>{{ job.department.name }}</dd></div>
+          <div class="kv-list__row"><dt>Designation</dt><dd>{{ job.designation.name }}</dd></div>
+          <div class="kv-list__row"><dt>Location</dt><dd>{{ job.location_label }}</dd></div>
+          <div class="kv-list__row"><dt>Deadline</dt><dd>{{ job.deadline|date:"j M Y" }}</dd></div>
+          <div class="kv-list__row"><dt>Verification</dt><dd><span class="badge-soft success"><i class="bi bi-patch-check-fill" aria-hidden="true"></i>Verified institution</span></dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Before you submit</h2>
+        <ul class="list-unstyled text-small text-muted-fng mb-0 mt-2">
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>Check the official notification and eligibility conditions.</li>
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>Attach only PDF, JPG or PNG files up to 5 MB each.</li>
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>Your application cannot be edited after submission, but you can withdraw it.</li>
+          <li><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>Only the institution's recruitment team can view your documents.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load fng %}
+
+{% block title %}{{ meta.title }} — {{ SITE_NAME }}{% endblock %}
+{% block meta_description %}{{ meta.description }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'jobs:find' %}">Find jobs</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ meta.title }}</li>
+      </ol>
+    </nav>
+    <span class="eyebrow eyebrow--light">{{ meta.eyebrow }}</span>
+    <h1>{{ meta.title }}</h1>
+    <p>{{ meta.intro }}</p>
+    <form class="search-panel mt-4" method="get" action="{{ request.path }}" role="search" aria-label="Search {{ meta.title|lower }}">
+      <div class="row g-2">
+        <div class="col-lg-6">
+          <label class="visually-hidden" for="category-q">Keyword</label>
+          <input class="form-control" type="search" id="category-q" name="q" value="{{ search_terms.q }}" placeholder="Role, department or institution">
+        </div>
+        <div class="col-sm-6 col-lg-2">
+          <label class="visually-hidden" for="category-state">State</label>
+          <select class="form-select" id="category-state" name="state" data-state-select data-city-target="category-city">
+            <option value="">All states</option>
+            {% for state in states %}<option value="{{ state.slug }}" {% if search_terms.state == state.slug %}selected{% endif %}>{{ state.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+          <label class="visually-hidden" for="category-city">City</label>
+          <select class="form-select" id="category-city" name="city">
+            <option value="">All cities</option>
+            {% for city in cities %}<option value="{{ city.slug }}" data-state="{{ city.state_id }}" {% if search_terms.city == city.slug %}selected{% endif %}>{{ city.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-2"><button class="btn btn-brand w-100" type="submit">Search</button></div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="results-bar">
+      <div>
+        <h2>{{ total }} live {{ meta.title|lower }}</h2>
+        <p>Only verified institutions with completed vacancy checks are shown.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a class="chip" href="{% url 'jobs:find' %}">All vacancies</a>
+        <a class="chip {% if category == 'teaching' %}is-active{% endif %}" href="{% url 'jobs:teaching' %}">Teaching</a>
+        <a class="chip {% if category == 'research' %}is-active{% endif %}" href="{% url 'jobs:research' %}">Research</a>
+        <a class="chip {% if category == 'non_teaching' %}is-active{% endif %}" href="{% url 'jobs:non_teaching' %}">Non-teaching</a>
+      </div>
+    </div>
+
+    {% if designations %}
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        {% for designation in designations %}
+          <a class="chip {% if search_terms.designation == designation.slug %}is-active{% endif %}" href="?designation={{ designation.slug }}">{{ designation.name }}</a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if page_obj.object_list %}
+      <div class="row g-3">
+        {% for job in page_obj %}
+          <div class="col-lg-6">{% include "partials/job_card.html" with job=job %}</div>
+        {% endfor %}
+      </div>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="card-fng">
+        <div class="card-fng__body">
+          <div class="empty-state">
+            <div class="empty-state__icon mx-auto"><i class="bi bi-briefcase" aria-hidden="true"></i></div>
+            <h3>No {{ meta.title|lower }} right now</h3>
+            <p>New vacancies are added as institutions complete verification and publish. Create an alert to hear about the next match.</p>
+            <div class="d-flex justify-content-center flex-wrap gap-2">
+              <a class="btn btn-brand" href="{% url 'candidates:job_alerts' %}">Create job alert</a>
+              <a class="btn btn-outline-brand" href="{% url 'jobs:find' %}">Browse all vacancies</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="cta-band mt-5">
+      <div>
+        <h2>Looking for a different academic role?</h2>
+        <p>Search the full directory of verified teaching, research and institutional vacancies across India.</p>
+      </div>
+      <a class="btn btn-brand" href="{% url 'jobs:find' %}">Browse all jobs</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

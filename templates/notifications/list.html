@@ -1,0 +1,80 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Notifications — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Notifications{% endblock %}
+{% block dashboard_subtitle %}Application updates, vacancy decisions and account alerts in one place.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'notifications:preferences' %}"><i class="bi bi-envelope-gear me-1" aria-hidden="true"></i>Email preferences</a>
+  {% if notifications and not unread_only %}
+    <form method="post" action="{% url 'notifications:mark_all_read' %}">
+      {% csrf_token %}
+      <button class="btn btn-brand btn-sm" type="submit"><i class="bi bi-check2-all me-1" aria-hidden="true"></i>Mark all read</button>
+    </form>
+  {% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="card-fng">
+  <div class="card-fng__header">
+    <h2>{% if unread_only %}Unread notifications{% else %}All notifications{% endif %}</h2>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-sm {% if not unread_only %}btn-brand{% else %}btn-outline-brand{% endif %}" href="{% url 'notifications:list' %}">All</a>
+      <a class="btn btn-sm {% if unread_only %}btn-brand{% else %}btn-outline-brand{% endif %}" href="?unread=1">Unread only</a>
+    </div>
+  </div>
+  <div class="card-fng__body p-0">
+    {% if notifications %}
+      <ul class="list-unstyled mb-0">
+        {% for notification in notifications %}
+          <li class="border-bottom px-3 px-md-4 py-3 {% if not notification.is_read %}bg-light{% endif %}">
+            <div class="d-flex align-items-start gap-3">
+              <span class="stat-card__icon mb-0">
+                <i class="bi {% if notification.category == 'application' %}bi-inboxes{% elif notification.category == 'job' %}bi-briefcase{% elif notification.category == 'institution' %}bi-buildings{% else %}bi-person{% endif %}" aria-hidden="true"></i>
+              </span>
+              <div class="flex-grow-1">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <strong>{% if not notification.is_read %}<span class="visually-hidden">Unread:</span>{% endif %}{{ notification.title }}</strong>
+                  <span class="badge-soft {% if notification.level == 'success' %}success{% elif notification.level == 'warning' %}warning{% elif notification.level == 'error' %}danger{% else %}info{% endif %}">{{ notification.get_category_display }}</span>
+                </div>
+                <p class="text-small text-muted-fng mb-1 mt-1">{{ notification.message }}</p>
+                <span class="text-tiny text-muted-fng">{{ notification.created_at|date:"j M Y, H:i" }}</span>
+              </div>
+              <div class="d-flex flex-column gap-1">
+                {% if notification.url %}
+                  <form method="post" action="{% url 'notifications:mark_read' notification.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-brand" type="submit">Open</button>
+                  </form>
+                {% elif not notification.is_read %}
+                  <form method="post" action="{% url 'notifications:mark_read' notification.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-brand" type="submit">Mark read</button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state__icon mx-auto"><i class="bi bi-bell" aria-hidden="true"></i></div>
+        <h3>{% if unread_only %}You are all caught up{% else %}No notifications yet{% endif %}</h3>
+        <p>{% if unread_only %}There are no unread notifications. View all notifications to review earlier updates.{% else %}Updates about your applications, alerts and account will appear here.{% endif %}</p>
+        {% if unread_only %}
+          <a class="btn btn-outline-brand" href="{% url 'notifications:list' %}">View all notifications</a>
+        {% else %}
+          <a class="btn btn-brand" href="{% url 'jobs:find' %}">Find academic vacancies</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="alert-fng info mt-3">
+  <i class="bi bi-envelope-check" aria-hidden="true"></i>
+  <div>Important account and security notices are always sent. You can control optional job alerts, application updates and marketing email from <a href="{% url 'notifications:preferences' %}">email preferences</a>.</div>
+</div>
+{% endblock %}

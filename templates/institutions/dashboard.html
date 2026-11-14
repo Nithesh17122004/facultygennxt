@@ -1,0 +1,161 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Institution dashboard — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}{{ institution.name }}{% endblock %}
+{% block dashboard_subtitle %}Manage verification, vacancies, applicants and your recruiter team from one workspace.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'institutions:profile' %}"><i class="bi bi-building me-1" aria-hidden="true"></i>Institution profile</a>
+  {% if institution.is_verified %}<a class="btn btn-brand btn-sm" href="{% url 'jobs:recruiter_create' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Post a vacancy</a>{% endif %}
+{% endblock %}
+{% block mobile_primary_url %}{% url 'jobs:recruiter_create' %}{% endblock %}
+
+{% block dashboard_content %}
+{% if not institution.is_verified %}
+  <div class="alert-fng {% if institution.verification_status == 'rejected' or institution.verification_status == 'suspended' %}error{% else %}warning{% endif %} mb-3">
+    <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+    <div>
+      <strong>{{ institution.verification_label }}.</strong>
+      {% if institution.verification_status == "pending" %}
+        Your documents are in the review queue. You can complete your profile while you wait, but vacancies cannot be published until verification is complete.
+      {% elif institution.verification_status == "rejected" %}
+        Your verification was not approved. Review the verification notes and upload corrected documents.
+      {% elif institution.verification_status == "suspended" %}
+        Your institution is suspended. Contact support before publishing or editing vacancies.
+      {% endif %}
+      <a href="{% url 'institutions:profile' %}" class="fw-semibold">Review verification</a>
+    </div>
+  </div>
+{% endif %}
+
+<div class="row g-3 mb-2">
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-briefcase" aria-hidden="true"></i></div><div class="stat-card__value">{{ status_counts.published }}</div><div class="stat-card__label">Live vacancies</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-hourglass-split" aria-hidden="true"></i></div><div class="stat-card__value">{{ status_counts.pending }}</div><div class="stat-card__label">Awaiting review</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-inboxes" aria-hidden="true"></i></div><div class="stat-card__value">{{ applications_count }}</div><div class="stat-card__label">Applications</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-eye" aria-hidden="true"></i></div><div class="stat-card__value">{{ views }}</div><div class="stat-card__label">Vacancy views</div></div></div>
+</div>
+
+<div class="row g-3 mt-1">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header">
+        <h2>Recent applicant activity</h2>
+        <a class="link-arrow text-small" href="{% url 'applications:recruiter_list' %}">All applicants</a>
+      </div>
+      <div class="card-fng__body p-0">
+        {% if recent_applications %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng mb-0">
+                <thead><tr><th scope="col">Candidate</th><th scope="col">Vacancy</th><th scope="col">Status</th><th scope="col" class="text-end">Action</th></tr></thead>
+                <tbody>
+                  {% for application in recent_applications %}
+                    <tr>
+                      <td>{{ application.candidate.get_full_name }}<span class="cell-meta">{{ application.applied_at|time_ago }}</span></td>
+                      <td>{{ application.job.title|truncatechars:36 }}</td>
+                      <td><span class="badge-soft {{ application.status_css }}">{{ application.get_status_display }}</span></td>
+                      <td class="text-end"><a class="btn btn-sm btn-outline-brand" href="{% url 'applications:recruiter_detail' application.pk %}">Review</a></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state__icon mx-auto"><i class="bi bi-inboxes" aria-hidden="true"></i></div>
+            <h3>No applications yet</h3>
+            <p>Applications will appear here once candidates apply to your published vacancies.</p>
+            {% if institution.is_verified %}<a class="btn btn-brand" href="{% url 'jobs:recruiter_create' %}">Post a vacancy</a>{% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Your vacancies</h2><a class="link-arrow text-small" href="{% url 'jobs:recruiter_list' %}">Manage all</a></div>
+      <div class="card-fng__body p-0">
+        {% if recent_jobs %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng mb-0">
+                <thead><tr><th scope="col">Vacancy</th><th scope="col">Status</th><th scope="col">Deadline</th><th scope="col" class="text-end">Action</th></tr></thead>
+                <tbody>
+                  {% for job in recent_jobs %}
+                    <tr>
+                      <td><a href="{% url 'jobs:recruiter_detail' job.pk %}">{{ job.title|truncatechars:44 }}</a><span class="cell-meta">{{ job.designation.name }} · {{ job.department.name }}</span></td>
+                      <td><span class="badge-soft {% if job.status == 'published' %}success{% elif job.status == 'rejected' or job.status == 'suspended' %}danger{% elif job.status == 'pending' %}warning{% else %}neutral{% endif %}">{{ job.get_status_display }}</span></td>
+                      <td>{{ job.deadline|date:"j M Y"|default:"Not set" }}</td>
+                      <td class="text-end"><a class="btn btn-sm btn-outline-brand" href="{% url 'jobs:recruiter_detail' job.pk %}">Open</a></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state__icon mx-auto"><i class="bi bi-briefcase" aria-hidden="true"></i></div>
+            <h3>No vacancies created</h3>
+            <p>Create a draft, add the official notification and submit it for verification before publishing.</p>
+            {% if institution.is_verified %}<a class="btn btn-brand" href="{% url 'jobs:recruiter_create' %}">Create a draft</a>{% else %}<a class="btn btn-brand" href="{% url 'institutions:profile' %}">Complete verification</a>{% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+          <h2 class="h6 mb-0">Profile completion</h2>
+          <strong>{{ profile_completion }}%</strong>
+        </div>
+        <div class="progress-fng"><div class="progress-bar" style="width:{{ profile_completion }}%"></div></div>
+        <p class="text-small text-muted-fng mt-2">A complete public profile helps candidates recognise your institution. Add a logo, description and contact details.</p>
+        <a class="btn btn-outline-brand w-100" href="{% url 'institutions:profile' %}">Update profile</a>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Verification</h2>
+        <div class="d-flex justify-content-between align-items-center mt-2 mb-2">
+          <span class="text-small text-muted-fng">Status</span>
+          <span class="badge-soft {% if institution.verification_status == 'verified' %}success{% elif institution.verification_status == 'rejected' or institution.verification_status == 'suspended' %}danger{% else %}warning{% endif %}">{{ institution.get_verification_status_display }}</span>
+        </div>
+        <p class="text-small text-muted-fng">Your institution must be verified before any vacancy can be submitted for review.</p>
+        {% if institution.verification_status == "verified" %}
+          <div class="alert-fng success mb-0"><i class="bi bi-patch-check-fill" aria-hidden="true"></i><div>Verified {% if institution.verified_at %}on {{ institution.verified_at|date:"j M Y" }}{% endif %}. Vacancy-level review still applies to every listing.</div></div>
+        {% else %}
+          <a class="btn btn-outline-brand w-100" href="{% url 'institutions:profile' %}">Verification centre</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Free recruitment services</h2>
+        <p class="text-small text-muted-fng mb-0">FacultyNxtGen currently provides free academic recruitment services to registered educational institutions.</p>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Quick actions</h2>
+        <div class="d-grid gap-2 mt-2">
+          <a class="d-flex align-items-center gap-2 text-reset" href="{% url 'jobs:recruiter_list' %}"><i class="bi bi-briefcase text-primary" aria-hidden="true"></i>Manage vacancies</a>
+          <a class="d-flex align-items-center gap-2 text-reset" href="{% url 'applications:recruiter_list' %}"><i class="bi bi-inboxes text-primary" aria-hidden="true"></i>Review applicants</a>
+          <a class="d-flex align-items-center gap-2 text-reset" href="{% url 'institutions:recruiters' %}"><i class="bi bi-people text-primary" aria-hidden="true"></i>Recruiter team</a>
+        </div>
+      </div>
+    </div>
+
+    {% if not user.is_email_verified %}
+      <div class="alert-fng warning mt-3"><i class="bi bi-envelope-exclamation-fill" aria-hidden="true"></i><div>Verify your email to submit vacancies. <a href="{% url 'accounts:verify_email_pending' %}">Verify now</a>.</div></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

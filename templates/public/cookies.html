@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="page-hero page-hero--light">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Cookie preferences</li>
+      </ol>
+    </nav>
+    <span class="eyebrow">Privacy controls</span>
+    <h1>Cookie preferences</h1>
+    <p>Choose whether FacultyNxtGen may use optional analytics and marketing cookies. Essential cookies are always required for the service to work.</p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-7">
+        <form method="post" action="{% url 'core:cookies' %}">
+          {% csrf_token %}
+          <div class="card-fng">
+            <div class="card-fng__body">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <h2 class="h6 mb-1">Strictly necessary</h2>
+                  <p class="text-small text-muted-fng mb-0">Sign-in sessions, CSRF protection, security rate limits and your cookie choice. These cannot be switched off.</p>
+                </div>
+                <span class="badge-soft success">Always on</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-fng mt-3">
+            <div class="card-fng__body">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="cookie-analytics" name="analytics" {% if preferences.analytics %}checked{% endif %}>
+                <label class="form-check-label fw-semibold" for="cookie-analytics">Analytics</label>
+              </div>
+              <p class="text-small text-muted-fng mt-2 mb-0">Helps us understand which pages and vacancy categories are useful, in aggregate. We do not use analytics to identify you personally or to sell data.</p>
+            </div>
+          </div>
+
+          <div class="card-fng mt-3">
+            <div class="card-fng__body">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="cookie-marketing" name="marketing" {% if preferences.marketing %}checked{% endif %}>
+                <label class="form-check-label fw-semibold" for="cookie-marketing">Marketing</label>
+              </div>
+              <p class="text-small text-muted-fng mt-2 mb-0">Allows measurement of campaigns that bring candidates or institutions to FacultyNxtGen. Email marketing is controlled separately in your email preferences.</p>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <button class="btn btn-brand" type="submit">Save preferences</button>
+            <a class="btn btn-outline-brand" href="{% url 'core:privacy' %}">Read the privacy policy</a>
+          </div>
+          {% if preferences.saved_at %}
+            <p class="text-tiny text-muted-fng mt-3 mb-0">Your current choices were saved on {{ preferences.saved_at|slice:":10" }}.</p>
+          {% endif %}
+        </form>
+      </div>
+      <div class="col-lg-5">
+        <div class="card-fng">
+          <div class="card-fng__header"><h2>How cookies are used</h2></div>
+          <div class="card-fng__body">
+            <div class="table-wrap">
+              <table class="table table-fng align-middle">
+                <thead>
+                  <tr><th scope="col">Type</th><th scope="col">Purpose</th><th scope="col">Default</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Essential</td><td>Session, security, consent</td><td>On</td></tr>
+                  <tr><td>Analytics</td><td>Aggregate usage measurement</td><td>Off until consent</td></tr>
+                  <tr><td>Marketing</td><td>Campaign measurement</td><td>Off until consent</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-small text-muted-fng mb-0 mt-3">You can also clear cookies in your browser. Clearing essential cookies will sign you out and may reset your saved preference.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

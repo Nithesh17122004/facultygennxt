@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="page-hero page-hero--light">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Privacy policy</li>
+      </ol>
+    </nav>
+    <span class="eyebrow">Trust centre</span>
+    <h1>Privacy policy</h1>
+    <p>How FacultyNxtGen collects, uses, shares and deletes personal data — and how you can exercise your rights.</p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-3">
+        <nav class="legal-nav" aria-label="Privacy policy sections">
+          <a href="#who-we-are">Who we are</a>
+          <a href="#data-we-collect">Data we collect</a>
+          <a href="#why-we-use-data">Why we use it</a>
+          <a href="#sharing">When we share data</a>
+          <a href="#cookies">Cookies</a>
+          <a href="#retention">Retention</a>
+          <a href="#security">Security</a>
+          <a href="#your-rights">Your rights</a>
+          <a href="#contact">Contact</a>
+        </nav>
+      </div>
+      <div class="col-lg-9">
+        <div class="prose measure">
+          <p class="text-muted-fng"><strong>Last updated:</strong> {{ current_year }}. This policy applies to the FacultyNxtGen website, candidate accounts and institution dashboards.</p>
+
+          <h2 id="who-we-are">1. Who we are</h2>
+          <p>FacultyNxtGen is an academic recruitment platform for Indian universities, colleges, research institutions and academic professionals. References to “we”, “us” or “the platform” mean the FacultyNxtGen service. References to “you” mean a visitor, candidate or institution representative using the service.</p>
+          <p>For privacy requests, contact <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>. Please include enough detail for us to identify your account and the request. We may need to verify your identity before acting.</p>
+
+          <h2 id="data-we-collect">2. Data we collect</h2>
+          <ul>
+            <li><strong>Account data:</strong> name, email address, mobile number, password hash, role, verification status, terms acceptance time and security events.</li>
+            <li><strong>Candidate profile data:</strong> academic qualifications, teaching and research experience, publications, certifications, specialisation, preferred location and role, and profile visibility choices.</li>
+            <li><strong>Documents:</strong> CVs, certificates, recruitment notifications and institution authorisation documents you upload.</li>
+            <li><strong>Application data:</strong> vacancies you apply to, cover letters, documents submitted, consent records and application status history.</li>
+            <li><strong>Institution data:</strong> institution name, official contact details, address, website, verification documents, recruiter accounts and vacancies.</li>
+            <li><strong>Technical data:</strong> IP address, browser and device information, pages requested, timestamps, cookie preferences, security logs and deduplicated vacancy view analytics.</li>
+            <li><strong>Communications:</strong> support enquiries, reports about vacancies, newsletter preferences and correspondence with our team.</li>
+          </ul>
+          <p>Please do not upload sensitive personal data that is not required for a vacancy — for example caste, religion, marital status, health information or photographs — unless the official recruitment notice specifically requires it.</p>
+
+          <h2 id="why-we-use-data">3. Why we use your data</h2>
+          <ul>
+            <li>To create and secure your account, verify your email and enforce role-based access.</li>
+            <li>To operate candidate profiles, vacancy search, saved jobs, alerts and applications.</li>
+            <li>To verify institutions and vacancies before publication, and to investigate reports.</li>
+            <li>To share your application and submitted documents with the institution you choose to apply to.</li>
+            <li>To send transactional messages and, where you have opted in, job alerts and career resources.</li>
+            <li>To detect abuse, prevent fraud, rate-limit requests and maintain audit logs.</li>
+            <li>To comply with applicable law and respond to lawful requests.</li>
+          </ul>
+          <p>Where Indian law requires a basis for processing, we rely on your consent, the performance of our contract with you, compliance with legal obligations, and legitimate uses such as platform security and fraud prevention. Marketing email is optional and off by default.</p>
+
+          <h2 id="sharing">4. When we share data</h2>
+          <ul>
+            <li><strong>Institutions you apply to:</strong> your application, profile snapshot, CV and any documents you submit for that vacancy. Institutions must use them only for recruitment related to that application.</li>
+            <li><strong>Service providers:</strong> hosting, email delivery and document storage providers that process data on our instructions under contractual confidentiality and security obligations.</li>
+            <li><strong>Professional advisers and authorities:</strong> where required by law, to enforce our terms, or to protect the rights, safety and security of users and the platform.</li>
+            <li><strong>Business transfer:</strong> if the service is reorganised or transferred, data may be transferred subject to equivalent protections and notice where required.</li>
+          </ul>
+          <p>We do not sell personal data. We do not share candidate contact details with advertisers. Profile visibility controls in your account determine whether recruiters can see your profile beyond an application you submit.</p>
+
+          <h2 id="cookies">5. Cookies and similar technologies</h2>
+          <p>We use essential cookies for sign-in, security, CSRF protection and remembering your cookie choices. Optional analytics and marketing cookies are used only with your consent. You can change your choices at any time on the <a href="{% url 'core:cookies' %}">cookie preferences</a> page. Blocking essential cookies may prevent sign-in and application submission.</p>
+
+          <h2 id="retention">6. How long we keep data</h2>
+          <p>We retain account and application records for as long as your account is active and for a reasonable period afterwards to meet legal, dispute-resolution and security obligations. Candidate data associated with an account deletion request is scheduled for deletion within {{ retention_days }} days, subject to records we must retain by law. Some records — such as audit logs and fraud-prevention evidence — may be retained longer where required.</p>
+          <p>Uploaded documents are private. When you delete a document or your account, the associated file is removed from active storage, subject to backup rotation and legal retention requirements.</p>
+
+          <h2 id="security">7. Security</h2>
+          <p>We use access controls, password hashing, email verification, rate limiting, CSRF and XSS protections, upload validation, private document storage with signed time-limited links, optional multi-factor authentication for staff, and audit logging. No system is completely secure. If you believe your account or a document has been compromised, contact us immediately at <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>.</p>
+
+          <h2 id="your-rights">8. Your rights and choices</h2>
+          <ul>
+            <li><strong>Access and portability:</strong> download a JSON copy of your account data from <a href="{% url 'accounts:security' %}">account security</a>.</li>
+            <li><strong>Correction:</strong> update your name, mobile and profile details from your account settings.</li>
+            <li><strong>Deletion:</strong> request account deletion from account security. Institution accounts must contact support so ownership can be verified.</li>
+            <li><strong>Marketing choices:</strong> manage <a href="{% url 'notifications:preferences' %}">email preferences</a> or unsubscribe from any marketing email.</li>
+            <li><strong>Consent withdrawal:</strong> withdraw optional consents at any time. This does not affect processing already carried out.</li>
+            <li><strong>Grievance:</strong> raise a concern with our privacy contact. We will acknowledge and investigate in good faith.</li>
+          </ul>
+          <p>You may also have rights under applicable Indian data protection law, including the right to nominate a representative where the law provides for it. We will explain any lawful reason why a request cannot be fulfilled.</p>
+
+          <h2 id="contact">9. Contact and changes</h2>
+          <p>Privacy questions and requests: <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>. Postal address: {{ CONTACT_ADDRESS }}. We may update this policy as the service changes. Material changes will be communicated through the platform or by email where appropriate, and the updated date will be revised.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Delete your account — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Delete your account{% endblock %}
+{% block dashboard_subtitle %}This action deactivates your account and submits a permanent deletion request.{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2 class="text-danger">Before you continue</h2></div>
+      <div class="card-fng__body">
+        {% if existing %}
+          <div class="alert-fng warning">
+            <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+            <div>A deletion request is already pending. Contact support if you need to change or cancel it.</div>
+          </div>
+          <a class="btn btn-outline-brand" href="{% url 'accounts:security' %}">Back to security</a>
+        {% else %}
+          <p class="text-small text-muted-fng">Deleting your account will:</p>
+          <ul class="text-small text-muted-fng">
+            <li>Deactivate your sign-in and end active sessions.</li>
+            <li>Remove public access to your profile and stop job alerts and marketing emails.</li>
+            <li>Submit your account and associated candidate data for deletion within the retention period described in the privacy policy.</li>
+            <li>Not automatically remove institution records. Institution accounts must contact support so we can verify ownership before closing the institution account.</li>
+          </ul>
+          <p class="text-small text-muted-fng">Application records may be retained where needed to comply with legal obligations, resolve disputes, prevent fraud or preserve the integrity of institution records. Audit logs may be retained as required by law.</p>
+          <hr>
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% include "partials/nonfield_errors.html" with form=form %}
+            {% include "partials/form_field.html" with field=form.password %}
+            {% include "partials/form_field.html" with field=form.reason %}
+            {% include "partials/form_field.html" with field=form.confirmation %}
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-outline-danger" type="submit">Deactivate and request deletion</button>
+              <a class="btn btn-outline-brand" href="{% url 'accounts:security' %}">Cancel</a>
+            </div>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <h2 class="h6">Need a break instead?</h2>
+        <p class="text-small text-muted-fng">You can pause job alerts, hide your profile from recruiters or opt out of marketing without deleting your account.</p>
+        <a class="btn btn-outline-brand btn-sm" href="{% url 'candidates:privacy' %}">Privacy controls</a>
+        <a class="btn btn-link btn-sm" href="{% url 'notifications:preferences' %}">Email preferences</a>
+      </div>
+    </div>
+    <div class="alert-fng info mt-3">
+      <i class="bi bi-download" aria-hidden="true"></i>
+      <div>Download a copy of your data first from <a href="{% url 'accounts:export_data' %}">account security</a>. The export is available before your account is deactivated.</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

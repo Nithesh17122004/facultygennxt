@@ -1,0 +1,83 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Job alerts — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Job alerts{% endblock %}
+{% block dashboard_subtitle %}Receive email digests when new verified vacancies match your criteria. Deliveries are deduplicated so you never see the same vacancy twice.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-brand btn-sm" href="{% url 'candidates:job_alert_create' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Create alert</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Your alerts</h2><span class="badge-soft neutral">{{ alerts|length }} of 10</span></div>
+      <div class="card-fng__body">
+        {% if alerts %}
+          <div class="d-grid gap-3">
+            {% for alert in alerts %}
+              <div class="border rounded-3 p-3">
+                <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
+                  <div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                      <h3 class="h6 mb-0">{{ alert.name }}</h3>
+                      {% if alert.is_active %}<span class="badge-soft success">Active</span>{% else %}<span class="badge-soft neutral">Paused</span>{% endif %}
+                      <span class="badge-soft primary">{{ alert.get_frequency_display }}</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                      {% if alert.keyword %}<span class="chip">{{ alert.keyword }}</span>{% endif %}
+                      {% if alert.department %}<span class="chip">{{ alert.department.name }}</span>{% endif %}
+                      {% if alert.designation %}<span class="chip">{{ alert.designation.name }}</span>{% endif %}
+                      {% if alert.city %}<span class="chip">{{ alert.city.name }}, {{ alert.city.state.name }}</span>{% elif alert.state %}<span class="chip">{{ alert.state.name }}</span>{% endif %}
+                      {% if alert.employment_type %}<span class="chip">{{ alert.get_employment_type_display }}</span>{% endif %}
+                    </div>
+                    <p class="text-tiny text-muted-fng mb-0 mt-2">
+                      {% if alert.last_sent_at %}Last digest {{ alert.last_sent_at|time_ago }}{% else %}No digest sent yet{% endif %}
+                      · Created {{ alert.created_at|date:"j M Y" }}
+                    </p>
+                  </div>
+                  <div class="d-flex flex-wrap gap-1">
+                    <a class="btn btn-sm btn-outline-brand" href="{% url 'candidates:job_alert_edit' alert.pk %}"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Edit</a>
+                    <form method="post" action="{% url 'candidates:job_alert_toggle' alert.pk %}">
+                      {% csrf_token %}
+                      <button class="btn btn-sm btn-outline-brand" type="submit">{% if alert.is_active %}<i class="bi bi-pause me-1" aria-hidden="true"></i>Pause{% else %}<i class="bi bi-play me-1" aria-hidden="true"></i>Resume{% endif %}</button>
+                    </form>
+                    <form method="post" action="{% url 'candidates:job_alert_delete' alert.pk %}">
+                      {% csrf_token %}
+                      <button class="btn btn-sm btn-outline-brand text-danger" type="submit" data-confirm="Delete this job alert?"><i class="bi bi-trash" aria-hidden="true"></i><span class="visually-hidden">Delete {{ alert.name }}</span></button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state__icon mx-auto"><i class="bi bi-bell" aria-hidden="true"></i></div>
+            <h3>No job alerts yet</h3>
+            <p>Create an alert for your department, designation and preferred location. You can pause alerts at any time.</p>
+            <a class="btn btn-brand" href="{% url 'candidates:job_alert_create' %}">Create your first alert</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <h2 class="h6">How alerts work</h2>
+        <ol class="text-small text-muted-fng ps-3 mt-2 mb-0">
+          <li class="mb-2">We check newly published, verified vacancies against your criteria.</li>
+          <li class="mb-2">Daily or weekly digests include up to eight matching roles.</li>
+          <li class="mb-2">Every delivery is logged, so jobs are not repeated.</li>
+          <li>You can pause or delete alerts whenever you want.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="alert-fng info mt-3"><i class="bi bi-envelope-check" aria-hidden="true"></i><div>Alert emails respect your <a href="{% url 'notifications:preferences' %}">email preferences</a>. Transactional account and application messages are unaffected.</div></div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends "dashboard/base.html" %}
+{% load fng documents %}
+
+{% block title %}{{ job.title }} — Recruiter — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}{{ job.title|truncatechars:58 }}{% endblock %}
+{% block dashboard_subtitle %}{{ job.designation.name }} · {{ job.department.name }} · {{ job.location_label }}{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'jobs:recruiter_list' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>All vacancies</a>
+  {% if can_edit %}<a class="btn btn-outline-brand btn-sm" href="{% url 'jobs:recruiter_edit' job.pk %}"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Edit</a>{% endif %}
+  {% if job.status == 'published' %}<a class="btn btn-brand btn-sm" href="{{ job.get_absolute_url }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>View live</a>{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header">
+        <h2>Vacancy status</h2>
+        <span class="badge-soft {% if job.status == 'published' %}success{% elif job.status == 'pending' %}warning{% elif job.status == 'rejected' or job.status == 'suspended' %}danger{% elif job.status == 'expired' %}neutral{% else %}primary{% endif %}">{{ job.get_status_display }}</span>
+      </div>
+      <div class="card-fng__body">
+        {% if job.status == "draft" %}
+          <div class="alert-fng info"><i class="bi bi-pencil-square" aria-hidden="true"></i><div>This draft is private. Submit it when every required detail and the official notification are complete.</div></div>
+        {% elif job.status == "pending" %}
+          <div class="alert-fng warning"><i class="bi bi-hourglass-split" aria-hidden="true"></i><div>Your vacancy is in the verification queue. You cannot edit it while it is under review.</div></div>
+        {% elif job.status == "approved" %}
+          <div class="alert-fng success"><i class="bi bi-patch-check-fill" aria-hidden="true"></i><div>The vacancy passed verification and is awaiting publication by our team.</div></div>
+        {% elif job.status == "rejected" %}
+          <div class="alert-fng error"><i class="bi bi-x-octagon-fill" aria-hidden="true"></i><div><strong>Changes are required.</strong> {{ job.rejection_reason|default:"Review the listing and resubmit." }}</div></div>
+        {% elif job.status == "suspended" %}
+          <div class="alert-fng error"><i class="bi bi-slash-circle-fill" aria-hidden="true"></i><div><strong>Vacancy suspended.</strong> {{ job.suspension_reason|default:"Contact support for details." }}</div></div>
+        {% elif job.status == "expired" %}
+          <div class="alert-fng info"><i class="bi bi-clock-history" aria-hidden="true"></i><div>This vacancy reached its deadline and is no longer public. Create a new vacancy if the institution is recruiting again.</div></div>
+        {% else %}
+          <div class="alert-fng success"><i class="bi bi-broadcast" aria-hidden="true"></i><div>This vacancy is live on the public site and accepting applications according to the selected method.</div></div>
+        {% endif %}
+
+        <dl class="kv-list">
+          <div class="kv-list__row"><dt>Application method</dt><dd>{{ job.get_application_method_display }}</dd></div>
+          <div class="kv-list__row"><dt>Deadline</dt><dd>{{ job.deadline|date:"j M Y"|default:"Not set" }} · {{ job.deadline_label }}</dd></div>
+          <div class="kv-list__row"><dt>Publication date</dt><dd>{{ job.publication_date|date:"j M Y" }}</dd></div>
+          <div class="kv-list__row"><dt>Views</dt><dd>{{ view_count }}</dd></div>
+          <div class="kv-list__row"><dt>Applications</dt><dd>{{ application_count }} total · {{ new_applications }} new · {{ shortlisted }} shortlisted</dd></div>
+        </dl>
+
+        {% if job.notification_document and not job.notification_document.is_deleted %}
+          <a class="btn btn-outline-brand btn-sm mt-3" href="{% document_url job.notification_document user %}" target="_blank" rel="noopener"><i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>Open official notification</a>
+        {% elif job.notification_url %}
+          <a class="btn btn-outline-brand btn-sm mt-3" href="{{ job.notification_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>Open notification link</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Recent applicants</h2><a class="link-arrow text-small" href="{% url 'applications:recruiter_list' %}?job={{ job.pk }}">All applicants</a></div>
+      <div class="card-fng__body p-0">
+        {% if applications %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng mb-0">
+                <thead><tr><th scope="col">Candidate</th><th scope="col">Applied</th><th scope="col">Status</th><th scope="col" class="text-end">Action</th></tr></thead>
+                <tbody>
+                  {% for application in applications %}
+                    <tr>
+                      <td>{{ application.candidate.get_full_name }}<span class="cell-meta">{{ application.candidate.email }}</span></td>
+                      <td>{{ application.applied_at|date:"j M Y" }}</td>
+                      <td><span class="badge-soft {{ application.status_css }}">{{ application.get_status_display }}</span></td>
+                      <td class="text-end"><a class="btn btn-sm btn-outline-brand" href="{% url 'applications:recruiter_detail' application.pk %}">Review</a></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state__icon mx-auto"><i class="bi bi-inboxes" aria-hidden="true"></i></div>
+            <h3>No applications yet</h3>
+            <p>Applications appear here once the vacancy is live and candidates apply through FacultyNxtGen.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Status history</h2></div>
+      <div class="card-fng__body">
+        {% if status_history %}
+          <div class="timeline">
+            {% for event in status_history %}
+              <div class="timeline-item {% if event.to_status == 'rejected' or event.to_status == 'suspended' %}is-muted{% endif %}">
+                <h3>{{ event.from_status|title|default:"Created" }} → {{ event.to_status|title }}</h3>
+                <p>{{ event.created_at|date:"j M Y, H:i" }}{% if event.actor %} · {{ event.actor.get_full_name }}{% endif %}</p>
+                {% if event.note %}<p class="mb-0">{{ event.note }}</p>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-small text-muted-fng mb-0">No status changes recorded yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Verification checklist</h2><span class="badge-soft {% if checklist_complete %}success{% else %}warning{% endif %}">{% if checklist_complete %}Complete{% else %}Pending{% endif %}</span></div>
+      <div class="card-fng__body">
+        <ul class="checklist">
+          {% for label, done in checklist %}
+            <li><i class="bi {% if done %}bi-check-circle-fill ok{% else %}bi-circle pending{% endif %}" aria-hidden="true"></i><span>{{ label }}</span></li>
+          {% endfor %}
+        </ul>
+        <p class="text-tiny text-muted-fng mt-3 mb-0">The checklist is completed by our verification team. You do not need to tick these items.</p>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Actions</h2>
+        <div class="d-grid gap-2 mt-2">
+          <a class="btn btn-outline-brand" href="{% url 'jobs:recruiter_analytics' job.pk %}"><i class="bi bi-graph-up me-1" aria-hidden="true"></i>View analytics</a>
+          {% if job.status == 'draft' or job.status == 'rejected' %}
+            <form method="post" action="{% url 'jobs:recruiter_submit' job.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-brand w-100" type="submit"><i class="bi bi-send-check me-1" aria-hidden="true"></i>Submit for review</button>
+            </form>
+          {% endif %}
+          {% if can_edit %}<a class="btn btn-outline-brand" href="{% url 'jobs:recruiter_edit' job.pk %}"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Edit vacancy</a>{% endif %}
+          {% if job.status == 'published' %}<a class="btn btn-outline-brand" href="{{ job.get_absolute_url }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>View public listing</a>{% endif %}
+          {% if can_delete %}
+            <form method="post" action="{% url 'jobs:recruiter_delete' job.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-outline-brand text-danger w-100" type="submit" data-confirm="Delete this vacancy from your dashboard? This cannot be undone."><i class="bi bi-trash me-1" aria-hidden="true"></i>Delete vacancy</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-fng info mt-3">
+      <i class="bi bi-life-preserver" aria-hidden="true"></i>
+      <div>Need help with verification or a rejected listing? <a href="{% url 'core:contact' %}">Contact the review team</a>.</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

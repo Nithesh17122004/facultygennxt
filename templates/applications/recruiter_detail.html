@@ -1,0 +1,213 @@
+{% extends "dashboard/base.html" %}
+{% load fng documents %}
+
+{% block title %}{{ application.candidate.get_full_name }} — {{ application.job.title }} — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Applicant review{% endblock %}
+{% block dashboard_subtitle %}{{ application.candidate.get_full_name }} for {{ application.job.title }}{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'applications:recruiter_list' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>All applicants</a>
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'jobs:recruiter_detail' application.job.pk %}"><i class="bi bi-briefcase me-1" aria-hidden="true"></i>Open vacancy</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header">
+        <div class="d-flex align-items-center gap-3">
+          <span class="avatar avatar--lg" aria-hidden="true">{% if profile.avatar %}<img src="{{ profile.avatar.url }}" alt="">{% else %}{{ application.candidate|user_initials }}{% endif %}</span>
+          <div>
+            <h2 class="h5 mb-0">{{ application.candidate.get_full_name }}</h2>
+            <p class="text-small text-muted-fng mb-0">{{ profile.headline|default:application.job.designation.name }}</p>
+          </div>
+        </div>
+        <span class="badge-soft {{ application.status_css }}">{{ application.get_status_display }}</span>
+      </div>
+      <div class="card-fng__body">
+        <dl class="kv-list">
+          <div class="kv-list__row"><dt>Email</dt><dd><a href="mailto:{{ application.candidate.email }}">{{ application.candidate.email }}</a></dd></div>
+          <div class="kv-list__row"><dt>Mobile</dt><dd>{% if application.candidate.mobile %}<a href="tel:{{ application.candidate.mobile }}">{{ application.candidate.mobile }}</a>{% else %}Not provided{% endif %}</dd></div>
+          <div class="kv-list__row"><dt>Applied for</dt><dd><a href="{% url 'jobs:recruiter_detail' application.job.pk %}">{{ application.job.title }}</a></dd></div>
+          <div class="kv-list__row"><dt>Applied on</dt><dd>{{ application.applied_at|date:"j M Y, H:i" }}</dd></div>
+          <div class="kv-list__row"><dt>Last status update</dt><dd>{{ application.status_updated_at|date:"j M Y, H:i"|default:"No updates yet" }}</dd></div>
+          <div class="kv-list__row"><dt>Email verified</dt><dd>{% if application.candidate.is_email_verified %}<span class="text-success">Yes</span>{% else %}<span class="text-danger">No</span>{% endif %}</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Profile snapshot at application</h2></div>
+      <div class="card-fng__body">
+        {% if snapshot %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <dl class="kv-list mb-0">
+                <div class="kv-list__row"><dt>Highest qualification</dt><dd>{{ snapshot.highest_qualification|default:"Not provided" }}</dd></div>
+                <div class="kv-list__row"><dt>UG degree</dt><dd>{{ snapshot.ug_degree|default:"Not provided" }}</dd></div>
+                <div class="kv-list__row"><dt>PG degree</dt><dd>{{ snapshot.pg_degree|default:"Not provided" }}</dd></div>
+                <div class="kv-list__row"><dt>PhD status</dt><dd>{{ snapshot.phd_status|default:"Not provided" }}</dd></div>
+                <div class="kv-list__row"><dt>Specialisation</dt><dd>{{ snapshot.specialization|default:"Not provided" }}</dd></div>
+                <div class="kv-list__row"><dt>Department</dt><dd>{{ snapshot.department|default:"Not provided" }}</dd></div>
+              </dl>
+            </div>
+            <div class="col-md-6">
+              <dl class="kv-list mb-0">
+                <div class="kv-list__row"><dt>Teaching experience</dt><dd>{{ snapshot.teaching_experience_years }} years</dd></div>
+                <div class="kv-list__row"><dt>Research experience</dt><dd>{{ snapshot.research_experience_years }} years</dd></div>
+                <div class="kv-list__row"><dt>Current role</dt><dd>{{ snapshot.current_designation|default:"Not provided" }}{% if snapshot.current_institution %} · {{ snapshot.current_institution }}{% endif %}</dd></div>
+                <div class="kv-list__row"><dt>Preferred location</dt><dd>{{ snapshot.preferred_location|default:"Open to opportunities" }}</dd></div>
+                <div class="kv-list__row"><dt>Publications</dt><dd>{{ snapshot.publications_count }}</dd></div>
+                <div class="kv-list__row"><dt>Snapshot taken</dt><dd>{{ application.applied_at|date:"j M Y" }}</dd></div>
+              </dl>
+            </div>
+          </div>
+
+          {% if snapshot.qualifications %}
+            <h3 class="h6 mt-4">Qualifications</h3>
+            <div class="table-wrap">
+              <div class="table-responsive">
+                <table class="table table-fng mb-0">
+                  <thead><tr><th scope="col">Degree</th><th scope="col">Level</th><th scope="col">Institution</th><th scope="col">Year</th></tr></thead>
+                  <tbody>
+                    {% for item in snapshot.qualifications %}
+                      <tr><td>{{ item.degree }}{% if item.specialization %}<span class="cell-meta">{{ item.specialization }}</span>{% endif %}</td><td>{{ item.level }}</td><td>{{ item.institution }}</td><td>{{ item.year }}</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if snapshot.teaching_history %}
+            <h3 class="h6 mt-4">Teaching history</h3>
+            <ul class="list-unstyled text-small mb-0">
+              {% for item in snapshot.teaching_history %}
+                <li class="mb-2"><strong>{{ item.designation }}</strong> · {{ item.institution }}<span class="d-block text-muted-fng">{{ item.period }}</span></li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+
+          {% if snapshot.research_history %}
+            <h3 class="h6 mt-4">Research history</h3>
+            <ul class="list-unstyled text-small mb-0">
+              {% for item in snapshot.research_history %}
+                <li class="mb-2"><strong>{{ item.role }}</strong> · {{ item.institution }}<span class="d-block text-muted-fng">{{ item.period }}</span></li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% else %}
+          <p class="text-muted-fng mb-0">This application was submitted before profile snapshots were recorded. Review the attached documents and the candidate's current profile.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Documents</h2><span class="badge-soft neutral">{{ application.documents.all|length }}</span></div>
+      <div class="card-fng__body p-0">
+        {% if application.documents.all %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng align-middle mb-0">
+                <thead><tr><th scope="col">Document</th><th scope="col">Label</th><th scope="col">Uploaded</th><th scope="col" class="text-end">Open</th></tr></thead>
+                <tbody>
+                  {% for item in application.documents.all %}
+                    {% if not item.document.is_deleted %}
+                      <tr>
+                        <td><span class="fw-semibold">{{ item.document.original_name }}</span><span class="cell-meta">{{ item.document.size|filesizeformat }} · {{ item.document.mime_type }}</span></td>
+                        <td>{{ item.label|default:item.document.get_purpose_display }}</td>
+                        <td>{{ item.created_at|date:"j M Y" }}</td>
+                        <td class="text-end"><a class="btn btn-sm btn-outline-brand" href="{% document_url item.document user %}" target="_blank" rel="noopener"><i class="bi bi-download me-1" aria-hidden="true"></i>Open</a></td>
+                      </tr>
+                    {% endif %}
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state py-4"><div class="empty-state__icon mx-auto"><i class="bi bi-folder2-open" aria-hidden="true"></i></div><h3>No documents attached</h3><p>The candidate did not attach supporting files.</p></div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if application.cover_letter %}
+      <div class="card-fng mt-3">
+        <div class="card-fng__header"><h2>Cover letter</h2></div>
+        <div class="card-fng__body"><div class="job-content">{{ application.cover_letter|linebreaks }}</div></div>
+      </div>
+    {% endif %}
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Status history</h2></div>
+      <div class="card-fng__body">
+        <div class="timeline">
+          {% for event in application.status_events.all %}
+            <div class="timeline-item">
+              <div class="d-flex flex-wrap justify-content-between gap-2">
+                <strong>{{ event.to_status|capfirst }}</strong>
+                <span class="text-tiny text-muted-fng">{{ event.created_at|date:"j M Y, H:i" }} · {{ event.actor.get_full_name|default:"System" }}</span>
+              </div>
+              {% if event.note %}<p class="text-small text-muted-fng mb-0">{{ event.note }}</p>{% endif %}
+            </div>
+          {% empty %}
+            <p class="text-muted-fng mb-0">No status events recorded.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Update status</h2></div>
+      <div class="card-fng__body">
+        {% if allowed_statuses %}
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="update_status" value="1">
+            {% include "partials/nonfield_errors.html" with form=status_form %}
+            {% include "partials/form_field.html" with field=status_form.status %}
+            {% include "partials/form_field.html" with field=status_form.note %}
+            <button class="btn btn-brand w-100" type="submit">Save status &amp; notify candidate</button>
+          </form>
+          <p class="apply-note mt-3 mb-0">The candidate receives an in-app notification and email. Messages marked as not selected are shared with the candidate.</p>
+        {% else %}
+          <p class="text-small text-muted-fng">This application is in a final state ({{ application.get_status_display|lower }}) and cannot be moved further.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Internal notes</h2></div>
+      <div class="card-fng__body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="add_note" value="1">
+          {% include "partials/nonfield_errors.html" with form=note_form %}
+          {% include "partials/form_field.html" with field=note_form.note %}
+          <button class="btn btn-outline-brand w-100" type="submit"><i class="bi bi-journal-plus me-1" aria-hidden="true"></i>Add internal note</button>
+        </form>
+        <div class="mt-3">
+          {% for note in application.internal_notes.all %}
+            <div class="border rounded-3 p-3 mb-2">
+              <p class="text-small mb-1">{{ note.note|linebreaksbr }}</p>
+              <span class="text-tiny text-muted-fng">{{ note.author.get_full_name }} · {{ note.created_at|date:"j M Y, H:i" }}</span>
+            </div>
+          {% empty %}
+            <p class="text-tiny text-muted-fng mb-0">No internal notes yet. Notes are visible only to your institution's team.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Candidate consent</h2>
+        <p class="text-small text-muted-fng">The candidate consented to share their academic profile and documents for this vacancy only. Do not use these documents for other purposes.</p>
+        <a class="btn btn-outline-brand w-100" href="{% url 'core:contact' %}"><i class="bi bi-life-preserver me-1" aria-hidden="true"></i>Contact support</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

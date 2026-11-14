@@ -1,0 +1,21 @@
+[Unit]
+Description=FacultyNxtGen Celery worker
+After=network.target postgresql.service redis-server.service
+Wants=postgresql.service redis-server.service
+
+[Service]
+Type=simple
+User=facultynxtgen
+Group=www-data
+WorkingDirectory=/srv/facultynxtgen
+EnvironmentFile=/srv/facultynxtgen/.env
+ExecStart=/srv/facultynxtgen/.venv/bin/celery -A config worker --loglevel=INFO --concurrency=2
+Restart=always
+RestartSec=5
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

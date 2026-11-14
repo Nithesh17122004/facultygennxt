@@ -1,0 +1,49 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Candidate settings — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Account settings{% endblock %}
+{% block dashboard_subtitle %}Manage your account details, security and communication preferences.{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Account details</h2></div>
+      <div class="card-fng__body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.full_name %}
+          {% include "partials/form_field.html" with field=form.mobile %}
+          <button class="btn btn-brand" type="submit">Save account details</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <h2 class="h6">Email address</h2>
+        <p class="text-small text-muted-fng mb-1">{{ user.email }}</p>
+        <p class="text-tiny text-muted-fng">Contact support to change it. We verify ownership before updating an account email.</p>
+        <hr>
+        <h2 class="h6">Security</h2>
+        <div class="d-grid gap-2">
+          <a class="btn btn-outline-brand btn-sm" href="{% url 'accounts:security' %}"><i class="bi bi-shield-lock me-1" aria-hidden="true"></i>Security and MFA</a>
+          <a class="btn btn-outline-brand btn-sm" href="{% url 'accounts:password_change' %}"><i class="bi bi-key me-1" aria-hidden="true"></i>Change password</a>
+          <a class="btn btn-outline-brand btn-sm" href="{% url 'notifications:preferences' %}"><i class="bi bi-envelope-gear me-1" aria-hidden="true"></i>Email preferences</a>
+        </div>
+      </div>
+    </div>
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Looking for privacy controls?</h2>
+        <p class="text-small text-muted-fng">Manage profile visibility, marketing consent and data requests from the privacy page.</p>
+        <a class="btn btn-outline-brand btn-sm" href="{% url 'candidates:privacy' %}">Open privacy controls</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

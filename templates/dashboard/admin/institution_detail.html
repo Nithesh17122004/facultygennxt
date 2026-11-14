@@ -1,0 +1,191 @@
+{% extends "dashboard/base.html" %}
+{% load fng documents %}
+
+{% block title %}{{ institution.name }} — Verification — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}{{ institution.name }}{% endblock %}
+{% block dashboard_subtitle %}Verification file, recruiter team and vacancy history.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:institutions' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>All institutions</a>
+  <a class="btn btn-outline-brand btn-sm" href="{{ institution.get_absolute_url }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>Public profile</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header">
+        <div class="d-flex align-items-center gap-3">
+          <span class="avatar avatar--org" aria-hidden="true">{% if institution.logo %}<img src="{{ institution.logo.url }}" alt="">{% else %}{{ institution.name|user_initials }}{% endif %}</span>
+          <div>
+            <h2 class="h5 mb-0">{{ institution.name }}</h2>
+            <p class="text-small text-muted-fng mb-0">{{ institution.get_institution_type_display }} · {{ institution.city.name }}, {{ institution.state.name }}</p>
+          </div>
+        </div>
+        <span class="badge-soft {% if institution.verification_status == 'verified' %}success{% elif institution.verification_status == 'pending' %}warning{% elif institution.verification_status == 'suspended' %}danger{% else %}neutral{% endif %}">{{ institution.get_verification_status_display }}</span>
+      </div>
+      <div class="card-fng__body">
+        <div class="row g-3 mb-3">
+          <div class="col-4"><div class="stat-card"><div class="stat-card__value">{{ counts.jobs }}</div><div class="stat-card__label">Vacancies</div></div></div>
+          <div class="col-4"><div class="stat-card"><div class="stat-card__value">{{ counts.live }}</div><div class="stat-card__label">Live</div></div></div>
+          <div class="col-4"><div class="stat-card"><div class="stat-card__value">{{ counts.recruiters }}</div><div class="stat-card__label">Recruiter seats</div></div></div>
+        </div>
+        <dl class="kv-list">
+          <div class="kv-list__row"><dt>Official email</dt><dd><a href="mailto:{{ institution.official_email }}">{{ institution.official_email }}</a></dd></div>
+          <div class="kv-list__row"><dt>Phone</dt><dd>{{ institution.phone }}</dd></div>
+          <div class="kv-list__row"><dt>Website</dt><dd><a href="{{ institution.website }}" target="_blank" rel="noopener noreferrer">{{ institution.website|truncatechars:44 }}</a></dd></div>
+          <div class="kv-list__row"><dt>Contact person</dt><dd>{{ institution.contact_person }}{% if institution.contact_designation %} · {{ institution.contact_designation }}{% endif %}</dd></div>
+          <div class="kv-list__row"><dt>Address</dt><dd>{{ institution.address }}{% if institution.pincode %}, {{ institution.pincode }}{% endif %}</dd></div>
+          <div class="kv-list__row"><dt>Established</dt><dd>{{ institution.established_year|default:"Not provided" }}</dd></div>
+          <div class="kv-list__row"><dt>Registered</dt><dd>{{ institution.created_at|date:"j M Y, H:i" }}</dd></div>
+          <div class="kv-list__row"><dt>Verified</dt><dd>{% if institution.verified_at %}{{ institution.verified_at|date:"j M Y" }} by {{ institution.verified_by.get_full_name|default:"staff" }}{% else %}Not verified{% endif %}</dd></div>
+          <div class="kv-list__row"><dt>Account active</dt><dd>{% if institution.is_active %}<span class="text-success">Yes</span>{% else %}<span class="text-danger">No</span>{% endif %}</dd></div>
+        </dl>
+        {% if institution.description %}
+          <h3 class="h6 mt-4">About</h3>
+          <div class="job-content">{{ institution.description|linebreaks }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Verification documents</h2><span class="badge-soft neutral">{{ documents|length }}</span></div>
+      <div class="card-fng__body p-0">
+        {% if documents %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng align-middle mb-0">
+                <thead><tr><th scope="col">Document</th><th scope="col">Type</th><th scope="col">Status</th><th scope="col">Uploaded</th><th scope="col" class="text-end">Open</th></tr></thead>
+                <tbody>
+                  {% for item in documents %}
+                    <tr>
+                      <td><span class="fw-semibold">{{ item.document.original_name }}</span><span class="cell-meta">{{ item.document.size|filesizeformat }}</span></td>
+                      <td>{{ item.get_doc_type_display }}</td>
+                      <td><span class="badge-soft {% if item.status == 'accepted' %}success{% elif item.status == 'rejected' %}danger{% else %}warning{% endif %}">{{ item.get_status_display }}</span></td>
+                      <td>{{ item.created_at|date:"j M Y" }}</td>
+                      <td class="text-end"><a class="btn btn-sm btn-outline-brand" href="{% document_url item.document user %}" target="_blank" rel="noopener"><i class="bi bi-file-earmark-arrow-down me-1" aria-hidden="true"></i>Open</a></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state py-4"><div class="empty-state__icon mx-auto"><i class="bi bi-folder-x" aria-hidden="true"></i></div><h3>No verification documents</h3><p>The institution has not uploaded evidence. Request documents before verifying.</p></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Recruiter team</h2><span class="badge-soft neutral">{{ recruiters|length }}</span></div>
+      <div class="card-fng__body p-0">
+        {% if recruiters %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng align-middle mb-0">
+                <thead><tr><th scope="col">Recruiter</th><th scope="col">Designation</th><th scope="col">Role</th><th scope="col">Status</th><th scope="col">Joined</th></tr></thead>
+                <tbody>
+                  {% for recruiter in recruiters %}
+                    <tr>
+                      <td>{{ recruiter.user.get_full_name }}<span class="cell-meta">{{ recruiter.user.email }}</span></td>
+                      <td>{{ recruiter.designation|default:"—" }}</td>
+                      <td>{% if recruiter.is_primary %}<span class="badge-soft primary">Primary</span>{% else %}Team member{% endif %}</td>
+                      <td><span class="badge-soft {% if recruiter.is_active %}success{% else %}neutral{% endif %}">{% if recruiter.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                      <td>{{ recruiter.created_at|date:"j M Y" }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <p class="text-small text-muted-fng p-3 mb-0">No recruiter seats recorded.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Recent vacancies</h2><a class="link-arrow text-small" href="{% url 'dashboard:jobs' %}?q={{ institution.name|urlencode }}">All vacancies</a></div>
+      <div class="card-fng__body p-0">
+        {% if jobs %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng mb-0">
+                <thead><tr><th scope="col">Vacancy</th><th scope="col">Status</th><th scope="col">Deadline</th><th scope="col" class="text-end">Open</th></tr></thead>
+                <tbody>
+                  {% for job in jobs %}
+                    <tr>
+                      <td><span class="fw-semibold">{{ job.title|truncatechars:46 }}</span><span class="cell-meta">{{ job.designation.name }} · {{ job.department.name }}</span></td>
+                      <td><span class="badge-soft {% if job.status == 'published' %}success{% elif job.status == 'pending' %}warning{% elif job.status == 'rejected' or job.status == 'suspended' %}danger{% else %}neutral{% endif %}">{{ job.get_status_display }}</span></td>
+                      <td>{{ job.deadline|date:"j M Y"|default:"Not set" }}</td>
+                      <td class="text-end"><a class="btn btn-sm btn-outline-brand" href="{% url 'dashboard:job_detail' job.pk %}">Open</a></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <p class="text-small text-muted-fng p-3 mb-0">No vacancies created yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Institution audit trail</h2><a class="link-arrow text-small" href="{% url 'dashboard:audit' %}?q={{ institution.name|urlencode }}">Full audit log</a></div>
+      <div class="card-fng__body">
+        {% for entry in audit_entries %}
+          <div class="border-bottom pb-2 mb-2">
+            <span class="text-small fw-semibold">{{ entry.summary|truncatechars:70 }}</span>
+            <span class="d-block text-tiny text-muted-fng">{{ entry.action }} · {{ entry.actor.get_full_name|default:"System" }} · {{ entry.created_at|date:"j M Y, H:i" }}</span>
+          </div>
+        {% empty %}
+          <p class="text-small text-muted-fng mb-0">No audit entries for this institution.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Verification decision</h2></div>
+      <div class="card-fng__body">
+        {% if institution.verification_notes %}
+          <div class="alert-fng info"><i class="bi bi-journal-text" aria-hidden="true"></i><div><strong>Current notes.</strong> {{ institution.verification_notes }}</div></div>
+        {% endif %}
+        <form method="post" action="{% url 'dashboard:institution_decision' institution.pk %}" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.decision %}
+          {% include "partials/form_field.html" with field=form.notes %}
+          <button class="btn btn-brand w-100" type="submit" data-confirm="Save this verification decision? The institution team will be notified."><i class="bi bi-shield-check me-1" aria-hidden="true"></i>Save decision</button>
+        </form>
+        <p class="apply-note mt-3 mb-0">Rejections and suspensions require a clear reason. Suspending an institution also suspends its pending and approved vacancies.</p>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Verification checklist</h2>
+        <ul class="list-unstyled text-small text-muted-fng mb-0 mt-2">
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>Official domain and email match the institution.</li>
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>Authorisation letter is signed and current.</li>
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>Registration and affiliation evidence reviewed.</li>
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>Primary recruiter identity confirmed.</li>
+          <li><i class="bi bi-check2-circle text-success me-1" aria-hidden="true"></i>No unresolved fraud or impersonation signals.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Quick actions</h2>
+        <div class="d-grid gap-2 mt-2">
+          <a class="btn btn-outline-brand" href="{% url 'dashboard:jobs' %}?q={{ institution.name|urlencode }}">View vacancies</a>
+          <a class="btn btn-outline-brand" href="{% url 'dashboard:users' %}?q={{ institution.official_email|urlencode }}">Find account</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

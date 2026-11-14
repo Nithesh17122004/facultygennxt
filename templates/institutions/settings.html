@@ -1,0 +1,65 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Institution settings — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Account settings{% endblock %}
+{% block dashboard_subtitle %}Update your personal recruiter details and account identity. Institution-level details are managed in the profile centre.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'accounts:security' %}"><i class="bi bi-fingerprint me-1" aria-hidden="true"></i>Security</a>
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'institutions:profile' %}"><i class="bi bi-building me-1" aria-hidden="true"></i>Institution profile</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Your account</h2></div>
+      <div class="card-fng__body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=identity_form %}
+          {% for field in identity_form %}
+            {% include "partials/form_field.html" with field=field %}
+          {% endfor %}
+          <h3 class="form-section-title">Recruiter role</h3>
+          {% include "partials/nonfield_errors.html" with form=recruiter_form %}
+          {% include "partials/form_field.html" with field=recruiter_form.designation %}
+          {% include "partials/form_field.html" with field=recruiter_form.phone %}
+          <button class="btn btn-brand" type="submit"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Save settings</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <h2 class="h6">Institution</h2>
+        <dl class="kv-list mt-2">
+          <div class="kv-list__row"><dt>Name</dt><dd>{{ institution.name }}</dd></div>
+          <div class="kv-list__row"><dt>Status</dt><dd><span class="badge-soft {% if institution.verification_status == 'verified' %}success{% else %}warning{% endif %}">{{ institution.get_verification_status_display }}</span></dd></div>
+          <div class="kv-list__row"><dt>Primary contact</dt><dd>{{ institution.contact_person }}</dd></div>
+          <div class="kv-list__row"><dt>Official email</dt><dd>{{ institution.official_email }}</dd></div>
+        </dl>
+        <a class="btn btn-outline-brand w-100 mt-3" href="{% url 'institutions:profile' %}">Manage institution profile</a>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Email and security</h2>
+        <p class="text-small text-muted-fng">Choose which operational emails you receive, review active sessions and enable multi-factor authentication.</p>
+        <div class="d-grid gap-2">
+          <a class="btn btn-outline-brand" href="{% url 'notifications:preferences' %}"><i class="bi bi-envelope-gear me-1" aria-hidden="true"></i>Email preferences</a>
+          <a class="btn btn-outline-brand" href="{% url 'accounts:security' %}"><i class="bi bi-shield-lock me-1" aria-hidden="true"></i>Security and MFA</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-fng warning mt-3">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <div>Changing your login email requires re-verification. Contact support if the official institutional email is no longer accessible.</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

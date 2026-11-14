@@ -1,0 +1,106 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Applicants — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Applicants{% endblock %}
+{% block dashboard_subtitle %}Review every candidate who applied to {{ institution.name }}, move applications through the hiring workflow and keep candidates informed.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'jobs:recruiter_list' %}"><i class="bi bi-briefcase me-1" aria-hidden="true"></i>Manage vacancies</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3 mb-2">
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-inboxes" aria-hidden="true"></i></div><div class="stat-card__value">{{ total }}</div><div class="stat-card__label">{% if status or job_id or q %}Matching applications{% else %}All applications{% endif %}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-hourglass-split" aria-hidden="true"></i></div><div class="stat-card__value">{{ counts.submitted|default:0 }}</div><div class="stat-card__label">New submissions</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-star" aria-hidden="true"></i></div><div class="stat-card__value">{{ counts.shortlisted|default:0 }}</div><div class="stat-card__label">Shortlisted</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-patch-check" aria-hidden="true"></i></div><div class="stat-card__value">{{ counts.selected|default:0 }}</div><div class="stat-card__label">Selected</div></div></div>
+</div>
+
+<div class="card-fng">
+  <div class="card-fng__header">
+    <h2>Application pipeline</h2>
+    <span class="badge-soft neutral">Private to your recruitment team</span>
+  </div>
+  <div class="card-fng__body">
+    <div class="status-tabs" role="navigation" aria-label="Filter applicants by status">
+      <a href="?{% if job_id %}job={{ job_id }}{% endif %}{% if job_id and q %}&{% elif q %}q={{ q|urlencode }}{% endif %}" class="{% if not status %}active{% endif %}">All</a>
+      <a href="?status=submitted{% if job_id %}&job={{ job_id }}{% endif %}{% if q %}&q={{ q|urlencode }}{% endif %}" class="{% if status == 'submitted' %}active{% endif %}">Submitted{% if counts.submitted %} <span class="ms-1">{{ counts.submitted }}</span>{% endif %}</a>
+      <a href="?status=under_review{% if job_id %}&job={{ job_id }}{% endif %}{% if q %}&q={{ q|urlencode }}{% endif %}" class="{% if status == 'under_review' %}active{% endif %}">Under review{% if counts.under_review %} <span class="ms-1">{{ counts.under_review }}</span>{% endif %}</a>
+      <a href="?status=shortlisted{% if job_id %}&job={{ job_id }}{% endif %}{% if q %}&q={{ q|urlencode }}{% endif %}" class="{% if status == 'shortlisted' %}active{% endif %}">Shortlisted{% if counts.shortlisted %} <span class="ms-1">{{ counts.shortlisted }}</span>{% endif %}</a>
+      <a href="?status=selected{% if job_id %}&job={{ job_id }}{% endif %}{% if q %}&q={{ q|urlencode }}{% endif %}" class="{% if status == 'selected' %}active{% endif %}">Selected{% if counts.selected %} <span class="ms-1">{{ counts.selected }}</span>{% endif %}</a>
+      <a href="?status=rejected{% if job_id %}&job={{ job_id }}{% endif %}{% if q %}&q={{ q|urlencode }}{% endif %}" class="{% if status == 'rejected' %}active{% endif %}">Not selected{% if counts.rejected %} <span class="ms-1">{{ counts.rejected }}</span>{% endif %}</a>
+    </div>
+
+    <form method="get" class="row g-2 align-items-end mb-3" role="search" aria-label="Filter applicants">
+      {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+      <div class="col-md-5">
+        <label class="form-label" for="applicant-search">Search candidates</label>
+        <input class="form-control" id="applicant-search" type="search" name="q" value="{{ q }}" placeholder="Name, email or vacancy">
+      </div>
+      <div class="col-md-5">
+        <label class="form-label" for="applicant-job">Vacancy</label>
+        <select class="form-select" id="applicant-job" name="job">
+          <option value="">All vacancies</option>
+          {% for job in jobs %}
+            <option value="{{ job.pk }}" {% if job_id == job.pk|stringformat:"s" %}selected{% endif %}>{{ job.title|truncatechars:56 }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button class="btn btn-brand flex-grow-1" type="submit">Filter</button>
+        {% if q or status or job_id %}<a class="btn btn-outline-brand" href="{% url 'applications:recruiter_list' %}" aria-label="Clear filters"><i class="bi bi-x-lg" aria-hidden="true"></i></a>{% endif %}
+      </div>
+    </form>
+
+    {% if page_obj.object_list %}
+      <div class="table-wrap">
+        <div class="table-responsive">
+          <table class="table table-fng align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Candidate</th>
+                <th scope="col">Vacancy</th>
+                <th scope="col">Applied</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for application in page_obj %}
+                <tr>
+                  <td>
+                    <a class="fw-semibold" href="{% url 'applications:recruiter_detail' application.pk %}">{{ application.candidate.get_full_name }}</a>
+                    <span class="cell-meta">{{ application.candidate.email }}</span>
+                  </td>
+                  <td>{{ application.job.title|truncatechars:42 }}<span class="cell-meta">{{ application.job.designation.name }} · {{ application.job.department.name }}</span></td>
+                  <td>{{ application.applied_at|date:"j M Y" }}<span class="cell-meta">{{ application.applied_at|time:"H:i" }}</span></td>
+                  <td><span class="badge-soft {{ application.status_css }}">{{ application.get_status_display }}</span></td>
+                  <td class="text-end"><a class="btn btn-sm btn-outline-brand" href="{% url 'applications:recruiter_detail' application.pk %}">Review</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state__icon mx-auto"><i class="bi bi-inboxes" aria-hidden="true"></i></div>
+        <h3>{% if q or status or job_id %}No matching applications{% else %}No applications yet{% endif %}</h3>
+        <p>{% if q or status or job_id %}Try a different search, status or vacancy.{% else %}When candidates apply through FacultyNxtGen, their applications appear here for your team to review.{% endif %}</p>
+        {% if q or status or job_id %}
+          <a class="btn btn-outline-brand" href="{% url 'applications:recruiter_list' %}">Clear filters</a>
+        {% else %}
+          <a class="btn btn-brand" href="{% url 'jobs:recruiter_create' %}">Post a vacancy</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="alert-fng info mt-3">
+  <i class="bi bi-shield-lock" aria-hidden="true"></i>
+  <div><strong>Candidate privacy.</strong> Applicant profiles and documents are shared only for evaluating this vacancy. Do not download, forward or retain them outside your institution's recruitment process.</div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+FacultyNxtGen — confirm your newsletter subscription
+
+Hello{% if subscriber.name %} {{ subscriber.name }}{% endif %},
+
+Please confirm that you want to receive occasional academic career resources, vacancy digests and FacultyNxtGen product updates.
+
+Confirm subscription (link expires in 7 days):
+{{ confirmation_url }}
+
+This is a double opt-in email. You will not be subscribed unless you click confirm.
+
+If you did not request this, ignore the email. You can also decline and unsubscribe:
+{{ unsubscribe_url }}
+
+© {{ current_year }} {{ SITE_NAME }}

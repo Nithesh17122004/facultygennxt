@@ -1,0 +1,51 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Invite a recruiter — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Invite a recruiter{% endblock %}
+{% block dashboard_subtitle %}Give a colleague access to post vacancies and manage applicants for {{ institution.name }}.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'institutions:recruiters' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Back to team</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Recruiter details</h2><span class="badge-soft success">Free</span></div>
+      <div class="card-fng__body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.full_name %}
+          {% include "partials/form_field.html" with field=form.email %}
+          <div class="row">
+            <div class="col-md-6">{% include "partials/form_field.html" with field=form.designation %}</div>
+            <div class="col-md-6">{% include "partials/form_field.html" with field=form.phone %}</div>
+          </div>
+          <button class="btn btn-brand" type="submit"><i class="bi bi-send me-1" aria-hidden="true"></i>Send invitation</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="alert-fng info">
+      <i class="bi bi-envelope-check" aria-hidden="true"></i>
+      <div>The recruiter receives a time-limited invitation link to set a password and accept access. They cannot publish vacancies until they activate their account.</div>
+    </div>
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">What recruiters can do</h2>
+        <ul class="text-small text-muted-fng ps-3 mt-2 mb-0">
+          <li class="mb-2">Create and edit vacancy drafts.</li>
+          <li class="mb-2">Submit vacancies for verification.</li>
+          <li class="mb-2">Review applicants and update statuses.</li>
+          <li class="mb-2">View vacancy analytics.</li>
+          <li>They cannot change institution identity or verification ownership.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

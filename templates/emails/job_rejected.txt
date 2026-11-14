@@ -1,0 +1,14 @@
+FacultyNxtGen — your vacancy needs changes
+
+Our verification team reviewed {{ job.title }} at {{ job.institution.name }} and could not publish it yet.
+
+Reason from the reviewer:
+{{ reason }}
+
+Edit the vacancy to address the issue, attach a current official notification if needed, and resubmit. The listing stays private until it passes review.
+
+Edit and resubmit:
+{{ edit_url }}
+
+Think this decision is wrong? Reply to this email or contact {{ SUPPORT_EMAIL }} with the official source details.
+© {{ current_year }} {{ SITE_NAME }}

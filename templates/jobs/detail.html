@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% load fng documents %}
+
+{% block title %}{{ job.title }} at {{ job.institution.name }} — {{ SITE_NAME }}{% endblock %}
+{% block meta_description %}{{ job.title }} at {{ job.institution.name }}, {{ job.location_label }}. {{ job.required_qualification|default:job.description|striptags|truncatewords:28 }}{% endblock %}
+{% block og_title %}{{ job.title }} — {{ job.institution.name }}{% endblock %}
+{% block robots %}{% if is_preview %}<meta name="robots" content="noindex,nofollow">{% else %}<meta name="robots" content="index,follow,max-image-preview:large">{% endif %}{% endblock %}
+
+{% block structured_data %}
+  {% if not is_preview and not is_closed %}
+    <script type="application/ld+json" nonce="{{ csp_nonce }}">{{ job_schema_json|safe }}</script>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if is_preview %}
+  <div class="messages-wrap">
+    <div class="container">
+      <div class="alert-fng warning">
+        <i class="bi bi-eye-fill" aria-hidden="true"></i>
+        <div><strong>Preview only.</strong> This vacancy is {{ job.get_status_display|lower }} and is not visible to the public. {% if user.is_staff %}<a href="{% url 'dashboard:job_detail' job.pk %}">Open staff review</a>.{% endif %}</div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<section class="job-detail-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb" style="--bs-breadcrumb-divider-color:#8b9ab3;">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}" class="text-primary">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'jobs:find' %}" class="text-primary">Find jobs</a></li>
+        <li class="breadcrumb-item"><a href="{{ job.institution.get_absolute_url }}" class="text-primary">{{ job.institution.name|truncatechars:26 }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page" style="color:#5b6880;">{{ job.title|truncatechars:36 }}</li>
+      </ol>
+    </nav>
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <span class="avatar avatar--org" aria-hidden="true" style="width:58px;height:58px;">
+            {% if job.institution.logo %}<img src="{{ job.institution.logo.url }}" alt="">{% else %}{{ job.institution.name|user_initials }}{% endif %}
+          </span>
+          <div>
+            <a class="job-card__org-name" href="{{ job.institution.get_absolute_url }}">{{ job.institution.name }}{% if job.institution.verification_status == "verified" %}<i class="bi bi-patch-check-fill ms-1" title="Verified institution" aria-label="Verified institution"></i>{% endif %}</a>
+            <span class="text-tiny text-muted-fng d-block">{{ job.institution.get_institution_type_display }} · {{ job.institution.city.name }}, {{ job.institution.state.name }}</span>
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mb-2">
+          <span class="badge-soft primary">{{ job.designation.name }}</span>
+          <span class="badge-soft neutral">{{ job.department.name }}</span>
+          <span class="badge-soft neutral">{{ job.employment_type_label }}</span>
+          {% if job.salary_is_disclosed %}<span class="badge-soft success">Salary disclosed</span>{% endif %}
+        </div>
+        <h1>{{ job.title }}</h1>
+        <div class="job-facts">
+          <span><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ job.location_label }}{% if job.campus_location %} · {{ job.campus_location }}{% endif %}</span>
+          <span><i class="bi bi-briefcase" aria-hidden="true"></i>{{ job.employment_type_label }}</span>
+          {% if job.vacancies %}<span><i class="bi bi-people" aria-hidden="true"></i>{{ job.vacancies }} vacanc{{ job.vacancies|pluralize:"y,ies" }}</span>{% endif %}
+          <span><i class="bi bi-calendar-event" aria-hidden="true"></i>Posted {{ job.published_at|default:job.created_at|date:"j M Y" }}</span>
+          {% if job.experience_min %}<span><i class="bi bi-bar-chart" aria-hidden="true"></i>{{ job.experience_min }}+ years</span>{% endif %}
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          {% if user.is_authenticated and user.is_candidate %}
+            <form method="post" action="{% url 'jobs:toggle_save' job.slug %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <button class="btn btn-outline-brand btn-sm {% if saved %}text-primary{% endif %}" type="submit">
+                <i class="bi {% if saved %}bi-bookmark-fill{% else %}bi-bookmark{% endif %} me-1" aria-hidden="true"></i>{% if saved %}Saved{% else %}Save job{% endif %}
+              </button>
+            </form>
+          {% endif %}
+          <a class="btn btn-outline-brand btn-sm" href="#how-to-apply"><i class="bi bi-send me-1" aria-hidden="true"></i>How to apply</a>
+          <a class="btn btn-outline-brand btn-sm" href="{{ report_url }}"><i class="bi bi-flag me-1" aria-hidden="true"></i>Report this job</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card-fng">
+          <div class="card-fng__body">
+            <div class="job-content">
+              <h2>About the role</h2>
+              {% if job.description %}{{ job.description|linebreaks }}{% else %}<p class="text-muted-fng">The institution has not added a detailed description. Refer to the official notification for the full advertisement.</p>{% endif %}
+
+              {% if job.required_qualification %}
+                <h2>Required qualifications</h2>
+                {{ job.required_qualification|linebreaks }}
+              {% endif %}
+
+              {% if job.eligibility %}
+                <h2>Eligibility conditions</h2>
+                {{ job.eligibility|linebreaks }}
+              {% endif %}
+
+              {% if job.required_documents %}
+                <h2>Documents to prepare</h2>
+                {{ job.required_documents|linebreaks }}
+              {% endif %}
+
+              {% if job.application_instruction %}
+                <h2>Application instructions</h2>
+                {{ job.application_instruction|linebreaks }}
+              {% endif %}
+            </div>
+
+            <h2 class="h5 mt-4" id="how-to-apply">How to apply</h2>
+            {% if job.application_method == "internal" %}
+              <div class="alert-fng info">
+                <i class="bi bi-shield-check" aria-hidden="true"></i>
+                <div>This vacancy accepts applications through FacultyNxtGen. Your profile and documents are shared only with this institution after you consent and submit.</div>
+              </div>
+            {% else %}
+              <div class="alert-fng warning">
+                <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                <div><strong>External application.</strong> This institution accepts applications through its official website or email. You will leave FacultyNxtGen and continue on the institution's own application page.</div>
+              </div>
+              <p class="text-small text-muted-fng">Before leaving, confirm that the destination domain matches the institution's official website. FacultyNxtGen does not process or guarantee external applications.</p>
+            {% endif %}
+
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              {% if existing_application %}
+                <a class="btn btn-brand" href="{% url 'applications:candidate_detail' existing_application.pk %}"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>View your application</a>
+                <span class="text-small text-muted-fng">Submitted {{ existing_application.applied_at|date:"j M Y" }}</span>
+              {% elif is_closed %}
+                <span class="badge-soft danger">Applications closed</span>
+              {% else %}
+                {% if job.application_method == "internal" %}
+                  <a class="btn btn-brand btn-lg" href="{{ apply_target }}"><i class="bi bi-send me-1" aria-hidden="true"></i>Apply through FacultyNxtGen</a>
+                {% else %}
+                  <button class="btn btn-brand btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#externalApplyModal"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>Apply on institution website</button>
+                {% endif %}
+                <span class="text-tiny text-muted-fng">Deadline: {{ job.deadline|date:"j M Y" }}</span>
+              {% endif %}
+            </div>
+
+            {% if job.notification_document and not job.notification_document.is_deleted %}
+              <div class="mt-4">
+                <a class="btn btn-outline-brand" href="{% document_url job.notification_document user %}" target="_blank" rel="noopener"><i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>Download official notification</a>
+              </div>
+            {% elif job.notification_url %}
+              <div class="mt-4">
+                <a class="btn btn-outline-brand" href="{{ job.notification_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>View official notification</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if similar_jobs %}
+          <div class="section-head section-head--row mt-5 mb-3">
+            <div><h2 class="h4 mb-1">Similar vacancies</h2><p class="text-small text-muted-fng mb-0">Other verified roles in {{ job.department.name }}.</p></div>
+            <a class="link-arrow text-small" href="{% url 'jobs:find' %}">All jobs <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+          </div>
+          <div class="row g-3">
+            {% for similar in similar_jobs %}
+              <div class="col-md-6">{% include "partials/job_card.html" with job=similar %}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-4">
+        <aside class="job-sidebar" aria-label="Vacancy summary and application">
+          <div class="job-panel">
+            <h2>Application summary</h2>
+            <div class="deadline-box {% if job.days_left is not None and job.days_left <= 3 %}is-urgent{% endif %} mb-3">
+              <i class="bi bi-clock-history" aria-hidden="true"></i>
+              <div>
+                <strong class="d-block">{{ job.deadline_label }}</strong>
+                <span class="text-tiny">Deadline {{ job.deadline|date:"j M Y" }}</span>
+              </div>
+            </div>
+            <dl class="mb-0">
+              <div class="job-panel__row"><dt>Designation</dt><dd>{{ job.designation.name }}</dd></div>
+              <div class="job-panel__row"><dt>Department</dt><dd>{{ job.department.name }}</dd></div>
+              {% if job.specialization %}<div class="job-panel__row"><dt>Specialisation</dt><dd>{{ job.specialization }}</dd></div>{% endif %}
+              <div class="job-panel__row"><dt>Employment</dt><dd>{{ job.employment_type_label }}</dd></div>
+              <div class="job-panel__row"><dt>Experience</dt><dd>{% if job.experience_min %}{{ job.experience_min }}+ yrs{% else %}Not specified{% endif %}</dd></div>
+              <div class="job-panel__row"><dt>Salary</dt><dd>{% if job.salary_is_disclosed %}{{ job.salary_min|salary_short }}{% if job.salary_max and job.salary_max != job.salary_min %} – {{ job.salary_max|salary_short }}{% endif %}{% else %}Not disclosed{% endif %}</dd></div>
+            </dl>
+            {% if job.salary_notes %}<p class="apply-note">{{ job.salary_notes }}</p>{% endif %}
+
+            {% if existing_application %}
+              <a class="btn btn-outline-brand w-100 mt-3" href="{% url 'applications:candidate_detail' existing_application.pk %}">View application</a>
+            {% elif is_closed %}
+              <button class="btn btn-outline-brand w-100 mt-3" type="button" disabled>Applications closed</button>
+            {% elif job.application_method == "internal" %}
+              <a class="btn btn-brand w-100 mt-3" href="{{ apply_target }}">Apply now</a>
+            {% else %}
+              <button class="btn btn-brand w-100 mt-3" type="button" data-bs-toggle="modal" data-bs-target="#externalApplyModal">Apply on official website</button>
+            {% endif %}
+            <p class="apply-note">Applying on FacultyNxtGen is free. Report any request for money immediately.</p>
+          </div>
+
+          <div class="job-panel">
+            <h2>About the institution</h2>
+            <div class="d-flex align-items-start gap-3">
+              <span class="avatar avatar--org" aria-hidden="true">
+                {% if job.institution.logo %}<img src="{{ job.institution.logo.url }}" alt="">{% else %}{{ job.institution.name|user_initials }}{% endif %}
+              </span>
+              <div>
+                <a class="fw-semibold" href="{{ job.institution.get_absolute_url }}">{{ job.institution.name }}</a>
+                <p class="text-tiny text-muted-fng mb-2">{{ job.institution.city.name }}, {{ job.institution.state.name }} · {{ job.institution.get_institution_type_display }}</p>
+                <span class="badge-soft success"><i class="bi bi-patch-check-fill" aria-hidden="true"></i>Verified institution</span>
+              </div>
+            </div>
+            {% if job.institution.description %}<p class="text-small text-muted-fng mt-3 mb-0">{{ job.institution.description|truncatechars:180 }}</p>{% endif %}
+            <a class="btn btn-outline-brand w-100 mt-3" href="{{ job.institution.get_absolute_url }}">View institution profile</a>
+          </div>
+
+          <div class="job-panel">
+            <h2>Share this vacancy</h2>
+            <div class="share-row">
+              <a class="btn btn-sm btn-outline-brand" href="https://www.linkedin.com/sharing/share-offsite/?url={{ shared_url|urlencode }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-linkedin me-1" aria-hidden="true"></i>LinkedIn</a>
+              <a class="btn btn-sm btn-outline-brand" href="https://wa.me/?text={{ job.title|urlencode }}%20{{ shared_url|urlencode }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp me-1" aria-hidden="true"></i>WhatsApp</a>
+              <a class="btn btn-sm btn-outline-brand" href="mailto:?subject={{ job.title|urlencode }}&body={{ shared_url|urlencode }}"><i class="bi bi-envelope me-1" aria-hidden="true"></i>Email</a>
+            </div>
+            <p class="apply-note">Share only through channels you trust. The canonical link is {{ shared_url }}.</p>
+          </div>
+
+          <div class="job-panel">
+            <h2>Verification details</h2>
+            <dl class="mb-0">
+              <div class="job-panel__row"><dt>Institution</dt><dd><span class="text-success">Verified</span></dd></div>
+              <div class="job-panel__row"><dt>Vacancy check</dt><dd><span class="text-success">Completed</span></dd></div>
+              <div class="job-panel__row"><dt>Official source</dt><dd>{% if job.source_information %}On file{% else %}Not provided{% endif %}</dd></div>
+            </dl>
+            {% if job.source_information %}<p class="apply-note">{{ job.source_information|truncatechars:220 }}</p>{% endif %}
+            <a class="link-arrow text-small" href="{{ report_url }}"><i class="bi bi-flag me-1" aria-hidden="true"></i>Report incorrect information</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if job.application_method == "external" and not is_closed and not existing_application %}
+  <div class="modal fade" id="externalApplyModal" tabindex="-1" aria-labelledby="externalApplyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="externalApplyModalLabel">Continue to the institution website</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>This vacancy is not accepting applications through FacultyNxtGen. You will be redirected to the institution's official application page or email address.</p>
+          <div class="alert-fng warning mb-3">
+            <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+            <div>Verify the destination domain and never pay a fee to an unverified third party. FacultyNxtGen is not responsible for external application processes.</div>
+          </div>
+          <dl class="kv-list">
+            <div class="kv-list__row"><dt>Institution</dt><dd>{{ job.institution.name }}</dd></div>
+            <div class="kv-list__row"><dt>Official website</dt><dd>{{ job.institution.website|truncatechars:36 }}</dd></div>
+            <div class="kv-list__row"><dt>Application page</dt><dd class="text-break">{{ job.external_apply_link }}</dd></div>
+            <div class="kv-list__row"><dt>Deadline</dt><dd>{{ job.deadline|date:"j M Y" }}</dd></div>
+          </dl>
+          {% if job.external_application_email %}<p class="text-small text-muted-fng mt-3">Applications by email: <span class="mono">{{ job.external_application_email }}</span></p>{% endif %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-brand" data-bs-dismiss="modal">Stay on FacultyNxtGen</button>
+          <a class="btn btn-brand" href="{{ apply_target }}" rel="noopener noreferrer">Continue to official application <i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

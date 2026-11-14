@@ -1,0 +1,63 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Enquiry — {{ enquiry.subject }} — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Enquiry {{ enquiry.reference|stringformat:"s"|truncatechars:8 }}{% endblock %}
+{% block dashboard_subtitle %}{{ enquiry.name }} · {{ enquiry.created_at|date:"j M Y, H:i" }}{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:content' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>All enquiries</a>
+  <a class="btn btn-outline-brand btn-sm" href="mailto:{{ enquiry.email }}?subject=Re%3A%20{{ enquiry.subject|urlencode }}"><i class="bi bi-envelope me-1" aria-hidden="true"></i>Reply by email</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header">
+        <h2>{{ enquiry.subject }}</h2>
+        <span class="badge-soft {% if enquiry.status == 'new' %}warning{% elif enquiry.status == 'in_progress' %}info{% elif enquiry.status == 'resolved' %}success{% else %}neutral{% endif %}">{{ enquiry.get_status_display }}</span>
+      </div>
+      <div class="card-fng__body">
+        <dl class="kv-list">
+          <div class="kv-list__row"><dt>From</dt><dd>{{ enquiry.name }} · <a href="mailto:{{ enquiry.email }}">{{ enquiry.email }}</a></dd></div>
+          {% if enquiry.phone %}<div class="kv-list__row"><dt>Phone</dt><dd><a href="tel:{{ enquiry.phone }}">{{ enquiry.phone }}</a></dd></div>{% endif %}
+          {% if enquiry.organization %}<div class="kv-list__row"><dt>Organisation</dt><dd>{{ enquiry.organization }}</dd></div>{% endif %}
+          <div class="kv-list__row"><dt>Purpose</dt><dd>{{ enquiry.get_purpose_display }}</dd></div>
+          <div class="kv-list__row"><dt>Reference</dt><dd class="mono">{{ enquiry.reference }}</dd></div>
+          <div class="kv-list__row"><dt>Consent</dt><dd>{% if enquiry.consent %}<span class="text-success">Recorded</span>{% else %}<span class="text-danger">Not recorded</span>{% endif %}</dd></div>
+          <div class="kv-list__row"><dt>Handled by</dt><dd>{% if enquiry.handled_by %}{{ enquiry.handled_by.get_full_name }}{% else %}Not assigned{% endif %}</dd></div>
+        </dl>
+        <h3 class="h6 mt-4">Message</h3>
+        <div class="job-content">{{ enquiry.message|linebreaks }}</div>
+        {% if enquiry.admin_notes %}
+          <div class="alert-fng info mt-3"><i class="bi bi-journal-text" aria-hidden="true"></i><div><strong>Internal notes.</strong> {{ enquiry.admin_notes }}</div></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Handle enquiry</h2></div>
+      <div class="card-fng__body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.status %}
+          {% include "partials/form_field.html" with field=form.admin_notes %}
+          <button class="btn btn-brand w-100" type="submit"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Save enquiry</button>
+        </form>
+        <p class="apply-note mt-3 mb-0">Status and notes are internal. Reply to the sender from your official support mailbox.</p>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Privacy reminder</h2>
+        <p class="text-small text-muted-fng">Contact enquiries may contain personal data. Use it only to respond to this request, do not add the person to marketing lists without separate opt-in, and delete records according to the retention policy.</p>
+        <a class="btn btn-outline-brand w-100" href="{% url 'core:privacy' %}" target="_blank" rel="noopener">Privacy policy</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

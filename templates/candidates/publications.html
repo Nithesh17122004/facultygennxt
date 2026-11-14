@@ -1,0 +1,80 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Publications — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Publications{% endblock %}
+{% block dashboard_subtitle %}Add peer-reviewed papers, conference proceedings, books, chapters and patents. Recruiters value complete citation details.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'candidates:research_experience' %}"><i class="bi bi-bar-chart me-1" aria-hidden="true"></i>Research experience</a>
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'candidates:certifications' %}"><i class="bi bi-patch-check me-1" aria-hidden="true"></i>Certifications</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Publication record</h2><span class="badge-soft neutral">{{ records|length }}</span></div>
+      <div class="card-fng__body">
+        {% if records %}
+          <div class="d-grid gap-3">
+            {% for record in records %}
+              <div class="border rounded-3 p-3">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                      <span class="badge-soft primary">{{ record.get_publication_type_display }}</span>
+                      {% if record.is_peer_reviewed %}<span class="badge-soft success">Peer reviewed</span>{% endif %}
+                      {% if record.indexing %}<span class="badge-soft neutral">{{ record.indexing }}</span>{% endif %}
+                    </div>
+                    <h3 class="h6 mb-1">{{ record.title }}</h3>
+                    <p class="text-small text-muted-fng mb-1">{{ record.authors|truncatechars:180 }}</p>
+                    <p class="text-tiny text-muted-fng mb-0">{{ record.venue }} · {{ record.year }}{% if record.doi %} · DOI: {{ record.doi }}{% endif %}</p>
+                    {% if record.url %}<a class="link-arrow text-small mt-1 d-inline-block" href="{{ record.url }}" target="_blank" rel="noopener noreferrer">View publication <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a>{% endif %}
+                  </div>
+                  <div class="d-flex gap-1">
+                    <a class="btn btn-icon" href="{% url 'candidates:publication_edit' record.pk %}" aria-label="Edit {{ record.title|truncatechars:40 }}" title="Edit"><i class="bi bi-pencil" aria-hidden="true"></i></a>
+                    <form method="post" action="{% url 'candidates:publication_delete' record.pk %}">
+                      {% csrf_token %}
+                      <button class="btn btn-icon text-danger" type="submit" aria-label="Delete {{ record.title|truncatechars:40 }}" title="Delete" data-confirm="Remove this publication?"><i class="bi bi-trash" aria-hidden="true"></i></button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state__icon mx-auto"><i class="bi bi-journal-text" aria-hidden="true"></i></div>
+            <h3>No publications added</h3>
+            <p>List publications exactly as they appear in the journal or proceedings. Add DOI links where available.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Add a publication</h2></div>
+      <div class="card-fng__body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.title %}
+          {% include "partials/form_field.html" with field=form.authors %}
+          {% include "partials/form_field.html" with field=form.venue %}
+          <div class="row">
+            <div class="col-sm-6">{% include "partials/form_field.html" with field=form.publication_type %}</div>
+            <div class="col-sm-6">{% include "partials/form_field.html" with field=form.year %}</div>
+          </div>
+          {% include "partials/form_field.html" with field=form.doi %}
+          {% include "partials/form_field.html" with field=form.url %}
+          {% include "partials/form_field.html" with field=form.indexing %}
+          {% include "partials/form_field.html" with field=form.is_peer_reviewed %}
+          <button class="btn btn-brand w-100" type="submit"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add publication</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

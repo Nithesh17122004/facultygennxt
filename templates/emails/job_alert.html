@@ -1,0 +1,28 @@
+{% extends "emails/base.html" %}
+{% block title %}{{ jobs|length }} new vacancies match your alert — FacultyNxtGen{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 12px;font-size:24px;line-height:1.3;color:#10264A;">New vacancies for your alert</h1>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#33455E;">
+  Your alert <strong>{{ alert.name }}</strong> matched {{ jobs|length }} new verified vacanc{{ jobs|length|pluralize:"y,ies" }}.
+</p>
+<div style="margin:0 0 20px;">
+  {% for job in jobs %}
+  <div style="border:1px solid #DCE5F2;border-radius:8px;padding:14px 16px;margin:0 0 10px;">
+    <p style="margin:0 0 4px;font-size:16px;line-height:1.4;font-weight:600;">
+      <a href="{{ SITE_URL }}{{ job.get_absolute_url }}" style="color:#10264A;text-decoration:none;">{{ job.title }}</a>
+    </p>
+    <p style="margin:0 0 4px;font-size:14px;line-height:1.6;color:#33455E;">{{ job.institution.name }}</p>
+    <p style="margin:0;font-size:13px;line-height:1.6;color:#5B6B82;">
+      {{ job.city.name }}, {{ job.state.name }} · {{ job.get_employment_type_display }} · Apply by {{ job.deadline|date:"d M Y" }}
+    </p>
+  </div>
+  {% endfor %}
+</div>
+<p style="margin:0 0 20px;font-size:14px;line-height:1.7;color:#33455E;">
+  Only vacancies from verified institutions that passed our checklist appear in alerts. Always confirm details in the official notification before applying.
+</p>
+<p style="margin:0 0 20px;">
+  <a href="{{ manage_url }}" style="display:inline-block;background-color:#087BDB;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:12px 22px;border-radius:6px;">Manage job alerts</a>
+</p>
+<p style="margin:0;font-size:13px;line-height:1.7;color:#5B6B82;">You are receiving this because you created this alert. You can pause or delete it at any time; job-alert emails can also be turned off in email preferences.</p>
+{% endblock %}

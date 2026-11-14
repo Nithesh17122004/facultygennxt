@@ -1,0 +1,13 @@
+FacultyNxtGen — application update
+
+Your application for {{ job.title }} at {{ institution.name }} has a new status: {{ status_label }}.
+
+{% if note %}Message from the institution:
+{{ note }}
+{% endif %}
+The institution manages the next steps. Keep your contact details and documents up to date so they can reach you.
+
+View application details:
+{{ application_url }}
+
+© {{ current_year }} {{ SITE_NAME }}

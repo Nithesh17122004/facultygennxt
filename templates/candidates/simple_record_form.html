@@ -1,0 +1,38 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}{{ title }} — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}{{ title }}{% endblock %}
+{% block dashboard_subtitle %}Update the record below. Changes are reflected in your academic profile immediately.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'candidates:profile' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Academic profile</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>{{ title }}</h2></div>
+      <div class="card-fng__body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% for field in form %}
+            {% include "partials/form_field.html" with field=field %}
+          {% endfor %}
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-brand" type="submit"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Save changes</button>
+            <a class="btn btn-outline-brand" href="{% url 'candidates:profile' %}">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="alert-fng info">
+      <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+      <div>Keep dates and titles consistent with your appointment letters and certificates. You can review all records from your academic profile.</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

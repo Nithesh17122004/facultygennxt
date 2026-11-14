@@ -1,0 +1,149 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Administration overview — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Platform overview{% endblock %}
+{% block dashboard_subtitle %}Verification queues, live supply and candidate activity across FacultyNxtGen.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:institutions_pending' %}"><i class="bi bi-buildings me-1" aria-hidden="true"></i>Institution queue</a>
+  <a class="btn btn-brand btn-sm" href="{% url 'dashboard:jobs_pending' %}"><i class="bi bi-briefcase me-1" aria-hidden="true"></i>Vacancy queue</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-people" aria-hidden="true"></i></div><div class="stat-card__value">{{ stats.candidates }}</div><div class="stat-card__label">Active candidates</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-buildings" aria-hidden="true"></i></div><div class="stat-card__value">{{ stats.institutions }}</div><div class="stat-card__label">Active institutions</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-briefcase" aria-hidden="true"></i></div><div class="stat-card__value">{{ stats.live_jobs }}</div><div class="stat-card__label">Live vacancies</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-inboxes" aria-hidden="true"></i></div><div class="stat-card__value">{{ stats.applications }}</div><div class="stat-card__label">Applications · {{ stats.applications_30d }} in 30 days</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-eye" aria-hidden="true"></i></div><div class="stat-card__value">{{ stats.job_views }}</div><div class="stat-card__label">Vacancy detail views</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-hourglass-split" aria-hidden="true"></i></div><div class="stat-card__value">{{ stats.institutions_pending }}</div><div class="stat-card__label">Institutions awaiting verification</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-clipboard-check" aria-hidden="true"></i></div><div class="stat-card__value">{{ stats.jobs_pending }}</div><div class="stat-card__label">Vacancies awaiting review</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-flag" aria-hidden="true"></i></div><div class="stat-card__value">{{ stats.open_reports }}</div><div class="stat-card__label">Open reports</div></div></div>
+  <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-calendar-x" aria-hidden="true"></i></div><div class="stat-card__value">{{ stats.expired_jobs }}</div><div class="stat-card__label">Expired vacancies</div></div></div>
+</div>
+
+<div class="row g-3 mt-2">
+  <div class="col-lg-7">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Verification queue</h2><a class="link-arrow text-small" href="{% url 'dashboard:institutions' %}?status=pending">All pending</a></div>
+      <div class="card-fng__body p-0">
+        {% if pending_institutions %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng mb-0">
+                <thead><tr><th scope="col">Institution</th><th scope="col">Location</th><th scope="col">Registered</th><th scope="col" class="text-end">Review</th></tr></thead>
+                <tbody>
+                  {% for institution in pending_institutions %}
+                    <tr>
+                      <td><span class="fw-semibold">{{ institution.name }}</span><span class="cell-meta">{{ institution.get_institution_type_display }}</span></td>
+                      <td>{{ institution.city.name }}<span class="cell-meta">{{ institution.state.name }}</span></td>
+                      <td>{{ institution.created_at|date:"j M Y" }}</td>
+                      <td class="text-end"><a class="btn btn-sm btn-brand" href="{% url 'dashboard:institution_detail' institution.pk %}">Verify</a></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state py-4"><div class="empty-state__icon mx-auto"><i class="bi bi-check2-circle" aria-hidden="true"></i></div><h3>Institution queue is clear</h3><p>All submitted institutions have a decision.</p></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Vacancy review queue</h2><a class="link-arrow text-small" href="{% url 'dashboard:jobs' %}?status=pending">All pending</a></div>
+      <div class="card-fng__body p-0">
+        {% if pending_jobs %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng mb-0">
+                <thead><tr><th scope="col">Vacancy</th><th scope="col">Institution</th><th scope="col">Submitted</th><th scope="col" class="text-end">Review</th></tr></thead>
+                <tbody>
+                  {% for job in pending_jobs %}
+                    <tr>
+                      <td><span class="fw-semibold">{{ job.title|truncatechars:46 }}</span><span class="cell-meta">{{ job.designation.name }} · {{ job.department.name }}</span></td>
+                      <td>{{ job.institution.name|truncatechars:26 }}</td>
+                      <td>{{ job.updated_at|date:"j M Y" }}</td>
+                      <td class="text-end"><a class="btn btn-sm btn-brand" href="{% url 'dashboard:job_detail' job.pk %}">Review</a></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state py-4"><div class="empty-state__icon mx-auto"><i class="bi bi-check2-circle" aria-hidden="true"></i></div><h3>Vacancy queue is clear</h3><p>No vacancies are waiting for verification.</p></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="row g-3 mt-0">
+      <div class="col-md-6">
+        <div class="card-fng mt-3">
+          <div class="card-fng__header"><h2>Open reports</h2></div>
+          <div class="card-fng__body">
+            {% if open_reports %}
+              {% for report in open_reports %}
+                <a class="d-flex align-items-start justify-content-between gap-2 text-reset border-bottom pb-2 mb-2" href="{% url 'dashboard:report_detail' report.pk %}">
+                  <span><strong class="d-block text-small">{{ report.job.title|truncatechars:38 }}</strong><span class="text-tiny text-muted-fng">{{ report.get_reason_display }} · {{ report.created_at|date:"j M Y" }}</span></span>
+                  <span class="badge-soft warning">{{ report.get_status_display }}</span>
+                </a>
+              {% endfor %}
+              <a class="link-arrow text-small" href="{% url 'dashboard:reports' %}">All reports</a>
+            {% else %}
+              <p class="text-small text-muted-fng mb-0">No open reports. Candidate reports appear here.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card-fng mt-3">
+          <div class="card-fng__header"><h2>Vacancy health</h2></div>
+          <div class="card-fng__body">
+            <dl class="kv-list mb-0">
+              <div class="kv-list__row"><dt>Live vacancies</dt><dd>{{ stats.live_jobs }}</dd></div>
+              <div class="kv-list__row"><dt>Expiring in 3 days</dt><dd>{{ stats.expiring_jobs }}</dd></div>
+              <div class="kv-list__row"><dt>Expired vacancies</dt><dd>{{ stats.expired_jobs }}</dd></div>
+              <div class="kv-list__row"><dt>Vacancy detail views</dt><dd>{{ stats.job_views }}</dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Operational alerts</h2></div>
+      <div class="card-fng__body">
+        <dl class="kv-list">
+          <div class="kv-list__row"><dt>Expiring in 3 days</dt><dd>{{ stats.expiring_jobs }} live vacancies</dd></div>
+          <div class="kv-list__row"><dt>Expired vacancies</dt><dd>{{ stats.expired_jobs }}</dd></div>
+          <div class="kv-list__row"><dt>New enquiries</dt><dd><a href="{% url 'dashboard:content' %}?status=new">{{ stats.enquiries_new }}</a></dd></div>
+          <div class="kv-list__row"><dt>Open reports</dt><dd><a href="{% url 'dashboard:reports' %}">{{ stats.open_reports }}</a></dd></div>
+        </dl>
+        <div class="d-grid gap-2 mt-3">
+          <a class="btn btn-outline-brand" href="{% url 'dashboard:audit' %}"><i class="bi bi-shield-check me-1" aria-hidden="true"></i>Review audit log</a>
+          <a class="btn btn-outline-brand" href="{% url 'dashboard:team' %}"><i class="bi bi-person-gear me-1" aria-hidden="true"></i>Team and access</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Recent audit activity</h2><a class="link-arrow text-small" href="{% url 'dashboard:audit' %}">Full log</a></div>
+      <div class="card-fng__body">
+        {% for entry in recent_audit %}
+          <div class="border-bottom pb-2 mb-2">
+            <span class="text-small fw-semibold">{{ entry.summary|truncatechars:60 }}</span>
+            <span class="d-block text-tiny text-muted-fng">{{ entry.action }} · {{ entry.actor.get_full_name|default:"System" }} · {{ entry.created_at|date:"j M Y, H:i" }}</span>
+          </div>
+        {% empty %}
+          <p class="text-small text-muted-fng mb-0">No audit entries yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

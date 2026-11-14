@@ -1,0 +1,105 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Team and access — Administration — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Team and access{% endblock %}
+{% block dashboard_subtitle %}Staff accounts, multi-factor authentication and the permission boundaries for platform administration.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'admin:accounts_user_changelist' %}"><i class="bi bi-person-gear me-1" aria-hidden="true"></i>Manage accounts</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Staff accounts</h2><span class="badge-soft neutral">{{ members|length }}</span></div>
+      <div class="card-fng__body p-0">
+        {% if members %}
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng align-middle mb-0">
+                <thead><tr><th scope="col">Member</th><th scope="col">Role</th><th scope="col">Access</th><th scope="col">Joined</th><th scope="col">Last seen</th></tr></thead>
+                <tbody>
+                  {% for member in members %}
+                    <tr>
+                      <td><a class="fw-semibold" href="{% url 'dashboard:user_detail' member.pk %}">{{ member.get_full_name }}</a><span class="cell-meta">{{ member.email }}</span></td>
+                      <td>{{ member.get_role_display }}</td>
+                      <td>
+                        {% if member.is_superuser %}<span class="badge-soft primary">Superuser</span>{% elif member.is_staff %}<span class="badge-soft info">Staff</span>{% else %}<span class="badge-soft neutral">Standard</span>{% endif %}
+                        {% if not member.is_active %}<span class="badge-soft danger">Inactive</span>{% endif %}
+                      </td>
+                      <td>{{ member.date_joined|date:"j M Y" }}</td>
+                      <td>{{ member.last_seen_at|date:"j M Y, H:i"|default:"Never" }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state py-4"><div class="empty-state__icon mx-auto"><i class="bi bi-person-gear" aria-hidden="true"></i></div><h3>No staff accounts</h3><p>Create an administrator account to manage verification and moderation.</p></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Role boundaries</h2></div>
+      <div class="card-fng__body">
+        <div class="table-wrap">
+          <div class="table-responsive">
+            <table class="table table-fng mb-0">
+              <thead><tr><th scope="col">Capability</th><th scope="col">Candidate</th><th scope="col">Recruiter</th><th scope="col">Staff</th><th scope="col">Superuser</th></tr></thead>
+              <tbody>
+                <tr><td>Manage own academic profile and documents</td><td class="text-success">Yes</td><td>—</td><td>—</td><td>—</td></tr>
+                <tr><td>Apply to internal vacancies</td><td class="text-success">Yes</td><td>—</td><td>—</td><td>—</td></tr>
+                <tr><td>Post vacancies for a verified institution</td><td>—</td><td class="text-success">Yes</td><td>—</td><td>—</td></tr>
+                <tr><td>Review applicants for own institution</td><td>—</td><td class="text-success">Yes</td><td>—</td><td>—</td></tr>
+                <tr><td>Verify institutions and moderate vacancies</td><td>—</td><td>—</td><td class="text-success">Yes</td><td class="text-success">Yes</td></tr>
+                <tr><td>Manage staff roles and permissions</td><td>—</td><td>—</td><td>—</td><td class="text-success">Yes</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="apply-note mb-0">Staff status and Django model permissions are managed in Django admin. Only superusers should grant staff access or change permission groups.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Multi-factor authentication</h2></div>
+      <div class="card-fng__body">
+        {% if mfa_required %}
+          <div class="alert-fng success"><i class="bi bi-shield-check" aria-hidden="true"></i><div><strong>Required for staff.</strong> Staff accounts must enrol a TOTP authenticator before accessing administration tools.</div></div>
+        {% else %}
+          <div class="alert-fng warning"><i class="bi bi-shield-exclamation" aria-hidden="true"></i><div><strong>Not enforced in this environment.</strong> Production must set <span class="mono">MFA_REQUIRED_FOR_STAFF=True</span> and use HTTPS.</div></div>
+        {% endif %}
+        <p class="text-small text-muted-fng">Use an authenticator app for time-based one-time passwords. Recovery codes must be stored offline and rotated if a device is lost.</p>
+        <a class="btn btn-brand w-100" href="{% url 'accounts:mfa_setup' %}"><i class="bi bi-fingerprint me-1" aria-hidden="true"></i>Set up MFA for my account</a>
+        <a class="btn btn-outline-brand w-100 mt-2" href="{% url 'accounts:security' %}">Security settings</a>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Administration rules</h2>
+        <ul class="text-small text-muted-fng ps-3 mb-0 mt-2">
+          <li class="mb-2">Use a named staff account; never share credentials.</li>
+          <li class="mb-2">Record a reason for every rejection or suspension decision.</li>
+          <li class="mb-2">Review the audit log after sensitive actions.</li>
+          <li>Report suspected account compromise to the security owner immediately.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Django admin</h2>
+        <p class="text-small text-muted-fng">Model-level administration is available to staff with the relevant permissions. Custom screens remain the primary workflow for verification and moderation.</p>
+        <a class="btn btn-outline-brand w-100" href="{% url 'admin:index' %}">Open Django admin</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

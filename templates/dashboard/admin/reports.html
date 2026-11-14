@@ -1,0 +1,68 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Vacancy reports — Administration — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Vacancy reports{% endblock %}
+{% block dashboard_subtitle %}Investigate candidate reports about misleading, expired or suspicious vacancies and record the outcome.{% endblock %}
+
+{% block dashboard_content %}
+<div class="card-fng">
+  <div class="card-fng__header"><h2>Report queue</h2><span class="badge-soft neutral">{{ page_obj.paginator.count }} matching</span></div>
+  <div class="card-fng__body">
+    <div class="status-tabs" role="navigation" aria-label="Filter reports by status">
+      <a href="{% url 'dashboard:reports' %}" class="{% if not status %}active{% endif %}">All</a>
+      {% for value, label in status_choices %}
+        <a href="?status={{ value }}" class="{% if status == value %}active{% endif %}">{{ label }}{% if counts|get_item:value %} <span class="ms-1">{{ counts|get_item:value }}</span>{% endif %}</a>
+      {% endfor %}
+    </div>
+
+    {% if page_obj.object_list %}
+      <div class="table-wrap">
+        <div class="table-responsive">
+          <table class="table table-fng align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Vacancy</th>
+                <th scope="col">Reason</th>
+                <th scope="col">Reported by</th>
+                <th scope="col">Status</th>
+                <th scope="col">Reported</th>
+                <th scope="col" class="text-end">Review</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for report in page_obj %}
+                <tr>
+                  <td>
+                    <a class="fw-semibold" href="{% url 'dashboard:report_detail' report.pk %}">{{ report.job.title|truncatechars:40 }}</a>
+                    <span class="cell-meta">{{ report.job.institution.name|truncatechars:30 }}</span>
+                  </td>
+                  <td>{{ report.get_reason_display }}<span class="cell-meta">{{ report.details|truncatechars:52 }}</span></td>
+                  <td>{{ report.reported_by.get_full_name }}<span class="cell-meta">{{ report.reported_by.email }}</span></td>
+                  <td><span class="badge-soft {% if report.status == 'open' %}warning{% elif report.status == 'investigating' %}info{% elif report.status == 'resolved' %}success{% else %}neutral{% endif %}">{{ report.get_status_display }}</span></td>
+                  <td>{{ report.created_at|date:"j M Y" }}<span class="cell-meta">{{ report.created_at|time:"H:i" }}</span></td>
+                  <td class="text-end"><a class="btn btn-sm btn-outline-brand" href="{% url 'dashboard:report_detail' report.pk %}">Investigate</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state__icon mx-auto"><i class="bi bi-flag" aria-hidden="true"></i></div>
+        <h3>No reports in this queue</h3>
+        <p>{% if status %}No reports have this status.{% else %}Candidate reports about vacancies appear here for investigation.{% endif %}</p>
+        {% if status %}<a class="btn btn-outline-brand" href="{% url 'dashboard:reports' %}">View all reports</a>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="alert-fng info mt-3">
+  <i class="bi bi-shield-check" aria-hidden="true"></i>
+  <div><strong>Handle reports consistently.</strong> Check the official notification, the live vacancy and any institution history before suspending. Record resolution notes so the reporter and future reviewers understand the outcome.</div>
+</div>
+{% endblock %}

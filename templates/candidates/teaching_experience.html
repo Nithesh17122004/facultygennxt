@@ -1,0 +1,74 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Teaching experience — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Teaching experience{% endblock %}
+{% block dashboard_subtitle %}Add substantive teaching roles in reverse chronological order. Recruiters use this record to assess eligibility.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'candidates:qualifications' %}"><i class="bi bi-mortarboard me-1" aria-hidden="true"></i>Qualifications</a>
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'candidates:research_experience' %}"><i class="bi bi-bar-chart me-1" aria-hidden="true"></i>Research experience</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Teaching roles</h2><span class="badge-soft neutral">{{ records|length }}</span></div>
+      <div class="card-fng__body">
+        {% if records %}
+          <div class="timeline">
+            {% for record in records %}
+              <div class="timeline-item">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <h3>{{ record.designation }}</h3>
+                    <p>{{ record.institution }}{% if record.department %} · {{ record.department }}{% endif %}</p>
+                    <p class="mb-1">{{ record.duration_label }}{% if record.is_current %} · <span class="badge-soft success">Current</span>{% endif %}</p>
+                    {% if record.description %}<p class="text-small mb-0">{{ record.description|truncatechars:220 }}</p>{% endif %}
+                  </div>
+                  <div class="d-flex gap-1">
+                    <a class="btn btn-icon" href="{% url 'candidates:teaching_experience_edit' record.pk %}" aria-label="Edit {{ record.designation }}" title="Edit"><i class="bi bi-pencil" aria-hidden="true"></i></a>
+                    <form method="post" action="{% url 'candidates:teaching_experience_delete' record.pk %}">
+                      {% csrf_token %}
+                      <button class="btn btn-icon text-danger" type="submit" aria-label="Delete {{ record.designation }}" title="Delete" data-confirm="Remove this teaching experience?"><i class="bi bi-trash" aria-hidden="true"></i></button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state__icon mx-auto"><i class="bi bi-easel" aria-hidden="true"></i></div>
+            <h3>No teaching experience added</h3>
+            <p>Include full-time, part-time, contract and visiting appointments. Your current role should be marked as current.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Add a teaching role</h2></div>
+      <div class="card-fng__body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.designation %}
+          {% include "partials/form_field.html" with field=form.institution %}
+          {% include "partials/form_field.html" with field=form.department %}
+          <div class="row">
+            <div class="col-sm-6">{% include "partials/form_field.html" with field=form.start_date %}</div>
+            <div class="col-sm-6">{% include "partials/form_field.html" with field=form.end_date %}</div>
+          </div>
+          {% include "partials/form_field.html" with field=form.is_current %}
+          {% include "partials/form_field.html" with field=form.description %}
+          <button class="btn btn-brand w-100" type="submit"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add experience</button>
+        </form>
+      </div>
+    </div>
+    <div class="alert-fng info mt-3"><i class="bi bi-info-circle-fill" aria-hidden="true"></i><div>Use the dates shown on your appointment letters. Do not include teaching assistantship periods unless they were formal appointments.</div></div>
+  </div>
+</div>
+{% endblock %}

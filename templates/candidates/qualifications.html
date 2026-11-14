@@ -1,0 +1,78 @@
+{% extends "dashboard/base.html" %}
+{% load static documents %}
+
+{% block title %}Qualifications — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Academic qualifications{% endblock %}
+{% block dashboard_subtitle %}Add degrees in the order you want recruiters to read them. Attach certificates privately.{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Your qualifications</h2><span class="badge-soft neutral">{{ records|length }}</span></div>
+      <div class="card-fng__body">
+        {% if records %}
+          <div class="d-grid gap-3">
+            {% for record in records %}
+              <div class="border rounded-3 p-3">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <span class="badge-soft primary">{{ record.get_level_display }}</span>
+                    <h3 class="h6 mt-2 mb-1">{{ record.degree }}</h3>
+                    <p class="text-small text-muted-fng mb-1">{{ record.institution }}{% if record.specialization %} · {{ record.specialization }}{% endif %}</p>
+                    <p class="text-tiny text-muted-fng mb-0">{{ record.year_completed }}{% if record.percentage_or_grade %} · {{ record.percentage_or_grade }}{% endif %}{% if record.university_board %} · {{ record.university_board }}{% endif %}</p>
+                  </div>
+                  <div class="d-flex gap-1">
+                    <a class="btn btn-icon" href="{% url 'candidates:qualification_edit' record.pk %}" aria-label="Edit {{ record.degree }}" title="Edit"><i class="bi bi-pencil" aria-hidden="true"></i></a>
+                    <form method="post" action="{% url 'candidates:qualification_delete' record.pk %}">
+                      {% csrf_token %}
+                      <button class="btn btn-icon text-danger" type="submit" aria-label="Delete {{ record.degree }}" title="Delete" data-confirm="Remove this qualification?"><i class="bi bi-trash" aria-hidden="true"></i></button>
+                    </form>
+                  </div>
+                </div>
+                {% if record.document and not record.document.is_deleted %}
+                  <a class="link-arrow text-small mt-2 d-inline-block" href="{% document_url record.document user %}" target="_blank" rel="noopener"><i class="bi bi-file-earmark-lock me-1" aria-hidden="true"></i>View certificate</a>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state__icon mx-auto"><i class="bi bi-mortarboard" aria-hidden="true"></i></div>
+            <h3>No qualifications added</h3>
+            <p>Start with your highest degree. You can add bachelor’s, master’s, M.Phil., PhD and postdoctoral records.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Add a qualification</h2></div>
+      <div class="card-fng__body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.level %}
+          {% include "partials/form_field.html" with field=form.degree %}
+          {% include "partials/form_field.html" with field=form.specialization %}
+          {% include "partials/form_field.html" with field=form.institution %}
+          {% include "partials/form_field.html" with field=form.university_board %}
+          <div class="row">
+            <div class="col-6">{% include "partials/form_field.html" with field=form.year_completed %}</div>
+            <div class="col-6">{% include "partials/form_field.html" with field=form.percentage_or_grade %}</div>
+          </div>
+          {% include "partials/form_field.html" with field=form.document_file %}
+          <button class="btn btn-brand w-100" type="submit">Add qualification</button>
+        </form>
+      </div>
+    </div>
+    <div class="alert-fng info mt-3">
+      <i class="bi bi-lock-fill" aria-hidden="true"></i>
+      <div>Certificates are stored privately and shared only when you apply to a vacancy. Use PDF, JPG or PNG under 5 MB.</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

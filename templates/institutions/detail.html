@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load fng %}
+
+{% block title %}{{ institution.name }} — {{ SITE_NAME }}{% endblock %}
+{% block meta_description %}{{ institution.description|default:institution.name|truncatewords:24 }}{% endblock %}
+{% block og_title %}{{ institution.name }} — Verified academic employer{% endblock %}
+
+{% block content %}
+<section class="institution-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb" style="--bs-breadcrumb-divider-color:#8b9ab3;">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}" class="text-primary">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'institutions:directory' %}" class="text-primary">Institutions</a></li>
+        <li class="breadcrumb-item active" aria-current="page" style="color:#5b6880;">{{ institution.name }}</li>
+      </ol>
+    </nav>
+    <div class="d-flex flex-column flex-md-row gap-4 align-items-md-start">
+      <div class="institution-logo flex-shrink-0">
+        {% if institution.logo %}<img src="{{ institution.logo.url }}" alt="{{ institution.name }} logo">{% else %}<i class="bi bi-buildings" aria-hidden="true"></i>{% endif %}
+      </div>
+      <div class="flex-grow-1">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+          <h1 class="mb-0">{{ institution.name }}</h1>
+          {% if institution.verification_status == "verified" %}<span class="badge-soft success"><i class="bi bi-patch-check-fill" aria-hidden="true"></i>Verified institution</span>{% endif %}
+        </div>
+        <div class="institution-facts">
+          <span><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ institution.city.name }}, {{ institution.state.name }}</span>
+          <span><i class="bi bi-building" aria-hidden="true"></i>{{ institution.get_institution_type_display }}</span>
+          {% if institution.established_year %}<span><i class="bi bi-calendar3" aria-hidden="true"></i>Established {{ institution.established_year }}</span>{% endif %}
+          <span><i class="bi bi-briefcase" aria-hidden="true"></i>{{ total_live }} live vacanc{{ total_live|pluralize:"y,ies" }}</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-brand btn-sm" href="{% url 'jobs:find' %}?institution={{ institution.slug }}"><i class="bi bi-search me-1" aria-hidden="true"></i>View vacancies</a>
+          <a class="btn btn-outline-brand btn-sm" href="{{ institution.website }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>Official website</a>
+          {% if is_staff_preview %}<a class="btn btn-navy btn-sm" href="{% url 'dashboard:institution_detail' institution.pk %}"><i class="bi bi-shield-lock me-1" aria-hidden="true"></i>Staff review</a>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card-fng">
+          <div class="card-fng__header"><h2>About the institution</h2></div>
+          <div class="card-fng__body">
+            {% if institution.description %}
+              <div class="job-content"><p>{{ institution.description }}</p></div>
+            {% else %}
+              <p class="text-muted-fng mb-0">This institution has not added a public description yet.</p>
+            {% endif %}
+            <dl class="kv-list mt-4">
+              <div class="kv-list__row"><dt>Institution type</dt><dd>{{ institution.get_institution_type_display }}</dd></div>
+              <div class="kv-list__row"><dt>Location</dt><dd>{{ institution.city.name }}, {{ institution.state.name }}</dd></div>
+              {% if institution.established_year %}<div class="kv-list__row"><dt>Established</dt><dd>{{ institution.established_year }}</dd></div>{% endif %}
+              <div class="kv-list__row"><dt>Verification</dt><dd>{% if institution.verification_status == "verified" %}<span class="text-success">Document verified</span>{% else %}<span class="text-muted-fng">{{ institution.verification_label }}</span>{% endif %}</dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <div class="section-head section-head--row mt-5 mb-3">
+          <div>
+            <h2 class="h4 mb-1">Live academic vacancies</h2>
+            <p class="text-small text-muted-fng mb-0">Published after institution verification and a vacancy-level checklist review.</p>
+          </div>
+          <a class="link-arrow text-small" href="{% url 'jobs:find' %}">All jobs <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+        </div>
+
+        {% if jobs %}
+          <div class="row g-3">
+            {% for job in jobs %}
+              <div class="col-md-6">{% include "partials/job_card.html" with job=job %}</div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="card-fng">
+            <div class="card-fng__body">
+              <div class="empty-state">
+                <div class="empty-state__icon mx-auto"><i class="bi bi-briefcase" aria-hidden="true"></i></div>
+                <h3>No live vacancies right now</h3>
+                <p>Follow this institution through job alerts to hear when a verified vacancy is published.</p>
+                <a class="btn btn-brand" href="{% url 'candidates:job_alerts' %}">Create a job alert</a>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-4">
+        <div class="job-panel">
+          <h2>Official contact</h2>
+          <dl class="mb-0">
+            <div class="job-panel__row"><dt>Website</dt><dd><a href="{{ institution.website }}" target="_blank" rel="noopener noreferrer">Visit site <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a></dd></div>
+            <div class="job-panel__row"><dt>Location</dt><dd>{{ institution.city.name }}</dd></div>
+            <div class="job-panel__row"><dt>Live vacancies</dt><dd>{{ total_live }}</dd></div>
+          </dl>
+          <p class="apply-note">Contact details for individual vacancies are included in the official notification. FacultyNxtGen does not collect application fees.</p>
+        </div>
+
+        <div class="job-panel">
+          <h2>Verification record</h2>
+          <ul class="checklist">
+            <li><i class="bi bi-patch-check-fill ok" aria-hidden="true"></i><span>Institution identity reviewed</span></li>
+            <li><i class="bi bi-patch-check-fill ok" aria-hidden="true"></i><span>Authorisation to recruit confirmed</span></li>
+            <li><i class="bi bi-patch-check-fill ok" aria-hidden="true"></i><span>Official contact details validated</span></li>
+            <li><i class="bi bi-patch-check-fill ok" aria-hidden="true"></i><span>Vacancies individually checked before publishing</span></li>
+          </ul>
+          <p class="apply-note">Verification confirms institutional identity. Always consult the official recruitment notification before applying.</p>
+        </div>
+
+        <div class="alert-fng info mt-3">
+          <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+          <div>Found incorrect information? <a href="{% url 'core:contact' %}">Report it to our verification team</a>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

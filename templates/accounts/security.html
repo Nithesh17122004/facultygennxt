@@ -1,0 +1,97 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Account security — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Account security{% endblock %}
+{% block dashboard_subtitle %}Protect your account, review two-factor authentication and control your data.{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-fng">
+      <div class="card-fng__header">
+        <h2>Sign-in and password</h2>
+        <span class="badge-soft success"><i class="bi bi-check-circle-fill" aria-hidden="true"></i>Protected</span>
+      </div>
+      <div class="card-fng__body">
+        <div class="kv-list">
+          <div class="kv-list__row"><dt>Email address</dt><dd>{{ user.email }}<br><span class="text-tiny text-muted-fng">{% if user.is_email_verified %}<i class="bi bi-patch-check-fill text-success" aria-hidden="true"></i> Verified{% else %}<i class="bi bi-exclamation-circle text-warning" aria-hidden="true"></i> Verification pending{% endif %}</span></dd></div>
+          <div class="kv-list__row"><dt>Password</dt><dd><a class="btn btn-outline-brand btn-sm" href="{% url 'accounts:password_change' %}">Change password</a></dd></div>
+          <div class="kv-list__row"><dt>Account role</dt><dd>{{ user.get_role_display }}</dd></div>
+          <div class="kv-list__row"><dt>Last sign-in</dt><dd>{{ user.last_login|default:"Not recorded" }}</dd></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header">
+        <h2>Two-factor authentication</h2>
+        {% if mfa_device %}
+          <span class="badge-soft success"><i class="bi bi-shield-check" aria-hidden="true"></i>Enabled</span>
+        {% else %}
+          <span class="badge-soft warning">Not enabled</span>
+        {% endif %}
+      </div>
+      <div class="card-fng__body">
+        {% if mfa_device %}
+          <p class="text-small text-muted-fng">Your account uses an authenticator app. A six-digit code is required after your password when signing in.</p>
+          {% if mfa_required %}
+            <div class="alert-fng info"><i class="bi bi-info-circle-fill" aria-hidden="true"></i><div>Two-factor authentication is mandatory for administrator accounts and cannot be disabled.</div></div>
+          {% else %}
+            <a class="btn btn-outline-brand btn-sm" href="{% url 'accounts:mfa_disable' %}">Disable two-factor authentication</a>
+          {% endif %}
+        {% else %}
+          <p class="text-small text-muted-fng">Add an authenticator app for a strong second factor. This protects your applications, documents and institution if your password is reused or exposed.</p>
+          <a class="btn btn-brand btn-sm" href="{% url 'accounts:mfa_setup' %}">Set up two-factor authentication</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Your data</h2></div>
+      <div class="card-fng__body">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 border-bottom pb-3 mb-3">
+          <div>
+            <h3 class="h6 mb-1">Export account data</h3>
+            <p class="text-small text-muted-fng mb-0">Download a JSON copy of your account, profile, applications, saved jobs and document metadata. Exports are rate-limited.</p>
+          </div>
+          <a class="btn btn-outline-brand btn-sm" href="{% url 'accounts:export_data' %}"><i class="bi bi-download me-1" aria-hidden="true"></i>Download</a>
+        </div>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div>
+            <h3 class="h6 mb-1 text-danger">Delete account</h3>
+            <p class="text-small text-muted-fng mb-0">Deactivate your account and submit a deletion request. Some records may be retained for legal and tax purposes.</p>
+          </div>
+          {% if deletion_request %}
+            <span class="badge-soft warning">Deletion request pending</span>
+          {% else %}
+            <a class="btn btn-outline-danger btn-sm" href="{% url 'accounts:delete_account' %}">Request deletion</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <h2 class="h6">Security practices</h2>
+        <ul class="checklist mt-2">
+          <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Use a unique password of at least 10 characters.</span></li>
+          <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Enable an authenticator app rather than SMS where possible.</span></li>
+          <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Never share OTPs or verification links with anyone, including someone claiming to be a recruiter.</span></li>
+          <li><i class="bi bi-check-circle-fill ok" aria-hidden="true"></i><span>Report suspicious emails or vacancy links to support.</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Session records</h2>
+        <p class="text-small text-muted-fng">Sign-in, password and MFA events are recorded in security audit logs with IP address and timestamp for fraud investigation. These logs are visible only to authorised administrators.</p>
+        <a class="link-arrow" href="{% url 'core:privacy' %}">Read the privacy policy <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

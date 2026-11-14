@@ -1,0 +1,140 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}{{ account.get_full_name }} — User — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}{{ account.get_full_name }}{% endblock %}
+{% block dashboard_subtitle %}{{ account.email }} · {{ account.get_role_display }} account{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:users' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>All users</a>
+  {% if institution %}<a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:institution_detail' institution.pk %}">Institution file</a>{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header">
+        <h2>Account</h2>
+        <span class="badge-soft {% if account.is_active %}success{% else %}danger{% endif %}">{% if account.is_active %}Active{% else %}Inactive{% endif %}</span>
+      </div>
+      <div class="card-fng__body">
+        <dl class="kv-list">
+          <div class="kv-list__row"><dt>Full name</dt><dd>{{ account.full_name }}</dd></div>
+          <div class="kv-list__row"><dt>Email</dt><dd><a href="mailto:{{ account.email }}">{{ account.email }}</a> {% if account.is_email_verified %}<span class="badge-soft success ms-1">Verified</span>{% else %}<span class="badge-soft warning ms-1">Unverified</span>{% endif %}</dd></div>
+          <div class="kv-list__row"><dt>Mobile</dt><dd>{{ account.mobile|default:"Not provided" }}</dd></div>
+          <div class="kv-list__row"><dt>Role</dt><dd>{{ account.get_role_display }}{% if account.is_staff %} · staff{% endif %}{% if account.is_superuser %} · superuser{% endif %}</dd></div>
+          <div class="kv-list__row"><dt>Joined</dt><dd>{{ account.date_joined|date:"j M Y, H:i" }}</dd></div>
+          <div class="kv-list__row"><dt>Last seen</dt><dd>{{ account.last_seen_at|date:"j M Y, H:i"|default:"Never" }}</dd></div>
+          <div class="kv-list__row"><dt>Terms accepted</dt><dd>{{ account.terms_accepted_at|date:"j M Y"|default:"Not recorded" }}</dd></div>
+          {% if account.is_locked %}<div class="kv-list__row"><dt>Login lock</dt><dd class="text-danger">Locked until {{ account.locked_until|date:"j M Y, H:i" }}</dd></div>{% endif %}
+        </dl>
+      </div>
+    </div>
+
+    {% if profile %}
+      <div class="card-fng mt-3">
+        <div class="card-fng__header"><h2>Candidate profile</h2><span class="badge-soft neutral">{{ profile.completion_percentage }}% complete</span></div>
+        <div class="card-fng__body">
+          <dl class="kv-list">
+            <div class="kv-list__row"><dt>Headline</dt><dd>{{ profile.headline|default:"Not provided" }}</dd></div>
+            <div class="kv-list__row"><dt>Department</dt><dd>{{ profile.department.name|default:"Not provided" }}</dd></div>
+            <div class="kv-list__row"><dt>Highest qualification</dt><dd>{{ profile.highest_qualification|default:"Not provided" }}</dd></div>
+            <div class="kv-list__row"><dt>PhD status</dt><dd>{{ profile.get_phd_status_display }}</dd></div>
+            <div class="kv-list__row"><dt>Experience</dt><dd>{{ profile.teaching_experience_years }} teaching · {{ profile.research_experience_years }} research years</dd></div>
+            <div class="kv-list__row"><dt>Preferred location</dt><dd>{{ profile.preferred_location_display }}</dd></div>
+            <div class="kv-list__row"><dt>Open to work</dt><dd>{% if profile.is_open_to_work %}Yes{% else %}No{% endif %}</dd></div>
+          </dl>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if recruiter %}
+      <div class="card-fng mt-3">
+        <div class="card-fng__header"><h2>Recruiter record</h2><span class="badge-soft {% if recruiter.is_active %}success{% else %}neutral{% endif %}">{% if recruiter.is_active %}Active{% else %}Inactive{% endif %}</span></div>
+        <div class="card-fng__body">
+          <dl class="kv-list">
+            <div class="kv-list__row"><dt>Institution</dt><dd>{% if institution %}<a href="{% url 'dashboard:institution_detail' institution.pk %}">{{ institution.name }}</a>{% else %}None{% endif %}</dd></div>
+            <div class="kv-list__row"><dt>Designation</dt><dd>{{ recruiter.designation|default:"Not provided" }}</dd></div>
+            <div class="kv-list__row"><dt>Primary recruiter</dt><dd>{% if recruiter.is_primary %}Yes{% else %}No{% endif %}</dd></div>
+            <div class="kv-list__row"><dt>Seat created</dt><dd>{{ recruiter.created_at|date:"j M Y" }}</dd></div>
+          </dl>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if applications %}
+      <div class="card-fng mt-3">
+        <div class="card-fng__header"><h2>Recent applications</h2></div>
+        <div class="card-fng__body p-0">
+          <div class="table-wrap border-0">
+            <div class="table-responsive">
+              <table class="table table-fng mb-0">
+                <thead><tr><th scope="col">Vacancy</th><th scope="col">Institution</th><th scope="col">Status</th><th scope="col">Applied</th></tr></thead>
+                <tbody>
+                  {% for application in applications %}
+                    <tr>
+                      <td>{{ application.job.title|truncatechars:42 }}</td>
+                      <td>{{ application.job.institution.name|truncatechars:28 }}</td>
+                      <td><span class="badge-soft {{ application.status_css }}">{{ application.get_status_display }}</span></td>
+                      <td>{{ application.applied_at|date:"j M Y" }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Audit trail</h2><a class="link-arrow text-small" href="{% url 'dashboard:audit' %}?q={{ account.email|urlencode }}">Full log</a></div>
+      <div class="card-fng__body">
+        {% for entry in audit_entries %}
+          <div class="border-bottom pb-2 mb-2">
+            <span class="text-small fw-semibold">{{ entry.summary|truncatechars:70 }}</span>
+            <span class="d-block text-tiny text-muted-fng">{{ entry.action }} · {{ entry.created_at|date:"j M Y, H:i" }}</span>
+          </div>
+        {% empty %}
+          <p class="text-small text-muted-fng mb-0">No audit entries for this account.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Moderate access</h2></div>
+      <div class="card-fng__body">
+        <form method="post" action="{% url 'dashboard:user_moderate' account.pk %}" novalidate>
+          {% csrf_token %}
+          {% include "partials/nonfield_errors.html" with form=form %}
+          {% include "partials/form_field.html" with field=form.action %}
+          {% include "partials/form_field.html" with field=form.notes %}
+          <button class="btn btn-brand w-100" type="submit" data-confirm="Change this account's access? Active sessions will be affected on their next request."><i class="bi bi-person-check me-1" aria-hidden="true"></i>Save account status</button>
+        </form>
+        <p class="apply-note mt-3 mb-0">Deactivating an account prevents sign-in immediately. Recruiter seats are deactivated together with the account. You cannot change your own account here.</p>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Quick actions</h2>
+        <div class="d-grid gap-2 mt-2">
+          {% if institution %}<a class="btn btn-outline-brand" href="{% url 'dashboard:institution_detail' institution.pk %}">Institution verification</a>{% endif %}
+          <a class="btn btn-outline-brand" href="{% url 'dashboard:audit' %}?q={{ account.email|urlencode }}">Audit entries</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Support contact</h2>
+        <p class="text-small text-muted-fng">Use the registered email only. Never ask a user to share a password or one-time code.</p>
+        <a class="btn btn-outline-brand w-100" href="mailto:{{ account.email }}">Email {{ account.get_short_name }}</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

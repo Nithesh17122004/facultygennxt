@@ -1,0 +1,16 @@
+FacultyNxtGen — your vacancy is live
+
+{{ job.title }} at {{ job.institution.name }} passed verification and is now public on FacultyNxtGen.
+
+Deadline: {{ job.deadline|date:"d M Y" }}
+Location: {{ job.city.name }}, {{ job.state.name }}
+Application route: {{ job.get_application_method_display }}
+
+View public listing:
+{{ job_url }}
+
+Share the listing with your networks and monitor applications from the institution dashboard. Keep candidate data within your authorised hiring team.
+
+If any detail changes before the deadline, update the vacancy promptly. Do not publish edits that change the official terms without notifying candidates.
+
+© {{ current_year }} {{ SITE_NAME }}

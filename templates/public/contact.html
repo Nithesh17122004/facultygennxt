@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Contact</li>
+      </ol>
+    </nav>
+    <span class="eyebrow eyebrow--light">We are here to help</span>
+    <h1>Contact FacultyNxtGen</h1>
+    <p>Questions about an account, institution verification, a vacancy or your data? Send us the details and we will route your enquiry to the right team.</p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-7">
+        <div class="card-fng">
+          <div class="card-fng__header">
+            <h2>Send an enquiry</h2>
+            <span class="badge-soft neutral">Response within 2 working days</span>
+          </div>
+          <div class="card-fng__body">
+            <form method="post" action="{% url 'core:contact' %}" novalidate>
+              {% csrf_token %}
+              {{ form.website }}
+              {% include "partials/nonfield_errors.html" with form=form %}
+              <div class="row">
+                <div class="col-md-6">{% include "partials/form_field.html" with field=form.name %}</div>
+                <div class="col-md-6">{% include "partials/form_field.html" with field=form.email %}</div>
+                <div class="col-md-6">{% include "partials/form_field.html" with field=form.phone %}</div>
+                <div class="col-md-6">{% include "partials/form_field.html" with field=form.organization %}</div>
+              </div>
+              {% include "partials/form_field.html" with field=form.purpose %}
+              {% include "partials/form_field.html" with field=form.subject %}
+              {% include "partials/form_field.html" with field=form.message %}
+              {% include "partials/form_field.html" with field=form.consent %}
+              <button class="btn btn-brand" type="submit">Send enquiry <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card-fng mb-3">
+          <div class="card-fng__body">
+            <h2 class="h5">Support channels</h2>
+            <div class="kv-list mt-3">
+              <div class="kv-list__row"><dt>Email</dt><dd><a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a></dd></div>
+              {% if CONTACT_PHONE %}<div class="kv-list__row"><dt>Phone</dt><dd>{{ CONTACT_PHONE }}</dd></div>{% endif %}
+              <div class="kv-list__row"><dt>Office</dt><dd class="text-end" style="max-width:220px;">{{ CONTACT_ADDRESS }}</dd></div>
+              <div class="kv-list__row"><dt>Hours</dt><dd>Mon–Fri, 9:30–18:00 IST</dd></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-fng mb-3">
+          <div class="card-fng__body">
+            <h2 class="h5">Choose the right route</h2>
+            <ul class="list-unstyled d-grid gap-2 mt-3 mb-0 text-small">
+              <li class="d-flex gap-2"><i class="bi bi-buildings text-primary" aria-hidden="true"></i><span><strong>Institution verification:</strong> use your registered official email so we can match your record.</span></li>
+              <li class="d-flex gap-2"><i class="bi bi-briefcase text-primary" aria-hidden="true"></i><span><strong>Vacancy posting:</strong> sign in to your institution dashboard to create or manage a vacancy.</span></li>
+              <li class="d-flex gap-2"><i class="bi bi-shield-lock text-primary" aria-hidden="true"></i><span><strong>Privacy requests:</strong> you can export or delete your data from <a href="{% url 'accounts:security' %}">account security</a>.</span></li>
+              <li class="d-flex gap-2"><i class="bi bi-flag text-primary" aria-hidden="true"></i><span><strong>Report a vacancy:</strong> use the report link on the job page so the listing reference is captured automatically.</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="alert-fng info">
+          <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+          <div>Never send passwords, OTPs or full identity documents by email or through this form. Our team will never ask for them.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

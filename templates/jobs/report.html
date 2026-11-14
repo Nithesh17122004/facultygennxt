@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load fng %}
+
+{% block title %}Report a vacancy — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+
+{% block content %}
+<section class="page-hero page-hero--light">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'jobs:find' %}">Find jobs</a></li>
+        <li class="breadcrumb-item"><a href="{{ job.get_absolute_url }}">{{ job.title|truncatechars:28 }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Report</li>
+      </ol>
+    </nav>
+    <span class="eyebrow">Help keep listings accurate</span>
+    <h1>Report a vacancy concern</h1>
+    <p>Tell our verification team what looks wrong. Reports are reviewed by staff and are not shown publicly or shared with the institution.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card-fng">
+          <div class="card-fng__header"><h2>Report details</h2><span class="badge-soft warning">Confidential</span></div>
+          <div class="card-fng__body">
+            <form method="post" novalidate>
+              {% csrf_token %}
+              {% include "partials/nonfield_errors.html" with form=form %}
+              {% include "partials/form_field.html" with field=form.reason %}
+              {% include "partials/form_field.html" with field=form.details %}
+              <div class="d-flex flex-wrap gap-2 mt-3">
+                <button class="btn btn-brand" type="submit"><i class="bi bi-flag me-1" aria-hidden="true"></i>Submit report</button>
+                <a class="btn btn-outline-brand" href="{{ job.get_absolute_url }}">Cancel</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card-fng">
+          <div class="card-fng__header"><h2>Vacancy being reported</h2></div>
+          <div class="card-fng__body">
+            <h3 class="h6">{{ job.title }}</h3>
+            <p class="text-small text-muted-fng mb-2">{{ job.institution.name }} · {{ job.location_label }}</p>
+            <dl class="kv-list">
+              <div class="kv-list__row"><dt>Status</dt><dd>{{ job.get_status_display }}</dd></div>
+              <div class="kv-list__row"><dt>Deadline</dt><dd>{{ job.deadline|date:"j M Y" }}</dd></div>
+              <div class="kv-list__row"><dt>Published</dt><dd>{{ job.published_at|date:"j M Y"|default:"—" }}</dd></div>
+            </dl>
+            <a class="btn btn-outline-brand w-100 mt-3" href="{{ job.get_absolute_url }}">Back to vacancy</a>
+          </div>
+        </div>
+
+        <div class="alert-fng info mt-3">
+          <i class="bi bi-shield-check" aria-hidden="true"></i>
+          <div><strong>What we investigate:</strong> incorrect deadlines, misleading eligibility, duplicate listings, wrong institution details and suspicious requests for money.</div>
+        </div>
+        <div class="alert-fng warning mt-3">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <div>If you have been asked to pay a fee to an individual rather than the institution, do not pay. Report the vacancy and contact us.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

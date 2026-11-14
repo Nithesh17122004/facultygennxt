@@ -1,0 +1,23 @@
+[Unit]
+Description=FacultyNxtGen Django application (Gunicorn)
+After=network.target postgresql.service redis-server.service
+Wants=postgresql.service redis-server.service
+
+[Service]
+Type=simple
+User=facultynxtgen
+Group=www-data
+WorkingDirectory=/srv/facultynxtgen
+EnvironmentFile=/srv/facultynxtgen/.env
+ExecStart=/srv/facultynxtgen/.venv/bin/gunicorn --config /srv/facultynxtgen/deployment/gunicorn.conf.py
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=35
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

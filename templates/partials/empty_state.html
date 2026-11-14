@@ -1,0 +1,17 @@
+<div class="py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <div class="empty-state__icon mx-auto"><i class="bi {{ icon|default:'bi-inbox' }}" aria-hidden="true"></i></div>
+        <h2 class="h4 mt-2">{{ title }}</h2>
+        <p class="text-muted-fng">{{ copy }}</p>
+        {% if action_url %}
+          <a class="btn btn-brand" href="{{ action_url }}">{{ action_label|default:"Continue" }}</a>
+        {% endif %}
+        {% if secondary_url %}
+          <a class="btn btn-outline-brand ms-2" href="{{ secondary_url }}">{{ secondary_label }}</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

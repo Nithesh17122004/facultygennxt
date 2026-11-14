@@ -1,0 +1,93 @@
+{% extends "dashboard/base.html" %}
+{% load fng %}
+
+{% block title %}Analytics — {{ job.title }} — {{ SITE_NAME }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block dashboard_title %}Vacancy analytics{% endblock %}
+{% block dashboard_subtitle %}{{ job.title }} · last 30 days. Views are deduplicated per browser session and day to reduce noise.{% endblock %}
+{% block dashboard_actions %}
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'jobs:recruiter_detail' job.pk %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Back to vacancy</a>
+  {% if job.status == 'published' %}<a class="btn btn-brand btn-sm" href="{{ job.get_absolute_url }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>View live</a>{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-3 mb-2">
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-eye" aria-hidden="true"></i></div><div class="stat-card__value">{{ total_views }}</div><div class="stat-card__label">Views in 30 days</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-inboxes" aria-hidden="true"></i></div><div class="stat-card__value">{{ application_count }}</div><div class="stat-card__label">Applications</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></div><div class="stat-card__value">{{ external_clicks|default:0 }}</div><div class="stat-card__label">External apply clicks</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat-card"><div class="stat-card__icon"><i class="bi bi-clock" aria-hidden="true"></i></div><div class="stat-card__value">{{ job.deadline_label }}</div><div class="stat-card__label">Application deadline</div></div></div>
+</div>
+
+<div class="row g-3 mt-1">
+  <div class="col-lg-8">
+    <div class="card-fng">
+      <div class="card-fng__header"><h2>Daily views</h2><span class="badge-soft neutral">30 days</span></div>
+      <div class="card-fng__body">
+        <div class="d-flex align-items-end gap-1" style="height:180px;" role="img" aria-label="Bar chart of daily vacancy views for the last 30 days">
+          {% for point in series %}
+            <div class="flex-fill d-flex flex-column justify-content-end" style="height:100%;" title="{{ point.date|date:'j M' }}: {{ point.views }} view{{ point.views|pluralize }}">
+              <div style="height:{{ point.height }}%; min-height:3px; background:linear-gradient(180deg,#48a6f4,#087bdb); border-radius:4px 4px 0 0;"></div>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="d-flex justify-content-between text-tiny text-muted-fng mt-2">
+          <span>{{ series.0.date|date:"j M" }}</span>
+          <span>Last 30 days</span>
+          <span>Today</span>
+        </div>
+        <p class="text-small text-muted-fng mt-3 mb-0">Each bar represents one day. Hover or focus a bar to see the exact count. Views from staff accounts are excluded.</p>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__header"><h2>Applications by status</h2></div>
+      <div class="card-fng__body">
+        {% if applications_by_status %}
+          <div class="d-grid gap-3">
+            {% for row in applications_by_status %}
+              <div>
+                <div class="d-flex justify-content-between text-small mb-1"><span>{{ row.label }}</span><strong>{{ row.count }} · {{ row.percentage }}%</strong></div>
+                <div class="progress-fng"><div class="progress-bar" style="width:{{ row.percentage }}%"></div></div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state py-4">
+            <div class="empty-state__icon mx-auto"><i class="bi bi-inboxes" aria-hidden="true"></i></div>
+            <h3>No applications yet</h3>
+            <p>Status breakdowns appear once candidates apply.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-fng">
+      <div class="card-fng__body">
+        <h2 class="h6">Performance summary</h2>
+        <dl class="kv-list mt-2">
+          <div class="kv-list__row"><dt>Live since</dt><dd>{{ job.published_at|date:"j M Y"|default:"Not published" }}</dd></div>
+          <div class="kv-list__row"><dt>Total views</dt><dd>{{ job.views_count }}</dd></div>
+          <div class="kv-list__row"><dt>Applications</dt><dd>{{ application_count }}</dd></div>
+          <div class="kv-list__row"><dt>View-to-apply</dt><dd>{% if total_views %}{% widthratio application_count total_views 100 %}%{% else %}—{% endif %}</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card-fng mt-3">
+      <div class="card-fng__body">
+        <h2 class="h6">Improve results</h2>
+        <ul class="text-small text-muted-fng ps-3 mt-2 mb-0">
+          <li class="mb-2">Disclose a salary range and vacancies count.</li>
+          <li class="mb-2">Keep eligibility and required documents specific.</li>
+          <li class="mb-2">Share the public listing through your official channels.</li>
+          <li>Keep the vacancy open long enough for candidates to apply.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="alert-fng info mt-3"><i class="bi bi-shield-check" aria-hidden="true"></i><div>Analytics are aggregated. FacultyNxtGen does not expose candidate identities or individual browsing data.</div></div>
+  </div>
+</div>
+{% endblock %}
