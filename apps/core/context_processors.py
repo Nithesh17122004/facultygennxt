@@ -5,13 +5,16 @@ def site_context(request):
     """Small, cache-friendly values required by every rendered page."""
     unread_notifications = 0
     dashboard_url = None
-    if request.user.is_authenticated:
+    # Error handlers can run before AuthenticationMiddleware has attached
+    # request.user (for example, when CommonMiddleware rejects an invalid host).
+    user = getattr(request, "user", None)
+    if user is not None and user.is_authenticated:
         from apps.notifications.models import Notification
 
         unread_notifications = Notification.objects.filter(
-            recipient=request.user, is_read=False
+            recipient=user, is_read=False
         ).count()
-        dashboard_url = request.user.get_dashboard_url()
+        dashboard_url = user.get_dashboard_url()
 
     return {
         "SITE_NAME": settings.SITE_NAME,
