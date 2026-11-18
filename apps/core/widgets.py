@@ -2,7 +2,7 @@ from django import forms
 
 
 class CitySelect(forms.Select):
-    """Select widget that exposes each city's state slug for dependent filtering."""
+    """Select widget that exposes each city's state ID for dependent filtering."""
 
     def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
         option = super().create_option(
@@ -10,7 +10,8 @@ class CitySelect(forms.Select):
         )
         city = getattr(value, "instance", None) if value else None
         if city is not None:
-            option["attrs"]["data-state"] = city.state.slug
+            # StateSelect is a ModelChoiceField whose HTML value is the state's PK.
+            option["attrs"]["data-state"] = str(city.state_id)
         return option
 
 
