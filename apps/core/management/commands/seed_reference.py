@@ -33,7 +33,7 @@ STATES = [
     ("Punjab", "PB", ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Mohali"]),
     ("Rajasthan", "RJ", ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Ajmer", "Bikaner", "Alwar"]),
     ("Sikkim", "SK", ["Gangtok", "Namchi", "Gyalshing", "Mangan"]),
-    ("Tamil Nadu", "TN", ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli", "Vellore"]),
+    ("Tamil Nadu", "TN", ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli", "Vellore", "Srivilliputhur", "Virudhunagar", "Sivakasi", "Rajapalayam", "Sattur", "Kovilpatti", "Dindigul", "Erode", "Tiruppur", "Thanjavur", "Theni", "Nagercoil", "Karur", "Namakkal", "Hosur", "Cuddalore", "Kanchipuram", "Tiruvannamalai", "Thoothukudi", "Ramanathapuram", "Nagapattinam", "Krishnagiri"]),
     ("Telangana", "TS", ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam", "Secunderabad"]),
     ("Tripura", "TR", ["Agartala", "Udaipur", "Dharmanagar", "Kailashahar"]),
     ("Uttar Pradesh", "UP", ["Lucknow", "Kanpur", "Varanasi", "Agra", "Noida", "Ghaziabad", "Meerut", "Prayagraj"]),
