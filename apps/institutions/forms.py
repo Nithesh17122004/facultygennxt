@@ -61,8 +61,8 @@ class InstitutionRegistrationForm(StyledFormMixin, forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["state"].queryset = State.objects.filter(is_active=True)
-        self.fields["city"].queryset = City.objects.filter(is_active=True).select_related("state")
+        self.fields["state"].queryset = State.objects.all().order_by("name")
+        self.fields["city"].queryset = City.objects.all().select_related("state").order_by("name")
         self.fields["state"].widget = forms.Select(
             attrs={"data-state-select": "", "data-city-target": "#id_city", "class": "form-select"}
         )
