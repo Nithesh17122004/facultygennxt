@@ -16,6 +16,11 @@ class InstitutionRegistrationTests(TestCase):
         self.state = State.objects.create(name="Karnataka", slug="karnataka", code="KA")
         self.city = City.objects.create(state=self.state, name="Bengaluru", slug="bengaluru")
 
+    def test_registration_city_options_match_state_select_value(self):
+        response = self.client.get(reverse("institutions:register"))
+        self.assertContains(response, 'data-state="%s"' % self.state.pk)
+        self.assertContains(response, "Bengaluru")
+
     def _document(self, owner, **kwargs):
         return Document.objects.create(
             owner=owner,
