@@ -85,7 +85,7 @@
       <div class="card-fng__header"><h2>Status history</h2></div>
       <div class="card-fng__body">
         <div class="timeline">
-          {% for event in job.status_history %}
+          {% for event in job.status_history.all %}
             <div class="timeline-item">
               <div class="d-flex flex-wrap justify-content-between gap-2">
                 <strong>{{ event.to_status|capfirst }}</strong>
