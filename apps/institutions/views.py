@@ -55,7 +55,7 @@ def _require_institution(request):
 def register(request):
     # Render free instances may not have an interactive Shell. Bootstrap the
     # reference tables on first use so the state/city selectors are populated.
-    if not City.objects.filter(is_active=True).exists():
+    if not City.objects.filter(is_active=True, state__code="TN").exists():
         call_command("seed_reference", verbosity=0)
 
     if request.user.is_authenticated:
