@@ -7,7 +7,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.core.management import call_command
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Q
 from django.http import Http404
@@ -53,10 +52,6 @@ def _require_institution(request):
 
 @ratelimit(key="ip", rate="5/h", method="POST", block=True)
 def register(request):
-    # Keep location reference data available even on ephemeral/free deployments.
-    # The seed command is idempotent and reactivates existing state/city records.
-    call_command("seed_reference", verbosity=0)
-
     if request.user.is_authenticated:
         return redirect(request.user.get_dashboard_url())
     form = InstitutionRegistrationForm(request.POST or None, request.FILES or None)
@@ -166,8 +161,8 @@ def register(request):
         {
             "form": form,
             "institution_types": INSTITUTION_TYPES,
-            "states": State.objects.filter(is_active=True),
-            "cities": City.objects.filter(is_active=True).select_related("state"),
+            "states": State.objects.all().order_by("name"),
+            "cities": City.objects.all().select_related("state").order_by("name"),
         },
     )
 
