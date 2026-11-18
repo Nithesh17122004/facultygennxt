@@ -18,7 +18,7 @@ class InstitutionRegistrationTests(TestCase):
 
     def test_registration_city_options_match_state_select_value(self):
         response = self.client.get(reverse("institutions:register"))
-        self.assertContains(response, 'data-state="%s"' % self.state.pk)
+        self.assertContains(response, 'data-state-slug="%s"' % self.state.slug)
         self.assertContains(response, "Bengaluru")
 
     def _document(self, owner, **kwargs):
