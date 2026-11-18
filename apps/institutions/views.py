@@ -58,6 +58,7 @@ def register(request):
     if (
         State.objects.filter(is_active=True).count() < 36
         or State.objects.filter(is_active=True, cities__is_active=True).distinct().count() < 36
+        or City.objects.filter(is_active=True).count() < 150
     ):
         call_command("seed_reference", verbosity=0)
 
