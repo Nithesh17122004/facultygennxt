@@ -95,13 +95,13 @@
       function syncCities() {
         var selectedStateOption = stateSelect.options[stateSelect.selectedIndex];
         var selectedStateSlug = selectedStateOption
-          ? selectedStateOption.getAttribute("data-state-slug")
+          ? (selectedStateOption.getAttribute("data-state-slug") || selectedStateOption.value)
           : "";
         var previousCity = citySelect.value;
 
         citySelect.replaceChildren(placeholder.cloneNode(true));
         allCityOptions.forEach(function (option) {
-          var cityStateSlug = option.getAttribute("data-state-slug");
+          var cityStateSlug = option.getAttribute("data-state-slug") || option.getAttribute("data-state");
           if (selectedStateSlug && cityStateSlug === selectedStateSlug) {
             var copy = option.cloneNode(true);
             copy.selected = copy.value === previousCity;
