@@ -6,7 +6,7 @@ from django.utils import timezone
 from apps.core.constants import INSTITUTION_TYPES
 from apps.core.forms import StyledFormMixin
 from apps.core.models import City, State
-from apps.core.widgets import CitySelect
+from apps.core.widgets import CitySelect, StateSelect
 from apps.core.utils import validate_uploaded_document
 from apps.documents.models import scan_for_malware
 from apps.accounts.validators import normalize_mobile
@@ -63,15 +63,13 @@ class InstitutionRegistrationForm(StyledFormMixin, forms.Form):
         super().__init__(*args, **kwargs)
         self.fields["state"].queryset = State.objects.filter(is_active=True)
         self.fields["city"].queryset = City.objects.filter(is_active=True).select_related("state")
-        self.fields["state"].widget.attrs.update(
-            {"data-state-select": "", "data-city-target": "#id_city"}
+        self.fields["state"].widget = StateSelect(
+            attrs={"data-state-select": "", "data-city-target": "#id_city", "class": "form-select"}
         )
         self.fields["website"].widget.attrs["placeholder"] = "https://institution.ac.in"
         self.fields["official_email"].widget.attrs["placeholder"] = "registrar@institution.ac.in"
         self.fields["phone"].widget.attrs["inputmode"] = "tel"
-        self.fields["city"].widget = CitySelect(
-            attrs=self.fields["city"].widget.attrs
-        )
+        self.fields["city"].widget = CitySelect(attrs={"class": "form-select"})
 
     def clean_official_email(self):
         email = self.cleaned_data["official_email"].strip().lower()
@@ -155,10 +153,10 @@ class InstitutionProfileForm(StyledFormMixin, forms.ModelForm):
             "address": forms.Textarea(attrs={"rows": 3}),
             "logo": forms.FileInput(attrs={"accept": "image/jpeg,image/png,image/webp"}),
             "established_year": forms.NumberInput(attrs={"min": 1800, "max": 2026}),
-            "state": forms.Select(
-                attrs={"data-state-select": "", "data-city-target": "#id_city"}
+            "state": StateSelect(
+                attrs={"data-state-select": "", "data-city-target": "#id_city", "class": "form-select"}
             ),
-            "city": CitySelect(),
+            "city": CitySelect(attrs={"class": "form-select"}),
         }
 
     def __init__(self, *args, **kwargs):
