@@ -11,6 +11,7 @@ class StateSelect(forms.Select):
         state = getattr(value, "instance", None) if value else None
         if state is not None:
             option["attrs"]["data-state-slug"] = state.slug
+            option["attrs"]["data-state"] = str(state.pk)
         return option
 
 
@@ -24,4 +25,5 @@ class CitySelect(forms.Select):
         city = getattr(value, "instance", None) if value else None
         if city is not None:
             option["attrs"]["data-state-slug"] = city.state.slug
+            option["attrs"]["data-state"] = str(city.state_id)
         return option
