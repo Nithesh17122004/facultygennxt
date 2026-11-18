@@ -79,44 +79,38 @@
       });
     }
 
-    /* Dependent state -> city selects use matching slugs on both option sets. */
+    /* Dependent state -> city selects: compare the actual database IDs. */
     document.querySelectorAll("select[data-state-select]").forEach(function (stateSelect) {
-      var targetSelector = stateSelect.getAttribute("data-city-target");
-      var citySelect = targetSelector
-        ? document.querySelector(targetSelector.charAt(0) === "#" ? targetSelector : "#" + targetSelector)
-        : null;
+      var target = stateSelect.getAttribute("data-city-target") || "#id_city";
+      var citySelect = document.querySelector(target.charAt(0) === "#" ? target : "#" + target);
       if (!citySelect) return;
 
-      var allCityOptions = Array.prototype.slice.call(citySelect.options).filter(function (option) {
+      var cityOptions = Array.prototype.slice.call(citySelect.options).filter(function (option) {
         return option.value !== "";
       });
       var placeholder = new Option("Select a state first", "");
 
-      function syncCities() {
-        var selectedStateOption = stateSelect.options[stateSelect.selectedIndex];
-        var selectedStateSlug = selectedStateOption
-          ? (selectedStateOption.getAttribute("data-state-slug") || selectedStateOption.value)
-          : "";
-        var previousCity = citySelect.value;
-
+      function updateCityOptions() {
+        var stateId = stateSelect.value;
+        var previousCityId = citySelect.value;
         citySelect.replaceChildren(placeholder.cloneNode(true));
-        allCityOptions.forEach(function (option) {
-          var cityStateSlug = option.getAttribute("data-state-slug") || option.getAttribute("data-state");
-          if (selectedStateSlug && cityStateSlug === selectedStateSlug) {
-            var copy = option.cloneNode(true);
-            copy.selected = copy.value === previousCity;
-            citySelect.add(copy);
+
+        cityOptions.forEach(function (option) {
+          if (option.getAttribute("data-state") === stateId) {
+            var clone = option.cloneNode(true);
+            clone.selected = clone.value === previousCityId;
+            citySelect.add(clone);
           }
         });
 
-        citySelect.disabled = !selectedStateSlug || citySelect.options.length <= 1;
-        if (selectedStateSlug && citySelect.options.length <= 1) {
+        citySelect.disabled = !stateId || citySelect.options.length === 1;
+        if (stateId && citySelect.options.length === 1) {
           citySelect.options[0].textContent = "No cities available for this state";
         }
       }
 
-      stateSelect.addEventListener("change", syncCities);
-      syncCities();
+      stateSelect.addEventListener("change", updateCityOptions);
+      updateCityOptions();
     });
 
     /* Type-ahead suggestions */
