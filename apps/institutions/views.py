@@ -50,7 +50,7 @@ def _require_institution(request):
     return institution
 
 
-@ratelimit(key="ip", rate="5/h", method="POST", block=True)
+@ratelimit(key="ip", rate="700/h", method="POST", block=True)
 def register(request):
     if request.user.is_authenticated:
         return redirect(request.user.get_dashboard_url())
