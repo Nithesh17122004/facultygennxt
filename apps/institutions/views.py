@@ -7,6 +7,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.core.management import call_command
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Q
 from django.http import Http404
@@ -52,6 +53,11 @@ def _require_institution(request):
 
 @ratelimit(key="ip", rate="5/h", method="POST", block=True)
 def register(request):
+    # Render free instances may not have an interactive Shell. Bootstrap the
+    # reference tables on first use so the state/city selectors are populated.
+    if not City.objects.filter(is_active=True).exists():
+        call_command("seed_reference", verbosity=0)
+
     if request.user.is_authenticated:
         return redirect(request.user.get_dashboard_url())
     form = InstitutionRegistrationForm(request.POST or None, request.FILES or None)
