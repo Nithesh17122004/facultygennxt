@@ -53,14 +53,9 @@ def _require_institution(request):
 
 @ratelimit(key="ip", rate="5/h", method="POST", block=True)
 def register(request):
-    # Render free instances may not have an interactive Shell. Bootstrap the
-    # reference tables on first use so the state/city selectors are populated.
-    if (
-        State.objects.filter(is_active=True).count() < 36
-        or State.objects.filter(is_active=True, cities__is_active=True).distinct().count() < 36
-        or City.objects.filter(is_active=True).count() < 150
-    ):
-        call_command("seed_reference", verbosity=0)
+    # Keep location reference data available even on ephemeral/free deployments.
+    # The seed command is idempotent and reactivates existing state/city records.
+    call_command("seed_reference", verbosity=0)
 
     if request.user.is_authenticated:
         return redirect(request.user.get_dashboard_url())
