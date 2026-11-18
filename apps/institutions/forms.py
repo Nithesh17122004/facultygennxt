@@ -6,7 +6,7 @@ from django.utils import timezone
 from apps.core.constants import INSTITUTION_TYPES
 from apps.core.forms import StyledFormMixin
 from apps.core.models import City, State
-from apps.core.widgets import CitySelect
+from apps.core.widgets import CitySelect, StateSelect
 from apps.core.utils import validate_uploaded_document
 from apps.documents.models import scan_for_malware
 from apps.accounts.validators import normalize_mobile
@@ -28,8 +28,22 @@ class InstitutionRegistrationForm(StyledFormMixin, forms.Form):
         label="Full address",
         widget=forms.Textarea(attrs={"rows": 3}),
     )
-    state = forms.ModelChoiceField(queryset=State.objects.none(), label="State / UT")
-    city = forms.ModelChoiceField(queryset=City.objects.none(), label="City")
+    state = forms.ModelChoiceField(
+        queryset=State.objects.all().order_by("name"),
+        label="State / UT",
+        widget=StateSelect(attrs={
+            "data-state-select": "",
+            "data-city-target": "#id_city",
+            "class": "form-select",
+        }),
+        empty_label="Select a state",
+    )
+    city = forms.ModelChoiceField(
+        queryset=City.objects.all().select_related("state").order_by("name"),
+        label="City",
+        widget=CitySelect(attrs={"class": "form-select"}),
+        empty_label="Select a city",
+    )
     pincode = forms.CharField(max_length=10, required=False, label="PIN code")
     institution_type = forms.ChoiceField(choices=INSTITUTION_TYPES, label="Institution type")
     established_year = forms.IntegerField(
@@ -63,13 +77,9 @@ class InstitutionRegistrationForm(StyledFormMixin, forms.Form):
         super().__init__(*args, **kwargs)
         self.fields["state"].queryset = State.objects.all().order_by("name")
         self.fields["city"].queryset = City.objects.all().select_related("state").order_by("name")
-        self.fields["state"].widget = forms.Select(
-            attrs={"data-state-select": "", "data-city-target": "#id_city", "class": "form-select"}
-        )
         self.fields["website"].widget.attrs["placeholder"] = "https://institution.ac.in"
         self.fields["official_email"].widget.attrs["placeholder"] = "registrar@institution.ac.in"
         self.fields["phone"].widget.attrs["inputmode"] = "tel"
-        self.fields["city"].widget = CitySelect(attrs={"class": "form-select"})
 
     def clean_official_email(self):
         email = self.cleaned_data["official_email"].strip().lower()
