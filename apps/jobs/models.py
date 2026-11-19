@@ -180,6 +180,7 @@ class Job(models.Model):
         related_name="approved_jobs",
     )
     review_notes = models.TextField(blank=True)
+    is_platform_posted = models.BooleanField(default=False)
     verified_institution = models.BooleanField(default=False)
     verified_recruiter = models.BooleanField(default=False)
     verified_advertisement = models.BooleanField(default=False)
