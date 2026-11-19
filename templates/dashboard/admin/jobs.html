@@ -6,6 +6,7 @@
 {% block dashboard_title %}Vacancy moderation{% endblock %}
 {% block dashboard_subtitle %}Approve, publish, reject or suspend vacancies after checking the institution, official notification and application route.{% endblock %}
 {% block dashboard_actions %}
+  <a class="btn btn-brand btn-sm" href="{% url 'dashboard:admin_job_create' %}"><i class="bi bi-plus-circle me-1" aria-hidden="true"></i>Post a job</a>
   <a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:jobs' %}?status=pending"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>Review queue ({{ counts.pending|default:0 }})</a>
 {% endblock %}
 
