@@ -227,7 +227,7 @@
           <div class="job-panel">
             <h2>Verification details</h2>
             <dl class="mb-0">
-              <div class="job-panel__row"><dt>Institution</dt><dd><span class="text-success">Verified</span></dd></div>
+              <div class="job-panel__row"><dt>Listing source</dt><dd><span class="text-success">{% if job.is_platform_posted %}Verified by FacultyNxtGen{% else %}Verified institution{% endif %}</span></dd></div>
               <div class="job-panel__row"><dt>Vacancy check</dt><dd><span class="text-success">Completed</span></dd></div>
               <div class="job-panel__row"><dt>Official source</dt><dd>{% if job.source_information %}On file{% else %}Not provided{% endif %}</dd></div>
             </dl>
