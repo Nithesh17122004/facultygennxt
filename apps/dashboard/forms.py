@@ -89,6 +89,7 @@ class ContentNoteForm(forms.Form):
 
 
 from apps.jobs.forms import JobForm
+from apps.jobs.models import Job
 from apps.core.constants import INSTITUTION_TYPES
 
 class AdminJobForm(JobForm):
