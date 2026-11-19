@@ -106,3 +106,5 @@ class AdminJobForm(JobForm):
         for name in ("company_name", "company_website", "company_email", "company_phone",
                      "company_contact_person", "company_contact_designation", "company_address", "company_type"):
             self.fields[name].required = True
+        self.fields["application_method"].choices = [(Job.ApplicationMethod.EXTERNAL, "External institution application")]
+        self.fields["application_method"].initial = Job.ApplicationMethod.EXTERNAL
