@@ -16,11 +16,9 @@ CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", [])
 SITE_NAME = "FacultyNxtGen"
 SITE_TAGLINE = "The Next Generation of Academic Careers."
 SITE_URL = env("SITE_URL", "http://127.0.0.1:8000").rstrip("/")
-SUPPORT_EMAIL = env("SUPPORT_EMAIL", "support@facultynxtgen.com")
-CONTACT_PHONE = env("CONTACT_PHONE", "+91 90000 00000")
-CONTACT_ADDRESS = env(
-    "CONTACT_ADDRESS", "FacultyNxtGen, Bengaluru, Karnataka, India"
-)
+SUPPORT_EMAIL = "support.facultynxtgen@saraban.in"
+CONTACT_PHONE = "+91 91235 99596"
+CONTACT_ADDRESS = "M C Complex, 70, Marudhamalai Main Road, Lawley Road, Coimbatore 641 003, Tamil Nadu"
 SOCIAL_LINKEDIN = env("SOCIAL_LINKEDIN", "")
 SOCIAL_INSTAGRAM = env("SOCIAL_INSTAGRAM", "")
 SOCIAL_X = env("SOCIAL_X", "")
