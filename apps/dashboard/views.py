@@ -18,8 +18,10 @@ from apps.audit.models import AuditLog
 from apps.audit.services import log_action
 from apps.core.models import BlogPost, ContactEnquiry, FAQ, NewsletterSubscriber
 from apps.institutions.models import Institution, InstitutionDocument
+from apps.documents.models import Document
+from apps.documents.services import create_document
 from apps.jobs.forms import JobRejectForm, JobReviewForm, JobSuspendForm
-from apps.jobs.models import Job, JobReport, JobView
+from apps.jobs.models import Job, JobReport, JobView, JobStatusHistory
 from apps.jobs.services import (
     JobWorkflowError,
     approve_job,
@@ -36,6 +38,7 @@ from .forms import (
     InstitutionDecisionForm,
     ReportResolutionForm,
     UserModerationForm,
+    AdminJobForm,
 )
 
 User = get_user_model()
@@ -237,6 +240,63 @@ def institution_decision(request, pk):
 # ---------------------------------------------------------------------------
 # Jobs
 # ---------------------------------------------------------------------------
+
+
+@staff_required
+def admin_job_create(request):
+    """Publish a vacancy for an employer without requiring an employer login."""
+    form = AdminJobForm(request.POST or None, request.FILES or None, action="submit", user=request.user)
+    if request.method == "POST" and form.is_valid():
+        data = form.cleaned_data
+        institution = Institution.objects.filter(name__iexact=data["company_name"].strip()).first()
+        if institution and not institution.is_verified:
+            form.add_error("company_name", "An institution with this name already exists but is not verified. Review its existing record first.")
+        else:
+            if institution is None:
+                institution = Institution.objects.create(
+                    name=data["company_name"].strip(), website=data["company_website"],
+                    official_email=data["company_email"], phone=data["company_phone"],
+                    contact_person=data["company_contact_person"],
+                    contact_designation=data["company_contact_designation"],
+                    address=data["company_address"], state=data["state"], city=data["city"],
+                    institution_type=data["company_type"],
+                    verification_status=Institution.VerificationStatus.VERIFIED,
+                    verification_notes="Unclaimed directory profile created by FacultyNxtGen admin for a manually verified vacancy. No institution login was created.",
+                    verified_at=timezone.now(), verified_by=request.user, is_active=True,
+                )
+            job = form.save(commit=False)
+            job.institution = institution
+            job.posted_by = request.user
+            job.status = Job.Status.PUBLISHED
+            job.is_platform_posted = True
+            job.verified_institution = job.verified_recruiter = True
+            job.verified_advertisement = job.verified_application_url = True
+            job.verified_deadline = job.verified_eligibility = True
+            job.approved_by = request.user
+            job.approved_at = job.published_at = timezone.now()
+            job.review_notes = "Manually entered and verified by FacultyNxtGen administrator."
+            job.save()
+            uploaded = data.get("notification_file")
+            if uploaded:
+                try:
+                    doc = create_document(owner=request.user, uploaded_file=uploaded,
+                        purpose=Document.Purpose.NOTIFICATION,
+                        description=f"Recruitment notification — {job.title}"[:255])
+                    job.notification_document = doc
+                    job.save(update_fields=["notification_document", "updated_at"])
+                except Exception as exc:
+                    job.delete()
+                    messages.error(request, f"Notification upload failed; vacancy was not retained: {exc}")
+                    return redirect("dashboard:admin_job_create")
+            JobStatusHistory.objects.create(job=job, from_status="", to_status=Job.Status.PUBLISHED,
+                actor=request.user, note="Manually published and verified by FacultyNxtGen admin.")
+            log_action(action="job.admin_created",
+                summary=f"Admin-created vacancy published: {job.title} — {institution.name}",
+                actor=request.user, entity_type="job", entity_id=job.pk,
+                metadata={"institution": institution.name, "source": job.source_information}, request=request)
+            messages.success(request, "Vacancy published and is now visible in the public job portal.")
+            return redirect("dashboard:job_detail", pk=job.pk)
+    return render(request, "dashboard/admin/job_create.html", {"form": form})
 
 
 @staff_required
