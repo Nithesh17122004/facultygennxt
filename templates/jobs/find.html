@@ -15,7 +15,7 @@
     </nav>
     <span class="eyebrow eyebrow--light">Verified academic vacancies</span>
     <h1>Find your next academic role</h1>
-    <p>Every vacancy comes from a verified institution and passes a vacancy-level checklist before publishing. Review the official notification before applying.</p>
+    <p>Vacancies are reviewed by FacultyNxtGen or submitted by verified institutions. Always review the official notification before applying.</p>
     <form class="search-panel mt-4" method="get" action="{% url 'jobs:find' %}" role="search" aria-label="Search academic jobs">
       {% for key, value in search_terms.items %}{% if key != "q" and value %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}{% endfor %}
       <div class="row g-2">
@@ -131,7 +131,7 @@
         <div class="results-bar">
           <div>
             <h2>{{ total }} verified vacanc{{ total|pluralize:"y,ies" }}</h2>
-            <p>{% if search_terms.q %}Results for “{{ search_terms.q }}”{% else %}Verified institutions only · updated continuously{% endif %}</p>
+            <p>{% if search_terms.q %}Results for “{{ search_terms.q }}”{% else %}Verified vacancies · updated continuously{% endif %}</p>
           </div>
           <form method="get" action="{% url 'jobs:find' %}" class="d-flex align-items-center gap-2">
             {% for key, value in search_terms.items %}{% if key != "sort" and value %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}{% endfor %}
