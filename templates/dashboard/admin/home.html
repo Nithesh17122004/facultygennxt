@@ -7,6 +7,7 @@
 {% block dashboard_subtitle %}Verification queues, live supply and candidate activity across FacultyNxtGen.{% endblock %}
 {% block dashboard_actions %}
   <a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:institutions_pending' %}"><i class="bi bi-buildings me-1" aria-hidden="true"></i>Institution queue</a>
+  <a class="btn btn-outline-brand btn-sm" href="{% url 'dashboard:admin_job_create' %}"><i class="bi bi-plus-circle me-1" aria-hidden="true"></i>Post a job</a>
   <a class="btn btn-brand btn-sm" href="{% url 'dashboard:jobs_pending' %}"><i class="bi bi-briefcase me-1" aria-hidden="true"></i>Vacancy queue</a>
 {% endblock %}
 
