@@ -13,7 +13,7 @@
     <div class="job-card__org">
       <span class="job-card__org-name">
         <a href="{{ job.institution.get_absolute_url }}" class="text-reset">{{ job.institution.name }}</a>
-        {% if job.institution.verification_status == "verified" %}<i class="bi bi-patch-check-fill" title="Verified institution" aria-label="Verified institution"></i>{% endif %}
+        {% if job.is_platform_posted %}<span class="badge-soft success ms-1"><i class="bi bi-patch-check-fill" aria-hidden="true"></i> Verified by FacultyNxtGen</span>{% elif job.institution.verification_status == "verified" %}<i class="bi bi-patch-check-fill" title="Verified institution" aria-label="Verified institution"></i>{% endif %}
       </span>
       <span class="job-card__posted">{{ job.published_at|time_ago|default:"Recently published" }}</span>
     </div>
