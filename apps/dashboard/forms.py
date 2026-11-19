@@ -86,3 +86,23 @@ class ContentNoteForm(forms.Form):
         max_length=3000,
         widget=forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
     )
+
+
+from apps.jobs.forms import JobForm
+from apps.core.constants import INSTITUTION_TYPES
+
+class AdminJobForm(JobForm):
+    company_name = forms.CharField(max_length=240, label="Company / institution name")
+    company_website = forms.URLField(max_length=500, label="Official website")
+    company_email = forms.EmailField(label="Official contact email")
+    company_phone = forms.CharField(max_length=25, label="Official phone")
+    company_contact_person = forms.CharField(max_length=150, label="Contact person")
+    company_contact_designation = forms.CharField(max_length=150, label="Contact person's designation")
+    company_address = forms.CharField(max_length=1000, widget=forms.Textarea(attrs={"rows": 2}), label="Institution address")
+    company_type = forms.ChoiceField(choices=INSTITUTION_TYPES, label="Institution type")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ("company_name", "company_website", "company_email", "company_phone",
+                     "company_contact_person", "company_contact_designation", "company_address", "company_type"):
+            self.fields[name].required = True
