@@ -109,3 +109,8 @@ class AdminJobForm(JobForm):
             self.fields[name].required = True
         self.fields["application_method"].choices = [(Job.ApplicationMethod.EXTERNAL, "External institution application")]
         self.fields["application_method"].initial = Job.ApplicationMethod.EXTERNAL
+
+        # Admins publish on behalf of employers, so the institution-only
+        # authorisation confirmation must not block this staff workflow.
+        self.fields["authorization_confirmed"].required = False
+        self.fields["authorization_confirmed"].widget.attrs.pop("required", None)
