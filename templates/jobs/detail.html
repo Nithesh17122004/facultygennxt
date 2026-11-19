@@ -41,7 +41,7 @@
             {% if job.institution.logo %}<img src="{{ job.institution.logo.url }}" alt="">{% else %}{{ job.institution.name|user_initials }}{% endif %}
           </span>
           <div>
-            <a class="job-card__org-name" href="{{ job.institution.get_absolute_url }}">{{ job.institution.name }}{% if job.institution.verification_status == "verified" %}<i class="bi bi-patch-check-fill ms-1" title="Verified institution" aria-label="Verified institution"></i>{% endif %}</a>
+            <a class="job-card__org-name" href="{{ job.institution.get_absolute_url }}">{{ job.institution.name }}{% if job.is_platform_posted %}<span class="badge-soft success ms-1">Verified by FacultyNxtGen</span>{% elif job.institution.verification_status == "verified" %}<i class="bi bi-patch-check-fill ms-1" title="Verified institution" aria-label="Verified institution"></i>{% endif %}</a>
             <span class="text-tiny text-muted-fng d-block">{{ job.institution.get_institution_type_display }} · {{ job.institution.city.name }}, {{ job.institution.state.name }}</span>
           </div>
         </div>
@@ -207,7 +207,7 @@
               <div>
                 <a class="fw-semibold" href="{{ job.institution.get_absolute_url }}">{{ job.institution.name }}</a>
                 <p class="text-tiny text-muted-fng mb-2">{{ job.institution.city.name }}, {{ job.institution.state.name }} · {{ job.institution.get_institution_type_display }}</p>
-                <span class="badge-soft success"><i class="bi bi-patch-check-fill" aria-hidden="true"></i>Verified institution</span>
+                {% if job.is_platform_posted %}<span class="badge-soft success"><i class="bi bi-patch-check-fill" aria-hidden="true"></i>Listing verified by FacultyNxtGen</span>{% else %}<span class="badge-soft success"><i class="bi bi-patch-check-fill" aria-hidden="true"></i>Verified institution</span>{% endif %}
               </div>
             </div>
             {% if job.institution.description %}<p class="text-small text-muted-fng mt-3 mb-0">{{ job.institution.description|truncatechars:180 }}</p>{% endif %}
