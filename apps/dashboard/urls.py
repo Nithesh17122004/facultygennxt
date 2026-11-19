@@ -13,6 +13,7 @@ urlpatterns = [
     path("institutions/<uuid:pk>/decision/", views.institution_decision, name="institution_decision"),
     # Jobs
     path("jobs/", views.jobs, name="jobs"),
+    path("jobs/create/", views.admin_job_create, name="admin_job_create"),
     path("jobs/pending/", views.jobs_pending, name="jobs_pending"),
     path("jobs/<uuid:pk>/", views.job_detail, name="job_detail"),
     path("jobs/<uuid:pk>/decision/", views.job_decision, name="job_decision"),
